@@ -8,6 +8,7 @@ import * as models from './sdk/model/Models';
 import {AlfrescoApi, ContentApi} from 'alfresco-js-api';
 import {Subject} from 'rxjs/Rx';
 import {Buffer} from 'buffer';
+import { SECRETS } from 'environments/secrets';
 
 
 @Injectable()
@@ -115,8 +116,8 @@ export class BlockchainProofService {
     }
 
     apiConfig() {
-        config.accessToken = ''; // FIXME
         const config = new ApiClientConfiguration();
+        config.accessToken = SECRETS.bcproofFixedToken;
         return config;
     }
 
