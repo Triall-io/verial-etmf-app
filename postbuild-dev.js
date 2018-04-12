@@ -26,7 +26,7 @@
 var fs = require('fs');
 var config = require('./dist/app.config.json');
 
-config.ecmHost = 'http://localhost:8080';
+config.ecmHost = 'http://192.168.79.1:28080';
 
 fs.writeFileSync(
     './dist/app.config.json',

@@ -60,7 +60,10 @@ import { NodeUnshareDirective } from './common/directives/node-unshare.directive
 import { NodeInfoDirective } from './common/directives/node-info.directive';
 import { NodeVersionsDirective } from './common/directives/node-versions.directive';
 import { VersionManagerDialogAdapterComponent } from './components/versions-dialog/version-manager-dialog-adapter.component';
+import { NodeBCSignDirective } from './common/directives/node-bcsign.directive';
+import { NodeBCVerifyDirective } from './common/directives/node-bcverify.directive';
 import { BrowsingFilesService } from './common/services/browsing-files.service';
+import { BlockchainProofService } from './common/services/blockchain-proof/blockchain-proof.service';
 import { ContentManagementService } from './common/services/content-management.service';
 import { NodeActionsService } from './common/services/node-actions.service';
 import { NodePermissionService } from './common/services/node-permission.service';
@@ -112,6 +115,8 @@ import { SearchComponent } from './components/search/search.component';
         NodeUnshareDirective,
         NodeInfoDirective,
         NodeVersionsDirective,
+        NodeBCSignDirective,
+        NodeBCVerifyDirective,
         VersionManagerDialogAdapterComponent,
         SearchComponent
     ],
@@ -127,7 +132,8 @@ import { SearchComponent } from './components/search/search.component';
         BrowsingFilesService,
         ContentManagementService,
         NodeActionsService,
-        NodePermissionService
+        NodePermissionService,
+        BlockchainProofService
     ],
     entryComponents: [
         VersionManagerDialogAdapterComponent

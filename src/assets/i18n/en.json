@@ -102,9 +102,12 @@
             "UNDO": "Undo",
             "RESTORE": "Restore",
             "FAVORITE": "Favorite",
+
             "UNSHARE": "Unshare",
             "DETAILS": "View details",
-            "VERSIONS": "Manage Versions"
+            "VERSIONS": "Manage Versions",
+            "BCSIGN": "Blockchain sign",
+            "BCVERIFY": "Blockchain verify"
         },
         "DIALOGS": {
             "CONFIRM_PURGE": {

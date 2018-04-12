@@ -97,6 +97,21 @@
                     <mat-icon color="primary">history</mat-icon>
                     <span>{{ 'APP.ACTIONS.VERSIONS' | translate }}</span>
                 </button>
+
+                <button
+                    mat-menu-item
+                    *ngIf="canManageVersions(documentList.selection)"
+                    [app-bcsign-node]="documentList.selection">
+                    <mat-icon color="primary">storage</mat-icon>
+                    <span>{{ 'APP.ACTIONS.BCSIGN' | translate }}</span>
+                </button>
+                <button
+                    mat-menu-item
+                    *ngIf="canManageVersions(documentList.selection)"
+                    [app-bcverify-node]="documentList.selection">
+                    <mat-icon color="primary">storage</mat-icon>
+                    <span>{{ 'APP.ACTIONS.BCVERIFY' | translate }}</span>
+                </button>
             </mat-menu>
         </adf-toolbar>
     </div>
