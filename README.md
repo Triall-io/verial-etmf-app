@@ -58,3 +58,8 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 [contributing]: ttps://github.com/Alfresco/alfresco-content-app/blob/master/CONTRIBUTING.md
 [github]: https://github.com/Alfresco/alfresco-content-app/issues
 [jira]: https://issues.alfresco.com/jira/projects/ACA
+
+
+## Additional configuration for Sphereon Blockchain demo
+Rename src/environments/secrets.ts.sample to secrets.ts and update the access token with a live one.
+In the root there are two config files,proxy.conf.js and postbuild-dev.js, the ecmHost needs to be changed to a live Alfresco host.
