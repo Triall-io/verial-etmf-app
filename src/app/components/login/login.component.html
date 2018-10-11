@@ -1,7 +1,8 @@
 <adf-login
-    copyrightText="&#169; 2017 - 2018 Alfresco Software, Inc. All rights reserved."
+    [copyrightText]="'application.copyright' | adfAppConfig"
     providers="ECM"
+    successRoute="/personal-files"
+    [logoImageUrl]="'./assets/images/alfresco-logo.svg'"
     [showRememberMe]="false"
-    [showLoginActions]="false"
-    (success)="onLoginSuccess($event)">
+    [showLoginActions]="false">
 </adf-login>

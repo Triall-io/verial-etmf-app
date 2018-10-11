@@ -11,9 +11,18 @@ const width = 1366;
 const height = 768;
 
 exports.config = {
-    allScriptsTimeout: 30000,
+    allScriptsTimeout: 40000,
 
     specs: [
+        './e2e/suites/authentication/*.test.ts',
+        './e2e/suites/list-views/*.test.ts',
+        './e2e/suites/application/page-titles.test.ts',
+        './e2e/suites/navigation/*.test.ts',
+        './e2e/suites/pagination/*.test.ts',
+        './e2e/suites/actions/*.test.ts',
+        './e2e/suites/viewer/*.test.ts',
+
+        './e2e/suites/extensions/*.test.ts'
     ],
 
     capabilities: {
@@ -28,12 +37,12 @@ exports.config = {
 
     directConnect: true,
 
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://localhost:4000',
 
     framework: 'jasmine2',
     jasmineNodeOpts: {
         showColors: true,
-        defaultTimeoutInterval: 50000,
+        defaultTimeoutInterval: 60000,
         print: function() {}
     },
 

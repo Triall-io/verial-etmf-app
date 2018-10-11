@@ -34,8 +34,8 @@
 npm-debug.log
 testem.log
 /typings
+/www
 secrets.ts
-
 # e2e
 /e2e/*.js
 /e2e/*.map

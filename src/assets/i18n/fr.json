@@ -3,11 +3,22 @@
     "LANGUAGE": "Langue",
     "SIGN_IN": "Connexion",
     "SIGN_OUT": "Déconnexion",
+    "SETTINGS": {
+      "TITLE": "Paramètres",
+      "APPLICATION-SETTINGS": "Paramètres de l'application",
+      "REPOSITORY-SETTINGS": "Paramètres de l'entrepôt",
+      "EXPERIMENTAL-FEATURES": "Fonctionnalités expérimentales",
+      "INVALID-VALUE-FORMAT": "Format de valeur non valide",
+      "REQUIRED-FIELD": "Ce champ doit être renseigné",
+      "RESET": "Réinitialiser",
+      "APPLY": "Appliquer"
+    },
     "PREVIEW": {
       "TITLE": "Aperçu"
     },
     "NEW_MENU": {
       "LABEL": "Nouveau",
+      "TOOLTIP": "Ajouter de nouveaux fichiers ou dossiers",
       "MENU_ITEMS": {
         "CREATE_FOLDER": "Créer un dossier",
         "UPLOAD_FILE": "Importer le fichier",
@@ -15,11 +26,11 @@
       },
       "TOOLTIPS": {
         "CREATE_FOLDER": "Créer un nouveau filtre",
-        "CREATE_FOLDER_NOT_ALLOWED": "Impossible de créer un dossier ici. Vous n'avez peut-être pas les droits d'accès requis, contactez le service informatique.",
+        "CREATE_FOLDER_NOT_ALLOWED": "Impossible de créer des dossiers pendant l'affichage des éléments actuels.",
         "UPLOAD_FILES": "Sélectionner les fichiers à ajouter",
-        "UPLOAD_FILES_NOT_ALLOWED": "Vous avez besoin de droits d'accès spécifiques pour importer un élément ici, contactez le service informatique.",
+        "UPLOAD_FILES_NOT_ALLOWED": "Impossible de charger les fichiers pendant l'affichage des éléments actuels",
         "UPLOAD_FOLDERS": "Sélectionner les fichiers à ajouter",
-        "UPLOAD_FOLDERS_NOT_ALLOWED": "Vous avez besoin de droits d'accès spécifiques pour importer un élément ici, contactez le service informatique."
+        "UPLOAD_FOLDERS_NOT_ALLOWED": "Impossible de charger les dossier pendant l'affichage des éléments actuels"
       }
     },
     "BROWSE": {
@@ -38,7 +49,7 @@
         },
         "EMPTY_STATE": {
           "TITLE": "Vous n'êtes actuellement membre d'aucune Bibliothèque de fichiers",
-          "TEXT": "Rejoignez des sites pour importer, consulter et partager des fichiers."
+          "TEXT": "Abonnez-vous à des Bibliothèques pour charger, afficher et partager des fichiers."
         }
       },
       "SHARED": {
@@ -88,6 +99,16 @@
       },
       "ABOUT": {
         "TITLE": "A propos de"
+      },
+      "SEARCH": {
+        "TITLE": "Résultats de la recherche",
+        "FOUND_RESULTS": "{{ number }} résultats trouvés",
+        "CUSTOM_ROW": {
+          "MODIFIED": "Modifié",
+          "LOCATION": "Emplacement",
+          "SIZE": "Taille"
+        },
+        "NO_RESULTS": "Votre recherche a renvoyé 0 résultat"
       }
     },
     "ACTIONS": {
@@ -100,9 +121,22 @@
       "DELETE_PERMANENT": "Supprimer définitivement",
       "MORE": "Plus d'actions",
       "UNDO": "Annuler",
+      "PERMISSIONS": "Permissions",
       "RESTORE": "Restaurer",
       "FAVORITE": "Favori",
-      "UNSHARE": "Ne pas partager"
+      "UNSHARE": "Ne pas partager",
+      "DETAILS": "Afficher les détails",
+      "VERSIONS": "Gérer les versions",
+      "TOGGLE-SIDENAV": "Activer/désactiver la barre de navigation latérale",
+      "SHARE": "Partager"
+    },
+    "DIALOGS": {
+      "CONFIRM_PURGE": {
+        "TITLE": "Supprimer de la corbeille ?",
+        "MESSAGE": "Le ou les éléments sélectionnés seront définitivement supprimés.",
+        "YES_LABEL": "Supprimer",
+        "NO_LABEL": "Garder"
+      }
     },
     "DOCUMENT_LIST": {
       "COLUMNS": {
@@ -116,6 +150,10 @@
         "SHARED_BY": "Partagé(s) par",
         "DELETED_ON": "Supprimé",
         "DELETED_BY": "Supprimé(s) par"
+      },
+      "TOOLBAR": {
+        "CARDVIEW": "Mode d'affichage Carte",
+        "LISTVIEW": "Mode Liste"
       }
     },
     "SITES_VISIBILITY": {
@@ -125,6 +163,7 @@
     },
     "MESSAGES": {
       "ERRORS": {
+        "MISSING_CONTENT": "Ce fichier ou dossier n'existe plus ou vous n'avez pas les droits pour le consulter.",
         "GENERIC": "L'action a échoué. Réessayez ou contactez le service informatique.",
         "CONFLICT": "Ce nom est déjà utilisé, essayez avec un nom différent.",
         "NODE_MOVE": "Echec du déplacement, un fichier du même nom existe déjà.",
@@ -145,6 +184,14 @@
             "LOCATION_MISSING": "Impossible de restaurer {{ name }}, l'emplacement d'origine n'existe plus",
             "GENERIC": "Un problème est survenu pendant la restauration de {{ name }}"
           }
+        },
+        "DELETE_LIBRARY_FAILED": "Impossible de supprimer la bibliothèque"
+      },
+      "UPLOAD": {
+        "ERROR": {
+          "GENERIC": "Une erreur est survenue",
+          "CONFLICT": "La nouvelle version n'a pas été importée, un autre fichier du même nom existe déjà",
+          "500": "Une erreur est survenue lors de l'importation"
         }
       },
       "INFO": {
@@ -182,7 +229,19 @@
             "PLURAL": "{{ partially }} éléments partiellement déplacés.",
             "FAIL": "{{ failed }} n'a/n'ont pas pu être déplacé(s)."
           }
-        }
+        },
+        "LIBRARY_DELETED": "Bibliothèque supprimée"
+      }
+    },
+    "CONTENT_METADATA": {
+      "EXIF_GROUP_TITLE": "EXIF de l'image"
+    },
+    "INFO_DRAWER": {
+      "TITLE": "Détails",
+      "TABS": {
+        "PROPERTIES": "Propriétés",
+        "VERSIONS": "Versions",
+        "COMMENTS": "Commentaires"
       }
     }
   },
@@ -192,5 +251,92 @@
     "MOVE_ITEM": "Déplacer '{{ name }}' vers...",
     "MOVE_ITEMS": "Déplacer {{ number }} éléments vers...",
     "SEARCH": "Rechercher"
+  },
+  "PERMISSIONS": {
+    "DIALOG": {
+      "TITLE": "Gérer les droits d'accès",
+      "CLOSE": "Fermer",
+      "INHERIT_PERMISSIONS_BUTTON": "Hériter les droits d'accès",
+      "INHERITED_PERMISSIONS_BUTTON": "Droits d'accès hérités"
+    }
+  },
+  "VERSION": {
+    "DIALOG": {
+      "TITLE": "Gérer les versions",
+      "CLOSE": "Fermer"
+    },
+    "SELECTION": {
+      "EMPTY": "Choisissez un document pour en voir les versions.",
+      "NO_PERMISSION": "Vous n'êtes pas autorisé(e) à gérer les versions de ce contenu."
+    }
+  },
+  "LIBRARY": {
+    "DIALOG": {
+      "CREATE_TITLE": "Créer une Bibliothèque",
+      "CREATE": "Créer",
+      "CANCEL": "Annuler",
+      "FORM": {
+        "DESCRIPTION": "Description",
+        "SITE_ID": "ID de Bibliothèque",
+        "NAME": "Nom"
+      }
+    },
+    "VISIBILITY": {
+      "PRIVATE": "Liste privée",
+      "PUBLIC": "Public",
+      "MODERATED": "Modéré"
+    },
+    "ERRORS": {
+      "GENERIC": "Une erreur est survenue",
+      "EXISTENT_SITE": "Cet ID de Bibliothèque est indisponible. Essayez avec une autre Bibliothèque.",
+      "CONFLICT": "Cet ID de Bibliothèque est déjà utilisé. Vérifiez la corbeille.",
+      "ID_TOO_LONG": "L'URL doit contenir 72 caractères maximum",
+      "DESCRIPTION_TOO_LONG": "La description doit contenir 512 caractères maximum",
+      "TITLE_TOO_LONG": "Le titre doit contenir 256 caractères maximum",
+      "ILLEGAL_CHARACTERS": "Utilisez uniquement des chiffres et des lettres"
+    }
+  },
+  "SEARCH": {
+    "SORT": {
+      "RELEVANCE": "Pertinence",
+      "FILENAME": "Nom de fichier",
+      "TITLE": "Titre",
+      "MODIFIED_DATE": "Date de Modification",
+      "SIZE": "Taille",
+      "TYPE": "Type",
+      "MODIFIER": "Modificateur",
+      "CREATE_DATE": "Date de création"
+    },
+    "FACET_FIELDS": {
+      "FILE_TYPE": "Type de fichier",
+      "CREATOR": "Créateur",
+      "MODIFIER": "Modificateur",
+      "LOCATION": "Emplacement"
+    },
+    "CATEGORIES": {
+      "MODIFIED_DATE": "Date de Modification",
+      "SIZE": "Taille",
+      "CREATED_DATE": "Date de création"
+    }
+  },
+  "CORE": {
+    "METADATA": {
+      "ACTIONS": {
+        "SAVE": "Enregistrer les modifications",
+        "CANCEL": "Ignorer les modifications"
+      }
+    }
+  },
+  "ADF_VIEWER": {
+    "ACTIONS": {
+      "INFO": "Afficher les détails"
+    }
+  },
+  "ADF_VERSION_LIST": {
+    "ACTIONS": {
+      "UPLOAD": {
+        "TOOLTIP": "Importer une nouvelle version"
+      }
+    }
   }
 }

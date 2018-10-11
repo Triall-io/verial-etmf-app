@@ -23,33 +23,55 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { NodesApiService, UserPreferencesService } from '@alfresco/adf-core';
-import { DocumentListComponent, ShareDataRow } from '@alfresco/adf-content-services';
+import { ShareDataRow } from '@alfresco/adf-content-services';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 import { PageComponent } from '../page.component';
+import { Store } from '@ngrx/store';
+import { AppStore } from '../../store/states/app.state';
+import { SiteEntry } from 'alfresco-js-api';
+import { ContentManagementService } from '../../services/content-management.service';
+import { ContentApiService } from '../../services/content-api.service';
+import { AppExtensionService } from '../../extensions/extension.service';
+import { map } from 'rxjs/operators';
 
 @Component({
     templateUrl: './libraries.component.html'
 })
-export class LibrariesComponent extends PageComponent {
+export class LibrariesComponent extends PageComponent implements OnInit {
 
-    @ViewChild(DocumentListComponent)
-    documentList: DocumentListComponent;
+    isSmallScreen = false;
 
-    sorting = [ 'title', 'asc' ];
-
-    constructor(private nodesApi: NodesApiService,
-                private route: ActivatedRoute,
+    constructor(private route: ActivatedRoute,
+                content: ContentManagementService,
+                private contentApi: ContentApiService,
+                store: Store<AppStore>,
+                extensions: AppExtensionService,
                 private router: Router,
-                preferences: UserPreferencesService) {
-        super(preferences);
+                private breakpointObserver: BreakpointObserver) {
+        super(store, extensions, content);
+    }
 
-        const sortingKey = preferences.get(`${this.prefix}.sorting.key`) || 'title';
-        const sortingDirection = preferences.get(`${this.prefix}.sorting.direction`) || 'desc';
+    ngOnInit() {
+        super.ngOnInit();
 
-        this.sorting = [sortingKey, sortingDirection];
+        this.subscriptions.push(
+            this.content.libraryDeleted.subscribe(() => this.reload()),
+            this.content.libraryCreated.subscribe((node: SiteEntry) => {
+                this.navigate(node.entry.guid);
+            }),
+
+            this.breakpointObserver
+                .observe([
+                    Breakpoints.HandsetPortrait,
+                    Breakpoints.HandsetLandscape
+                ])
+                .subscribe(result => {
+                    this.isSmallScreen = result.matches;
+                })
+        );
     }
 
     makeLibraryTooltip(library: any): string {
@@ -75,34 +97,20 @@ export class LibrariesComponent extends PageComponent {
         return isDuplicate ? `${title} (${id})` : `${title}`;
     }
 
-    onNodeDoubleClick(e: CustomEvent) {
-        const node: any = e.detail.node.entry;
-
-        if (node && node.guid) {
-            this.navigate(node.guid);
+    navigateTo(node: SiteEntry) {
+        if (node && node.entry.guid) {
+            this.navigate(node.entry.guid);
         }
     }
 
     navigate(libraryId: string) {
         if (libraryId) {
-            this.nodesApi
+            this.contentApi
                 .getNode(libraryId, { relativePath: '/documentLibrary' })
+                .pipe(map(node => node.entry))
                 .subscribe(documentLibrary => {
                     this.router.navigate([ './', documentLibrary.id ], { relativeTo: this.route });
                 });
         }
-    }
-
-    fetchNodes(): void {
-        // todo: remove once all views migrate to native data source
-    }
-
-    onSortingChanged(event: CustomEvent) {
-        this.preferences.set(`${this.prefix}.sorting.key`, event.detail.key || 'modifiedAt');
-        this.preferences.set(`${this.prefix}.sorting.direction`, event.detail.direction || 'desc');
-    }
-
-    private get prefix() {
-        return this.route.snapshot.data.preferencePrefix;
     }
 }

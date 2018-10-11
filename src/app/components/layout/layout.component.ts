@@ -23,42 +23,90 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { Subscription } from 'rxjs/Rx';
+import {
+    Component,
+    OnInit,
+    OnDestroy,
+    ViewChild,
+    ViewEncapsulation
+} from '@angular/core';
+import { Observable, Subject } from 'rxjs';
 import { MinimalNodeEntryEntity } from 'alfresco-js-api';
-import { BrowsingFilesService } from '../../common/services/browsing-files.service';
-import { NodePermissionService } from '../../common/services/node-permission.service';
+import { NodePermissionService } from '../../services/node-permission.service';
+import { SidenavViewsManagerDirective } from './sidenav-views-manager.directive';
+import { Store } from '@ngrx/store';
+import { AppStore } from '../../store/states';
+import {
+    currentFolder,
+    selectAppName,
+    selectHeaderColor,
+    selectLogoPath
+} from '../../store/selectors/app.selectors';
+import { takeUntil } from 'rxjs/operators';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
     selector: 'app-layout',
     templateUrl: './layout.component.html',
-    styleUrls: ['./layout.component.scss']
+    styleUrls: ['./layout.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    host: { class: 'app-layout' }
 })
 export class LayoutComponent implements OnInit, OnDestroy {
-    node: MinimalNodeEntryEntity;
-    isPreview = false;
+    @ViewChild(SidenavViewsManagerDirective)
+    manager: SidenavViewsManagerDirective;
 
-    private subscriptions: Subscription[] = [];
+    onDestroy$: Subject<boolean> = new Subject<boolean>();
+    expandedSidenav: boolean;
+    node: MinimalNodeEntryEntity;
+    canUpload = false;
+
+    appName$: Observable<string>;
+    headerColor$: Observable<string>;
+    logo$: Observable<string>;
+
+    isSmallScreen = false;
 
     constructor(
-        private router: Router,
-        private browsingFilesService: BrowsingFilesService,
-        public permission: NodePermissionService) {
-            this.router.events
-                .filter(event => event instanceof NavigationEnd)
-                .subscribe( (event: any ) => {
-                    this.isPreview = event.urlAfterRedirects.includes('preview');
-                });
-        }
+        protected store: Store<AppStore>,
+        private permission: NodePermissionService,
+        private breakpointObserver: BreakpointObserver
+    ) {
+        this.headerColor$ = store.select(selectHeaderColor);
+        this.appName$ = store.select(selectAppName);
+        this.logo$ = store.select(selectLogoPath);
+    }
 
     ngOnInit() {
-        this.subscriptions.concat([
-            this.browsingFilesService.onChangeParent.subscribe((node: MinimalNodeEntryEntity) => this.node = node)
-        ]);
+        if (!this.manager.minimizeSidenav) {
+            this.expandedSidenav = this.manager.sidenavState;
+        } else {
+            this.expandedSidenav = false;
+        }
+
+        this.manager.run(true);
+
+        this.store
+            .select(currentFolder)
+            .pipe(takeUntil(this.onDestroy$))
+            .subscribe(node => {
+                this.node = node;
+                this.canUpload =
+                    node && this.permission.check(node, ['create']);
+            });
+
+        this.breakpointObserver
+            .observe([
+                Breakpoints.HandsetPortrait,
+                Breakpoints.HandsetLandscape
+            ])
+            .subscribe(result => {
+                this.isSmallScreen = result.matches;
+            });
     }
 
     ngOnDestroy() {
-        this.subscriptions.forEach(s => s.unsubscribe());
+        this.onDestroy$.next(true);
+        this.onDestroy$.complete();
     }
 }

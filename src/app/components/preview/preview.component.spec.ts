@@ -25,19 +25,15 @@
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
-import { TestBed, async, ComponentFixture } from '@angular/core/testing';
-import {
-    AlfrescoApiService, UserPreferencesService, TranslationService, TranslationMock,
-    AppConfigService, StorageService, CookieService, NotificationService, NodeFavoriteDirective
-} from '@alfresco/adf-core';
-import { TranslateModule } from '@ngx-translate/core';
-import { HttpClientModule } from '@angular/common/http';
-
+import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { UserPreferencesService, AppConfigPipe, NodeFavoriteDirective } from '@alfresco/adf-core';
 import { PreviewComponent } from './preview.component';
-import { Observable } from 'rxjs/Rx';
-import { NodePermissionService } from '../../common/services/node-permission.service';
-import { MatSnackBarModule } from '@angular/material';
+import { of, throwError } from 'rxjs';
+import { EffectsModule } from '@ngrx/effects';
+import { ExperimentalDirective } from '../../directives/experimental.directive';
+import { NodeEffects } from '../../store/effects/node.effects';
+import { AppTestingModule } from '../../testing/app-testing.module';
+import { ContentApiService } from '../../services/content-api.service';
 
 describe('PreviewComponent', () => {
 
@@ -45,44 +41,32 @@ describe('PreviewComponent', () => {
     let component: PreviewComponent;
     let router: Router;
     let route: ActivatedRoute;
-    let alfrescoApi: AlfrescoApiService;
     let preferences: UserPreferencesService;
+    let contentApi: ContentApiService;
 
-    beforeEach(async(() => {
+    beforeEach(() => {
         TestBed.configureTestingModule({
                 imports: [
-                    HttpClientModule,
-                    RouterTestingModule,
-                    TranslateModule.forRoot(),
-                    MatSnackBarModule
-                ],
-                providers: [
-                    { provide: TranslationService, useClass: TranslationMock },
-                    AlfrescoApiService,
-                    AppConfigService,
-                    StorageService,
-                    CookieService,
-                    NotificationService,
-                    UserPreferencesService,
-                    NodePermissionService
+                    AppTestingModule,
+                    EffectsModule.forRoot([NodeEffects])
                 ],
                 declarations: [
+                    AppConfigPipe,
                     PreviewComponent,
-                    NodeFavoriteDirective
+                    NodeFavoriteDirective,
+                    ExperimentalDirective
                 ],
                 schemas: [ NO_ERRORS_SCHEMA ]
-        })
-        .compileComponents().then(() => {
-            fixture = TestBed.createComponent(PreviewComponent);
-            component = fixture.componentInstance;
-
-            router = TestBed.get(Router);
-            route = TestBed.get(ActivatedRoute);
-            alfrescoApi = TestBed.get(AlfrescoApiService);
-            alfrescoApi.reset();
-            preferences = TestBed.get(UserPreferencesService);
         });
-    }));
+
+        fixture = TestBed.createComponent(PreviewComponent);
+        component = fixture.componentInstance;
+
+        router = TestBed.get(Router);
+        route = TestBed.get(ActivatedRoute);
+        preferences = TestBed.get(UserPreferencesService);
+        contentApi = TestBed.get(ContentApiService);
+    });
 
     it('should extract the property path root', () => {
         expect(component.getRootField('some.property.path')).toBe('some');
@@ -203,7 +187,7 @@ describe('PreviewComponent', () => {
         component.onVisibilityChanged(false);
 
         expect(router.navigate).toHaveBeenCalledWith(
-            ['libraries']
+            ['libraries', {}]
         );
     });
 
@@ -217,7 +201,7 @@ describe('PreviewComponent', () => {
         component.onVisibilityChanged(false);
 
         expect(router.navigate).toHaveBeenCalledWith(
-            ['libraries', 'site1']
+            ['libraries', {}, 'site1']
         );
     });
 
@@ -231,7 +215,7 @@ describe('PreviewComponent', () => {
         component.onVisibilityChanged(false);
 
         expect(router.navigate).toHaveBeenCalledWith(
-            ['shared']
+            ['shared', {}]
         );
     });
 
@@ -297,7 +281,7 @@ describe('PreviewComponent', () => {
     });
 
     it('should display document upon init', () => {
-        route.params = Observable.of({
+        route.params = of({
             folderId: 'folder1',
             nodeId: 'node1'
         });
@@ -356,35 +340,33 @@ describe('PreviewComponent', () => {
 
     it('should not display node when id is missing', async () => {
         spyOn(router, 'navigate').and.stub();
-        spyOn(alfrescoApi.nodesApi, 'getNodeInfo').and.returnValue(
-            Promise.resolve(null)
+        spyOn(contentApi, 'getNodeInfo').and.returnValue(
+            of(null)
         );
 
         await component.displayNode(null);
 
-        expect(alfrescoApi.nodesApi.getNodeInfo).not.toHaveBeenCalled();
+        expect(contentApi.getNodeInfo).not.toHaveBeenCalled();
         expect(router.navigate).not.toHaveBeenCalled();
     });
 
     it('should navigate to original location if node not found', async () => {
         spyOn(router, 'navigate').and.stub();
-        spyOn(alfrescoApi.nodesApi, 'getNodeInfo').and.returnValue(
-            Promise.resolve(null)
+        spyOn(contentApi, 'getNodeInfo').and.returnValue(
+            of(null)
         );
 
         component.previewLocation = 'personal-files';
         await component.displayNode('folder1');
 
-        expect(alfrescoApi.nodesApi.getNodeInfo).toHaveBeenCalledWith(
-            'folder1', { include: [ 'allowableOperations' ] }
-        );
+        expect(contentApi.getNodeInfo).toHaveBeenCalledWith('folder1');
         expect(router.navigate).toHaveBeenCalledWith(['personal-files', 'folder1']);
     });
 
     it('should navigate to original location if node is not a File', async () => {
         spyOn(router, 'navigate').and.stub();
-        spyOn(alfrescoApi.nodesApi, 'getNodeInfo').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getNodeInfo').and.returnValue(
+            of({
                 isFile: false
             })
         );
@@ -392,31 +374,28 @@ describe('PreviewComponent', () => {
         component.previewLocation = 'personal-files';
         await component.displayNode('folder1');
 
-        expect(alfrescoApi.nodesApi.getNodeInfo).toHaveBeenCalledWith(
-            'folder1', { include: [ 'allowableOperations' ] }
-        );
+        expect(contentApi.getNodeInfo).toHaveBeenCalledWith('folder1');
         expect(router.navigate).toHaveBeenCalledWith(['personal-files', 'folder1']);
     });
 
     it('should navigate to original location in case of Alfresco API errors', async () => {
         spyOn(router, 'navigate').and.stub();
-        spyOn(alfrescoApi.nodesApi, 'getNodeInfo').and.returnValue(
-            Promise.reject('error')
+        spyOn(contentApi, 'getNodeInfo').and.returnValue(
+            throwError('error')
         );
 
         component.previewLocation = 'personal-files';
         await component.displayNode('folder1');
 
-        expect(alfrescoApi.nodesApi.getNodeInfo).toHaveBeenCalledWith(
-            'folder1', { include: [ 'allowableOperations' ] }
-        );
+        expect(contentApi.getNodeInfo).toHaveBeenCalledWith('folder1');
         expect(router.navigate).toHaveBeenCalledWith(['personal-files', 'folder1']);
     });
 
-    it('should navigate to original location in case of internal errors', async () => {
+    // todo: Fix after Angular6 migration
+    xit('should navigate to original location in case of internal errors', async () => {
         spyOn(router, 'navigate').and.stub();
-        spyOn(alfrescoApi.nodesApi, 'getNodeInfo').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getNodeInfo').and.returnValue(
+            of({
                 isFile: true
             })
         );
@@ -427,17 +406,15 @@ describe('PreviewComponent', () => {
         component.previewLocation = 'personal-files';
         await component.displayNode('folder1');
 
-        expect(alfrescoApi.nodesApi.getNodeInfo).toHaveBeenCalledWith(
-            'folder1', { include: [ 'allowableOperations' ] }
-        );
+        expect(contentApi.getNodeInfo).toHaveBeenCalledWith('folder1');
         expect(router.navigate).toHaveBeenCalledWith(['personal-files', 'folder1']);
     });
 
     it('should setup node for displaying', async () => {
         spyOn(router, 'navigate').and.stub();
         spyOn(component, 'getNearestNodes').and.returnValue({ left: 'node1', right: 'node3' });
-        spyOn(alfrescoApi.nodesApi, 'getNodeInfo').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getNodeInfo').and.returnValue(
+            of({
                 id: 'node2',
                 parentId: 'parent1',
                 isFile: true
@@ -456,8 +433,8 @@ describe('PreviewComponent', () => {
         preferences.set('personal-files.sorting.key', 'name');
         preferences.set('personal-files.sorting.direction', 'desc');
 
-        spyOn(alfrescoApi.nodesApi, 'getNodeChildren').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getNodeChildren').and.returnValue(
+            of({
                 list: {
                     entries: [
                         { entry: { id: 'node1', name: 'node 1' } },
@@ -475,8 +452,8 @@ describe('PreviewComponent', () => {
         preferences.set('personal-files.sorting.key', 'missing');
         preferences.set('personal-files.sorting.direction', 'desc');
 
-        spyOn(alfrescoApi.nodesApi, 'getNodeChildren').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getNodeChildren').and.returnValue(
+            of({
                 list: {
                     entries: [
                         { entry: { id: 'node1', name: 'node 1' } },
@@ -498,8 +475,8 @@ describe('PreviewComponent', () => {
     it('should sort file ids for personal-files with [modifiedAt desc]', async () => {
         spyOn(preferences, 'get').and.returnValue(null);
 
-        spyOn(alfrescoApi.nodesApi, 'getNodeChildren').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getNodeChildren').and.returnValue(
+            of({
                 list: {
                     entries: [
                         { entry: { id: 'node1', name: 'node 1', modifiedAt: 1 } },
@@ -517,8 +494,8 @@ describe('PreviewComponent', () => {
         preferences.set('personal-files.sorting.key', 'name');
         preferences.set('personal-files.sorting.direction', 'desc');
 
-        spyOn(alfrescoApi.nodesApi, 'getNodeChildren').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getNodeChildren').and.returnValue(
+            of({
                 list: {
                     entries: [
                         { entry: { id: 'node1', name: 'node 1' } },
@@ -540,8 +517,8 @@ describe('PreviewComponent', () => {
     it('should sort file ids for libraries with [modifiedAt desc]', async () => {
         spyOn(preferences, 'get').and.returnValue(null);
 
-        spyOn(alfrescoApi.nodesApi, 'getNodeChildren').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getNodeChildren').and.returnValue(
+            of({
                 list: {
                     entries: [
                         { entry: { id: 'node1', name: 'node 1', modifiedAt: new Date(1) } },
@@ -559,8 +536,8 @@ describe('PreviewComponent', () => {
         preferences.set('favorites.sorting.key', 'name');
         preferences.set('favorites.sorting.direction', 'desc');
 
-        spyOn(alfrescoApi.favoritesApi, 'getFavorites').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getFavorites').and.returnValue(
+            of({
                 list: {
                     entries: [
                         { entry: { target: { file: { id: 'file3', name: 'file 3' } } } },
@@ -578,8 +555,8 @@ describe('PreviewComponent', () => {
     it('should sort file ids for favorites with [modifiedAt desc]', async () => {
         spyOn(preferences, 'get').and.returnValue(null);
 
-        spyOn(alfrescoApi.favoritesApi, 'getFavorites').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getFavorites').and.returnValue(
+            of({
                 list: {
                     entries: [
                         { entry: { target: { file: { id: 'file3', modifiedAt: new Date(3) } } } },
@@ -598,8 +575,8 @@ describe('PreviewComponent', () => {
         preferences.set('shared.sorting.key', 'name');
         preferences.set('shared.sorting.direction', 'asc');
 
-        spyOn(alfrescoApi.sharedLinksApi, 'findSharedLinks').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'findSharedLinks').and.returnValue(
+            of({
                 list: {
                     entries: [
                         { entry: { nodeId: 'node2', name: 'node 2', modifiedAt: new Date(2) } },
@@ -616,8 +593,8 @@ describe('PreviewComponent', () => {
     it('should sort file ids for favorites with [modifiedAt desc]', async () => {
         spyOn(preferences, 'get').and.returnValue(null);
 
-        spyOn(alfrescoApi.sharedLinksApi, 'findSharedLinks').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'findSharedLinks').and.returnValue(
+            of({
                 list: {
                     entries: [
                         { entry: { nodeId: 'node2', name: 'node 2', modifiedAt: new Date(2) } },
@@ -635,14 +612,14 @@ describe('PreviewComponent', () => {
         preferences.set('recent-files.sorting.key', 'name');
         preferences.set('recent-files.sorting.direction', 'asc');
 
-        spyOn(alfrescoApi.peopleApi, 'getPerson').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getPerson').and.returnValue(
+            of({
                 entry: { id: 'user' }
             })
         );
 
-        spyOn(alfrescoApi.searchApi, 'search').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'search').and.returnValue(
+            of({
                 list: {
                     entries: [
                         { entry: { id: 'node2', name: 'node 2', modifiedAt: new Date(2) } },
@@ -659,14 +636,14 @@ describe('PreviewComponent', () => {
     it('should sort file ids for favorites with [modifiedAt desc]', async () => {
         spyOn(preferences, 'get').and.returnValue(null);
 
-        spyOn(alfrescoApi.peopleApi, 'getPerson').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'getPerson').and.returnValue(
+            of({
                 entry: { id: 'user' }
             })
         );
 
-        spyOn(alfrescoApi.searchApi, 'search').and.returnValue(
-            Promise.resolve({
+        spyOn(contentApi, 'search').and.returnValue(
+            of({
                 list: {
                     entries: [
                         { entry: { id: 'node2', name: 'node 2', modifiedAt: new Date(2) } },

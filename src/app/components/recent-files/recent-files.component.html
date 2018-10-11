@@ -4,114 +4,34 @@
         </adf-breadcrumb>
 
         <adf-toolbar class="inline">
+            <app-document-display-mode *ifExperimental="'cardview'"></app-document-display-mode>
 
-            <button
-                mat-icon-button
-                color="primary"
-                *ngIf="canPreviewFile(documentList.selection)"
-                title="{{ 'APP.ACTIONS.VIEW' | translate }}"
-                (click)="onNodeDoubleClick(documentList.selection[0]?.entry)">
-                <mat-icon>open_in_browser</mat-icon>
-            </button>
-
-            <button
-                mat-icon-button
-                color="primary"
-                *ngIf="hasSelection(documentList.selection)"
-                title="{{ 'APP.ACTIONS.DOWNLOAD' | translate }}"
-                [adfNodeDownload]="documentList.selection">
-                <mat-icon>get_app</mat-icon>
-            </button>
-
-            <button mat-icon-button
-                [color]="infoDrawerOpened ? 'accent' : 'primary'"
-                *ngIf="documentList.selection.length"
-                title="{{ 'APP.ACTIONS.DETAILS' | translate }}"
-                (click)="toggleSidebar()">
-                <mat-icon>info_outline</mat-icon>
-            </button>
-
-            <button
-                color="primary"
-                mat-icon-button
-                *ngIf="hasSelection(documentList.selection)"
-                title="{{ 'APP.ACTIONS.MORE' | translate }}"
-                [matMenuTriggerFor]="actionsMenu">
-                <mat-icon>more_vert</mat-icon>
-            </button>
-
-            <mat-menu #actionsMenu="matMenu"
-                [overlapTrigger]="false"
-                class="secondary-options">
-                <button
-                    mat-menu-item
-                    #selection="adfFavorite"
-                    [adf-node-favorite]="documentList.selection">
-                    <mat-icon [ngClass]="{
-                        'toolbar__option--active': selection.hasFavorites(),
-                        'toolbar__option--default': !selection.hasFavorites()
-                    }">
-                        {{ selection.hasFavorites() ? 'star' :'star_border' }}
-                    </mat-icon>
-                    <span>{{ 'APP.ACTIONS.FAVORITE' | translate }}</span>
-                </button>
-
-                <button
-                    mat-menu-item
-                    [app-copy-node]="documentList.selection">
-                    <mat-icon color="primary">content_copy</mat-icon>
-                    <span>{{ 'APP.ACTIONS.COPY' | translate }}</span>
-                </button>
-
-                <button
-                    mat-menu-item
-                    *ngIf="canMove(documentList.selection)"
-                    [app-move-node]="documentList.selection">
-                    <mat-icon color="primary">library_books</mat-icon>
-                    <span>{{ 'APP.ACTIONS.MOVE' | translate }}</span>
-                </button>
-
-                <button
-                    mat-menu-item
-                    *ngIf="canDelete(documentList.selection)"
-                    [app-delete-node]="documentList.selection">
-                    <mat-icon color="primary">delete</mat-icon>
-                    <span>{{ 'APP.ACTIONS.DELETE' | translate }}</span>
-                </button>
-
-                <button
-                    mat-menu-item
-                    *ngIf="canManageVersions(documentList.selection)"
-                    [app-node-versions]="documentList.selection">
-                    <mat-icon color="primary">history</mat-icon>
-                    <span>{{ 'APP.ACTIONS.VERSIONS' | translate }}</span>
-                </button>
-            </mat-menu>
+            <ng-container *ngFor="let entry of actions; trackBy: trackByActionId">
+                <aca-toolbar-action [entry]="entry"></aca-toolbar-action>
+            </ng-container>
         </adf-toolbar>
     </div>
 
     <div class="inner-layout__content">
-        <div class="inner-layout__panel" [ngClass]="{'adf-document-list--loading': documentList.isEmpty()}">
+        <div class="inner-layout__panel">
             <adf-document-list #documentList
-                [attr.class]="documentList.isEmpty() ? 'adf-document-list--empty' : ''"
+                acaDocumentList
+                acaContextActions
+                [display]="documentDisplayMode$ | async"
                 currentFolderId="-recent-"
                 selectionMode="multiple"
                 [navigate]="false"
-                [sorting]="sorting"
-                [contextMenuActions]="true"
-                [contentActions]="false"
+                [sorting]="[ 'modifiedAt', 'desc' ]"
                 [imageResolver]="imageResolver"
-                (sorting-changed)="onSortingChanged($event)"
-                (node-dblclick)="onNodeDoubleClick($event.detail?.node?.entry)"
-                (node-select)="onNodeSelect($event, documentList)">
+                (node-dblclick)="onNodeDoubleClick($event.detail?.node)">
 
                 <empty-folder-content>
                     <ng-template>
-                        <app-empty-folder
+                        <adf-empty-content
                             icon="access_time"
-                            title="APP.BROWSE.RECENT.EMPTY_STATE.TITLE"
+                            [title]="'APP.BROWSE.RECENT.EMPTY_STATE.TITLE'"
                             subtitle="APP.BROWSE.RECENT.EMPTY_STATE.TEXT">
-                        </app-empty-folder>
+                        </adf-empty-content>
                     </ng-template>
                 </empty-folder-content>
 
@@ -128,25 +48,32 @@
                         key="name"
                         title="APP.DOCUMENT_LIST.COLUMNS.NAME">
                         <ng-template let-value="value" let-context>
-                            <span class="adf-datatable-cell" title="{{ context?.row?.obj | adfNodeNameTooltip }}">{{ value }}</span>
+                            <span class="adf-datatable-cell dl-link"
+                                title="{{ context?.row?.obj | adfNodeNameTooltip }}"
+                                (click)="onNodeDoubleClick(context?.row?.obj)">
+                                {{ value }}
+                            </span>
                         </ng-template>
                     </data-column>
 
                     <data-column
-                        key="path"
+                        *ngIf="!isSmallScreen"
+                        key="path.name"
                         title="APP.DOCUMENT_LIST.COLUMNS.LOCATION">
                         <ng-template let-context>
-                            <app-location-link [context]="context"></app-location-link>
+                            <aca-location-link [context]="context"></aca-location-link>
                         </ng-template>
                     </data-column>
 
                     <data-column
+                        *ngIf="!isSmallScreen"
                         key="content.sizeInBytes"
                         type="fileSize"
                         title="APP.DOCUMENT_LIST.COLUMNS.SIZE">
                     </data-column>
 
                     <data-column
+                        *ngIf="!isSmallScreen"
                         key="modifiedAt"
                         title="APP.DOCUMENT_LIST.COLUMNS.MODIFIED_ON">
                         <ng-template let-value="value">
@@ -157,56 +84,12 @@
 
             </adf-document-list>
 
-            <ng-container *ngIf="!documentList.isEmpty()">
-                <adf-pagination
-                    [target]="documentList"
-                    (changePageSize)="onChangePageSize($event)">
-                </adf-pagination>
-            </ng-container>
+            <adf-pagination acaPagination [target]="documentList">
+            </adf-pagination>
         </div>
 
-        <div class="inner-layout__side-panel"
-            *ngIf="infoDrawerOpened"
-            [app-node-info]="documentList.selection"
-            (changed)="toggleSidebar($event)"
-            #infoInstance=nodeInfo>
-
-            <adf-info-drawer [title]="'APP.INFO_DRAWER.TITLE' | translate">
-                <adf-info-drawer-tab [label]="'APP.INFO_DRAWER.TABS.PROPERTIES' | translate">
-                    <div *ngIf="infoInstance.loading">
-                        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-                    </div>
-
-                    <adf-content-metadata-card
-                        [readOnly]="!canUpdate(documentList.selection)"
-                        [displayEmpty]="canUpdate(documentList.selection)"
-                        [preset]="'custom'"
-                        [node]="infoInstance.node">
-                    </adf-content-metadata-card>
-                </adf-info-drawer-tab>
-
-                <adf-info-drawer-tab [label]="'APP.INFO_DRAWER.TABS.VERSIONS' | translate">
-                    <ng-container *ngIf="isFileSelected(documentList.selection);else choose_document_template">
-                        <ng-container *ngIf="canManageVersions(documentList.selection); else no_permission_to_versions">
-                            <adf-version-manager *ngIf="infoInstance.node"
-                                                 [node]="infoInstance.node">
-                            </adf-version-manager>
-                        </ng-container>
-                    </ng-container>
-                    <ng-template #choose_document_template>
-                        <div class="adf-manage-versions-empty">
-                            <mat-icon class="adf-manage-versions-empty-icon">face</mat-icon>
-                            {{ 'VERSION.SELECTION.EMPTY' | translate }}
-                        </div>
-                    </ng-template>
-                    <ng-template #no_permission_to_versions>
-                        <div class="adf-manage-versions-no-permission">
-                            <mat-icon class="adf-manage-versions-no-permission-icon">warning</mat-icon>
-                            {{ 'VERSION.SELECTION.NO_PERMISSION' | translate }}
-                        </div>
-                    </ng-template>
-                </adf-info-drawer-tab>
-            </adf-info-drawer>
+        <div class="inner-layout__side-panel" *ngIf="infoDrawerOpened$ | async">
+            <aca-info-drawer [node]="selection.last"></aca-info-drawer>
         </div>
     </div>
 </div>

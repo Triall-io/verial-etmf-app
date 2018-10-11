@@ -23,89 +23,46 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs/Rx';
-import { MinimalNodeEntity } from 'alfresco-js-api';
-import { AlfrescoApiService, UserPreferencesService } from '@alfresco/adf-core';
-import { DocumentListComponent } from '@alfresco/adf-content-services';
-
-import { ContentManagementService } from '../../common/services/content-management.service';
-import { NodePermissionService } from '../../common/services/node-permission.service';
+import { Component, OnInit } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { ContentManagementService } from '../../services/content-management.service';
 import { PageComponent } from '../page.component';
+import { Store } from '@ngrx/store';
+import { AppStore } from '../../store/states/app.state';
+import { AppExtensionService } from '../../extensions/extension.service';
 
 @Component({
     templateUrl: './shared-files.component.html'
 })
-export class SharedFilesComponent extends PageComponent implements OnInit, OnDestroy {
+export class SharedFilesComponent extends PageComponent implements OnInit {
+    isSmallScreen = false;
 
-    @ViewChild(DocumentListComponent)
-    documentList: DocumentListComponent;
-
-    private subscriptions: Subscription[] = [];
-
-    sorting = [ 'modifiedAt', 'desc' ];
-
-    constructor(private router: Router,
-                private route: ActivatedRoute,
-                private content: ContentManagementService,
-                private apiService: AlfrescoApiService,
-                public permission: NodePermissionService,
-                preferences: UserPreferencesService) {
-        super(preferences);
-
-        const sortingKey = preferences.get(`${this.prefix}.sorting.key`) || 'modifiedAt';
-        const sortingDirection = preferences.get(`${this.prefix}.sorting.direction`) || 'desc';
-
-        this.sorting = [sortingKey, sortingDirection];
+    constructor(
+        store: Store<AppStore>,
+        extensions: AppExtensionService,
+        content: ContentManagementService,
+        private breakpointObserver: BreakpointObserver
+    ) {
+        super(store, extensions, content);
     }
 
     ngOnInit() {
+        super.ngOnInit();
+
         this.subscriptions = this.subscriptions.concat([
-            this.content.nodeDeleted.subscribe(() => this.refresh()),
-            this.content.nodeMoved.subscribe(() => this.refresh()),
-            this.content.nodeRestored.subscribe(() => this.refresh())
+            this.content.nodesDeleted.subscribe(() => this.reload()),
+            this.content.nodesMoved.subscribe(() => this.reload()),
+            this.content.nodesRestored.subscribe(() => this.reload()),
+            this.content.linksUnshared.subscribe(() => this.reload()),
+
+            this.breakpointObserver
+                .observe([
+                    Breakpoints.HandsetPortrait,
+                    Breakpoints.HandsetLandscape
+                ])
+                .subscribe(result => {
+                    this.isSmallScreen = result.matches;
+                })
         ]);
-    }
-
-    ngOnDestroy() {
-        this.subscriptions.forEach(s => s.unsubscribe());
-    }
-
-    onNodeDoubleClick(link: { nodeId?: string }) {
-        if (link && link.nodeId) {
-            this.apiService.nodesApi.getNode(link.nodeId).then(
-                (node: MinimalNodeEntity) => {
-                    if (node && node.entry && node.entry.isFile) {
-                        this.router.navigate(['./preview', node.entry.id], { relativeTo: this.route });
-                    }
-                }
-            );
-        }
-    }
-
-    fetchNodes(parentNodeId?: string) {
-        // todo: remove once all views migrate to native data source
-    }
-
-    /** @override */
-    isFileSelected(selection: Array<MinimalNodeEntity>): boolean {
-        return selection && selection.length === 1;
-    }
-
-    refresh(): void {
-        if (this.documentList) {
-            this.documentList.resetSelection();
-            this.documentList.reload();
-        }
-    }
-
-    onSortingChanged(event: CustomEvent) {
-        this.preferences.set(`${this.prefix}.sorting.key`, event.detail.key || 'modifiedAt');
-        this.preferences.set(`${this.prefix}.sorting.direction`, event.detail.direction || 'desc');
-    }
-
-    private get prefix() {
-        return this.route.snapshot.data.preferencePrefix;
     }
 }
