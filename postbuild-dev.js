@@ -26,7 +26,7 @@
 var fs = require('fs');
 var config = require('./dist/app.config.json');
 
-config.ecmHost = 'http://192.168.79.1:28080';
+config.ecmHost = 'http://alfresco.demo.sphereon.com';
 
 fs.writeFileSync(
     './dist/app.config.json',
