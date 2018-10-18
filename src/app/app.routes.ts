@@ -71,7 +71,7 @@ export const APP_ROUTES: Routes = [
         children: [
             {
                 path: '',
-                redirectTo: `/personal-files`,
+                redirectTo: `/libraries`,
                 pathMatch: 'full'
             },
             {

@@ -42,13 +42,13 @@
                 }
             },
             "LIBRARIES": {
-                "TITLE": "File Libraries",
+                "TITLE": "Trial Libraries",
                 "SIDENAV_LINK": {
-                    "LABEL": "File Libraries",
-                    "TOOLTIP": "Access File Libraries"
+                    "LABEL": "Trial Libraries",
+                    "TOOLTIP": "Access Trial Libraries"
                 },
                 "EMPTY_STATE": {
-                    "TITLE": "You aren't a member of any File Libraries yet",
+                    "TITLE": "You aren't a member of any Trial Libraries yet",
                     "TEXT": "Join libraries to upload, view, and share files."
                 }
             },
