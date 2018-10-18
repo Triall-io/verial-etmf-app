@@ -57,7 +57,9 @@
     "moment-es6": "1.0.0",
     "monaco-editor": "^0.14.2",
     "pdfjs-dist": "2.0.303",
+    "buffer": "^5.1.0",
     "rxjs": "^6.2.2",
+    "rxjs-compat": "^6.3.3",
     "showdown": "^1.8.6",
     "web-animations-js": "2.3.1",
     "zone.js": "0.8.26"

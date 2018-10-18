@@ -48,7 +48,7 @@ export const APP_ROUTES = {
     FILE_LIBRARIES: '/libraries',
     LOGIN: '/login',
     LOGOUT: '/logout',
-    PERSONAL_FILES: '/personal-files',
+//    PERSONAL_FILES: '/personal-files',
     RECENT_FILES: '/recent-files',
     SHARED_FILES: '/shared',
     TRASHCAN: '/trashcan'
@@ -56,7 +56,7 @@ export const APP_ROUTES = {
 
 // Sidebar labels
 export const SIDEBAR_LABELS = {
-    PERSONAL_FILES: 'Personal Files',
+//    PERSONAL_FILES: 'Personal Files',
     FILE_LIBRARIES: 'File Libraries',
     SHARED_FILES: 'Shared',
     RECENT_FILES: 'Recent Files',

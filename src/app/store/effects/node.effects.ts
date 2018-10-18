@@ -45,6 +45,8 @@ import {
     SHARE_NODE
 } from '../actions';
 import { ContentManagementService } from '../../services/content-management.service';
+import { BlockchainProofService } from '../../services/blockchain-proof/blockchain-proof.service';
+import { NotificationService } from '@alfresco/adf-core';
 import { currentFolder, appSelection } from '../selectors/app.selectors';
 import {
     UnshareNodesAction,
@@ -56,15 +58,22 @@ import {
     ManagePermissionsAction,
     MANAGE_PERMISSIONS,
     ManageVersionsAction,
-    MANAGE_VERSIONS
+    MANAGE_VERSIONS,
+    BlockchainSignAction,
+    BLOCKCHAIN_SIGN,
+    BlockchainVerifyAction,
+    BLOCKCHAIN_VERIFY
 } from '../actions/node.actions';
+import {Observable} from 'rxjs';
 
 @Injectable()
 export class NodeEffects {
     constructor(
         private store: Store<AppStore>,
         private actions$: Actions,
-        private contentService: ContentManagementService
+        private contentService: ContentManagementService,
+        private blockchainProofService: BlockchainProofService,
+        private notification: NotificationService
     ) {}
 
     @Effect({ dispatch: false })
@@ -293,4 +302,75 @@ export class NodeEffects {
             }
         })
     );
+
+    @Effect({ dispatch: false })
+    blockchainSignNodes$ = this.actions$.pipe(
+        ofType<BlockchainSignAction>(BLOCKCHAIN_SIGN),
+        map(action => {
+            if (action.payload && action.payload.length > 0) {
+                this.signNodes(action);
+            } else {
+                this.store
+                    .select(appSelection)
+                    .pipe(take(1))
+                    .subscribe(selection => {
+                        if (selection && !selection.isEmpty) {
+                            this.signNodes(selection);
+                        }
+                    });
+            }
+        })
+    );
+
+    private signNodes(selection) {
+        Observable.zip(
+            this.blockchainProofService.signSelection(selection.nodes)
+        ).subscribe(
+            (result) => {
+                const [operationResult] = result;
+                this.toastMessage(operationResult);
+            },
+            (error) => {
+                this.toastMessage(error.message);
+            }
+        );
+    }
+
+    @Effect({ dispatch: false })
+    blockchainVerifyNodes$ = this.actions$.pipe(
+        ofType<BlockchainVerifyAction>(BLOCKCHAIN_VERIFY),
+        map(action => {
+            if (action.payload && action.payload.length > 0) {
+                this.verifyNodes(action.payload);
+            } else {
+                this.store
+                    .select(appSelection)
+                    .pipe(take(1))
+                    .subscribe(selection => {
+                        if (selection && !selection.isEmpty) {
+                            this.verifyNodes(selection);
+                        }
+                    });
+            }
+        })
+    );
+
+
+    private verifyNodes(selection) {
+        Observable.zip(
+            this.blockchainProofService.verifySelection(selection.nodes)
+        ).subscribe(
+            (result) => {
+                const [operationResult] = result;
+                this.toastMessage(operationResult);
+            },
+            (error) => {
+                this.toastMessage(error.message);
+            }
+        );
+    }
+
+    private toastMessage(message: any) {
+        this.notification.openSnackMessageAction(message, '', 15000);
+    }
 }

@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    app: alfresco-adf-demo
+  annotations:
+    kubernetes.io/ingress.class: traefik
+  name: alfresco-adf-demo
+  namespace: alfresco
+spec:
+  rules:
+  - host: triall.dev.sphereon.com
+    http:
+      paths:
+      - backend:
+          serviceName: alfresco-adf-demo
+          servicePort: 80

@@ -77,7 +77,7 @@ describe('Viewer general', () => {
     });
 
     beforeEach(async (done) => {
-        await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.PERSONAL_FILES);
+        await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.FILE_LIBRARIES);
         await dataTable.waitForHeader();
         await dataTable.doubleClickOnRowByName(parent);
         await dataTable.waitForHeader();

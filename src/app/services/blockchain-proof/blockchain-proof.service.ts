@@ -8,7 +8,7 @@ import * as models from './sdk/model/Models';
 import {AlfrescoApi, ContentApi} from 'alfresco-js-api';
 import {Subject} from 'rxjs/Rx';
 import {Buffer} from 'buffer';
-import { SECRETS } from 'environments/secrets';
+import { secrets } from '../../../environments/secrets';
 
 
 @Injectable()
@@ -65,8 +65,7 @@ export class BlockchainProofService {
                 observable.next(message);
                 // this.signComplete.emit(message);
             }, error => {
-                console.log(error.message);
-                observable.error(new Error(JSON.stringify(error)));
+                this.handleApiError(error, observable);
             });
         });
     }
@@ -109,15 +108,33 @@ export class BlockchainProofService {
                 observable.next(message);
                 // this.signComplete.emit(message);
             }, error => {
-                console.log(error.message);
-                observable.error(new Error(JSON.stringify(error)));
+                this.handleApiError(error, observable);
             });
         });
     }
 
+    private handleApiError(error, observable: Subject<string>) {
+        console.log(error.message);
+        const messageBuilder = [];
+        if (error.error && error.error.errors) {
+            error.error.errors.forEach(errorItem => {
+                const errorMessage = JSON.stringify(errorItem);
+                console.log(errorMessage);
+                if (messageBuilder.length > 0) {
+                    messageBuilder.push('\n');
+                }
+                messageBuilder.push(errorMessage);
+            });
+        }
+        else {
+            messageBuilder.push(error.message);
+        }
+        observable.error(new Error(messageBuilder.join('')));
+    }
+
     apiConfig() {
         const config = new ApiClientConfiguration();
-        config.accessToken = SECRETS.bcproofFixedToken;
+        config.accessToken = secrets.bcproofFixedToken;
         return config;
     }
 

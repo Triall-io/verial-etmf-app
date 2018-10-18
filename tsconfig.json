@@ -1,14 +1,14 @@
 {
-    "compileOnSave": false,
-    "compilerOptions": {
-        "outDir": "./dist/out-tsc",
-        "sourceMap": true,
-        "declaration": false,
-        "moduleResolution": "node",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "noUnusedLocals": false,
-        "target": "es5",
+  "compileOnSave": false,
+  "compilerOptions": {
+    "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noUnusedLocals": false,
+    "target": "es5",
     "typeRoots": [
       "node_modules/@types"
     ],
@@ -32,7 +32,7 @@
         "dist/@alfresco/adf-extensions/*"
       ]
     }
-    },
+  },
   "exclude": [
     "node_modules"
   ],

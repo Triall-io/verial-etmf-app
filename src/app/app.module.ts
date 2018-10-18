@@ -58,8 +58,6 @@ import { NodePermissionService } from './services/node-permission.service';
 import { SearchResultsComponent } from './components/search/search-results/search-results.component';
 import { ProfileResolver } from './services/profile.resolver';
 import { ExperimentalGuard } from './services/experimental-guard.service';
-import { NodeBCSignDirective } from './common/directives/node-bcsign.directive';
-import { NodeBCVerifyDirective } from './common/directives/node-bcverify.directive';
 
 import { AppStoreModule } from './store/app-store.module';
 import { MaterialModule } from './material.module';
@@ -68,6 +66,7 @@ import { AppExtensionsModule } from './extensions.module';
 import { CoreExtensionsModule } from './extensions/core.extensions.module';
 import { SearchResultsRowComponent } from './components/search/search-results-row/search-results-row.component';
 import { NodePermissionsDialogComponent } from './dialogs/node-permissions/node-permissions.dialog';
+import { BlockchainProofService } from './services/blockchain-proof/blockchain-proof.service';
 import { PermissionsManagerComponent } from './components/permission-manager/permissions-manager.component';
 import { AppRouteReuseStrategy } from './app.routes.strategy';
 import { AppInfoDrawerModule } from './components/info-drawer/info.drawer.module';
@@ -75,6 +74,7 @@ import { DirectivesModule } from './directives/directives.module';
 import { ContextMenuModule } from './components/context-menu/context-menu.module';
 import { ExtensionsModule } from '@alfresco/adf-extensions';
 import { AppToolbarModule } from './components/toolbar/toolbar.module';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
     imports: [
@@ -97,7 +97,8 @@ import { AppToolbarModule } from './components/toolbar/toolbar.module';
         DirectivesModule,
         ContextMenuModule.forRoot(),
         AppInfoDrawerModule,
-        AppToolbarModule
+        AppToolbarModule,
+        HttpClientModule
     ],
     declarations: [
         AppComponent,
@@ -123,8 +124,6 @@ import { AppToolbarModule } from './components/toolbar/toolbar.module';
         PermissionsManagerComponent,
         SearchResultsComponent,
         SharedLinkViewComponent
- 		NodeBCSignDirective,
-        NodeBCVerifyDirective,
     ],
     providers: [
         { provide: RouteReuseStrategy, useClass: AppRouteReuseStrategy },
@@ -143,7 +142,7 @@ import { AppToolbarModule } from './components/toolbar/toolbar.module';
         ProfileResolver,
         ExperimentalGuard,
         ContentApiService,
-		BlockchainProofService
+        BlockchainProofService
     ],
     entryComponents: [
         LibraryDialogComponent,

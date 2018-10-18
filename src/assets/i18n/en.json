@@ -130,8 +130,8 @@
             "VERSIONS": "Manage Versions",
             "TOGGLE-SIDENAV": "Toggle side navigation bar",
             "SHARE": "Share",
-			"BCSIGN": "Blockchain sign",
-            "BCVERIFY": "Blockchain verify"
+            "BLOCKCHAIN_SIGN": "Blockchain sign",
+            "BLOCKCHAIN_VERIFY": "Blockchain verify"
         },
         "DIALOGS": {
             "CONFIRM_PURGE": {
@@ -234,7 +234,7 @@
                     }
                 },
                 "LIBRARY_DELETED": "Library deleted"
-                }
+            }
         },
         "CONTENT_METADATA": {
             "EXIF_GROUP_TITLE": "Image EXIF"
@@ -282,7 +282,7 @@
                 "DESCRIPTION": "Description",
                 "SITE_ID": "Library ID",
                 "NAME": "Name"
-    }
+            }
         },
         "VISIBILITY": {
             "PRIVATE": "Private",

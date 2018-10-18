@@ -41,7 +41,7 @@ export interface AppState {
 export const INITIAL_APP_STATE: AppState = {
     appName: 'Alfresco Example Content Application',
     headerColor: '#2196F3',
-    logoPath: 'assets/images/alfresco-logo-white.svg',
+    logoPath: 'assets/images/triall-logo.svg',
     languagePicker: false,
     sharedUrl: '',
     user: {

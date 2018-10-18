@@ -43,6 +43,9 @@ import {
 } from './store/actions';
 import { AppStore, AppState, INITIAL_APP_STATE } from './store/states/app.state';
 import { filter } from 'rxjs/operators';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
+
 
 @Component({
     selector: 'app-root',
@@ -59,8 +62,13 @@ export class AppComponent implements OnInit {
         private alfrescoApiService: AlfrescoApiService,
         private authenticationService: AuthenticationService,
         private uploadService: UploadService,
-        private extensions: AppExtensionService
-    ) {}
+        private extensions: AppExtensionService,
+        private matIconRegistry: MatIconRegistry,
+        private domSanitizer: DomSanitizer
+    ) {
+        const iconUrl = this.domSanitizer.bypassSecurityTrustResourceUrl('assets/images/bc.svg');
+        this.matIconRegistry.addSvgIcon('blockchain', iconUrl);
+    }
 
     ngOnInit() {
         this.alfrescoApiService.getInstance().on('error', error => {
