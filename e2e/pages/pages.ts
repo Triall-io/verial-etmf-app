@@ -23,6 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
+config.ecmHost = 'https://traill.dev.sphereon.com';
 export * from './browsing-page';
 export * from './login-page';
 export * from './logout-page';
