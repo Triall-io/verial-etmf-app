@@ -8,7 +8,7 @@ import * as models from './sdk/model/Models';
 import {AlfrescoApi, ContentApi} from 'alfresco-js-api';
 import {Subject} from 'rxjs/Rx';
 import {Buffer} from 'buffer';
-import { SECRETS } from 'environments/secrets';
+import { secrets } from '../../../environments/secrets';
 
 
 @Injectable()
@@ -117,7 +117,7 @@ export class BlockchainProofService {
 
     apiConfig() {
         const config = new ApiClientConfiguration();
-        config.accessToken = SECRETS.bcproofFixedToken;
+        config.accessToken = secrets.bcproofFixedToken;
         return config;
     }
 

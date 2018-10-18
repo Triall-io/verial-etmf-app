@@ -45,6 +45,7 @@ import {
     SHARE_NODE
 } from '../actions';
 import { ContentManagementService } from '../../services/content-management.service';
+import {BlockchainProofService} from '../../services/blockchain-proof/blockchain-proof.service';
 import { currentFolder, appSelection } from '../selectors/app.selectors';
 import {
     UnshareNodesAction,
@@ -56,7 +57,11 @@ import {
     ManagePermissionsAction,
     MANAGE_PERMISSIONS,
     ManageVersionsAction,
-    MANAGE_VERSIONS
+    MANAGE_VERSIONS,
+    BlockchainSignAction,
+    BLOCKCHAIN_SIGN,
+    BlockchainVerifyAction,
+    BLOCKCHAIN_VERIFY
 } from '../actions/node.actions';
 
 @Injectable()
@@ -64,7 +69,8 @@ export class NodeEffects {
     constructor(
         private store: Store<AppStore>,
         private actions$: Actions,
-        private contentService: ContentManagementService
+        private contentService: ContentManagementService,
+        private blockchainProofService: BlockchainProofService
     ) {}
 
     @Effect({ dispatch: false })
@@ -293,4 +299,43 @@ export class NodeEffects {
             }
         })
     );
+
+    @Effect({ dispatch: false })
+    blockchainSignNodes$ = this.actions$.pipe(
+        ofType<BlockchainSignAction>(BLOCKCHAIN_SIGN),
+        map(action => {
+            if (action.payload && action.payload.length > 0) {
+                this.contentService.copyNodes(action.payload);
+            } else {
+                this.store
+                    .select(appSelection)
+                    .pipe(take(1))
+                    .subscribe(selection => {
+                        if (selection && !selection.isEmpty) {
+                            this.blockchainProofService.signSelection(selection.nodes);
+                        }
+                    });
+            }
+        })
+    );
+
+    @Effect({ dispatch: false })
+    blockchainVerifyNodes$ = this.actions$.pipe(
+        ofType<BlockchainVerifyAction>(BLOCKCHAIN_VERIFY),
+        map(action => {
+            if (action.payload && action.payload.length > 0) {
+                this.blockchainProofService.verifySelection(action.payload);
+            } else {
+                this.store
+                    .select(appSelection)
+                    .pipe(take(1))
+                    .subscribe(selection => {
+                        if (selection && !selection.isEmpty) {
+                            this.blockchainProofService.verifySelection(selection.nodes);
+                        }
+                    });
+            }
+        })
+    );
+
 }

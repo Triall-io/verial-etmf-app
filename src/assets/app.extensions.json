@@ -457,6 +457,30 @@
                         "rules": {
                             "visible": "app.toolbar.permissions"
                         }
+                    },
+                    {
+                        "id": "app.toolbar.blockchain-sign",
+                        "order": 1200,
+                        "title": "APP.ACTIONS.BLOCKCHAIN_SIGN",
+                        "icon": "history",
+                        "actions": {
+                            "click": "BLOCKCHAIN_SIGN"
+                        },
+                        "rules": {
+                            "visible": "app.toolbar.canCopyNode"
+                        }
+                    },
+                    {
+                        "id": "app.toolbar.blockchain-verify",
+                        "order": 1300,
+                        "title": "APP.ACTIONS.BLOCKCHAIN_VERIFY",
+                        "icon": "history",
+                        "actions": {
+                            "click": "BLOCKCHAIN_SIGN"
+                        },
+                        "rules": {
+                            "visible": "app.toolbar.canCopyNode"
+                        }
                     }
                 ]
             }
@@ -627,6 +651,30 @@
                 "rules": {
                     "visible": "app.trashcan.hasSelection"
                 }
+            },
+            {
+                "id": "app.context.menu.blockchain-sign",
+                "order": 1400,
+                "title": "APP.ACTIONS.BLOCKCHAIN_SIGN",
+                "icon": "history",
+                "actions": {
+                    "click": "BLOCKCHAIN_SIGN"
+                },
+                "rules": {
+                    "visible": "app.toolbar.canCopyNode"
+                }
+            },
+            {
+                "id": "app.context.menu.blockchain-verify",
+                "order": 1500,
+                "title": "APP.ACTIONS.BLOCKCHAIN_VERIFY",
+                "icon": "history",
+                "actions": {
+                    "click": "BLOCKCHAIN_SIGN"
+                },
+                "rules": {
+                    "visible": "app.toolbar.canCopyNode"
+                }
             }
         ],
         "viewer": {
@@ -735,6 +783,30 @@
                     },
                     "rules": {
                         "visible": "app.toolbar.permissions"
+                    }
+                },
+                {
+                    "id": "app.viewer.blockchain-sign",
+                    "order": 900,
+                    "title": "APP.ACTIONS.BLOCKCHAIN_SIGN",
+                    "icon": "history",
+                    "actions": {
+                        "click": "BLOCKCHAIN_SIGN"
+                    },
+                    "rules": {
+                        "visible": "app.toolbar.canCopyNode"
+                    }
+                },
+                {
+                    "id": "app.viewer.blockchain-verify",
+                    "order": 1000,
+                    "title": "APP.ACTIONS.BLOCKCHAIN_VERIFY",
+                    "icon": "history",
+                    "actions": {
+                        "click": "BLOCKCHAIN_SIGN"
+                    },
+                    "rules": {
+                        "visible": "app.toolbar.canCopyNode"
                     }
                 }
             ],

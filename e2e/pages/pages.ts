@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-config.ecmHost = 'http://alfresco.demo.sphereon.com';
+config.ecmHost = 'http://alfresco.eks.sphereon.com';
 export * from './browsing-page';
 export * from './login-page';
 export * from './logout-page';
