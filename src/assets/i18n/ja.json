@@ -128,7 +128,9 @@
       "DETAILS": "詳細の表示",
       "VERSIONS": "バージョンの管理",
       "TOGGLE-SIDENAV": "サイドナビゲーションバーの切り替え",
-      "SHARE": "共有"
+      "SHARE": "共有",
+      "BLOCKCHAIN_SIGN": "Blockchain sign",
+      "BLOCKCHAIN_VERIFY": "Blockchain verify"
     },
     "DIALOGS": {
       "CONFIRM_PURGE": {

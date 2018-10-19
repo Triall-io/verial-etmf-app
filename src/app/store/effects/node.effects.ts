@@ -65,16 +65,25 @@ import {
     BLOCKCHAIN_VERIFY
 } from '../actions/node.actions';
 import {Observable} from 'rxjs';
+import {MatSnackBarConfig} from "@angular/material";
 
 @Injectable()
 export class NodeEffects {
+
+    private snackBarConfig:MatSnackBarConfig;
+
     constructor(
         private store: Store<AppStore>,
         private actions$: Actions,
         private contentService: ContentManagementService,
         private blockchainProofService: BlockchainProofService,
-        private notification: NotificationService
-    ) {}
+        private notification: NotificationService,
+    ) {
+        this.snackBarConfig = new MatSnackBarConfig();
+        this.snackBarConfig.duration = 150000;
+        this.snackBarConfig.panelClass = 'snackbarBlockchain';
+        this.snackBarConfig.politeness = 'assertive';
+    }
 
     @Effect({ dispatch: false })
     shareNode$ = this.actions$.pipe(
@@ -323,15 +332,22 @@ export class NodeEffects {
     );
 
     private signNodes(selection) {
+        const messageBuilder = [];
         Observable.zip(
             this.blockchainProofService.signSelection(selection.nodes)
         ).subscribe(
             (result) => {
-                const [operationResult] = result;
-                this.toastMessage(operationResult);
+                if(result != null) {
+                    result.forEach((message) => {
+                        messageBuilder.push(message);
+                        messageBuilder.push('\n');
+                    })
+                }
             },
             (error) => {
                 this.toastMessage(error.message);
+            }, () => {
+                this.toastMessage(messageBuilder.join(""));
             }
         );
     }
@@ -357,20 +373,27 @@ export class NodeEffects {
 
 
     private verifyNodes(selection) {
+        const messageBuilder = [];
         Observable.zip(
             this.blockchainProofService.verifySelection(selection.nodes)
         ).subscribe(
             (result) => {
-                const [operationResult] = result;
-                this.toastMessage(operationResult);
+                if(result != null) {
+                    result.forEach((message) => {
+                        messageBuilder.push(message);
+                        messageBuilder.push('\n');
+                    })
+                }
             },
             (error) => {
                 this.toastMessage(error.message);
+            }, () => {
+                this.toastMessage(messageBuilder.join(""));
             }
         );
     }
 
     private toastMessage(message: any) {
-        this.notification.openSnackMessageAction(message, '', 15000);
+        this.notification.openSnackMessageAction(message, '', this.snackBarConfig);
     }
 }

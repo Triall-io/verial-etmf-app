@@ -128,7 +128,9 @@
       "DETAILS": "Visningsdetaljer",
       "VERSIONS": "Administrer versjoner",
       "TOGGLE-SIDENAV": "Aktiver/deaktiver sidenavigasjonsfelt",
-      "SHARE": "Del"
+      "SHARE": "Del",
+      "BLOCKCHAIN_SIGN": "Blockchain sign",
+      "BLOCKCHAIN_VERIFY": "Blockchain verify"
     },
     "DIALOGS": {
       "CONFIRM_PURGE": {

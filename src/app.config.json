@@ -3,17 +3,17 @@
     "providers": "ECM",
     "authType" : "BASIC",
     "application": {
-        "name": "TRIALL",
-        "logo": "assets/images/triall-logo-small.png",
+        "name": "",
+        "logo": "assets/images/triall-logo-32.png",
         "copyright":
-            "© 2017 - 2018 Sphereon, Alfresco Software, Inc. All rights reserved."
+            "© 2017 - 2018 Triall, Alfresco Software, Inc. All rights reserved."
     },
     "experimental": {
         "cardview": false,
         "extensions": false,
         "external-plugins": false
     },
-    "headerColor": "#2196F3",
+    "headerColor": "#584E51",
     "languagePicker": false,
     "pagination": {
         "size": 25,

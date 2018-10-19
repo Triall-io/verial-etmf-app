@@ -128,7 +128,9 @@
       "DETAILS": "Afficher les détails",
       "VERSIONS": "Gérer les versions",
       "TOGGLE-SIDENAV": "Activer/désactiver la barre de navigation latérale",
-      "SHARE": "Partager"
+      "SHARE": "Partager",
+      "BLOCKCHAIN_SIGN": "Blockchain sign",
+      "BLOCKCHAIN_VERIFY": "Blockchain verify"
     },
     "DIALOGS": {
       "CONFIRM_PURGE": {

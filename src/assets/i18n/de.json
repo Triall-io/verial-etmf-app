@@ -128,7 +128,9 @@
       "DETAILS": "Details anzeigen",
       "VERSIONS": "Versionen verwalten",
       "TOGGLE-SIDENAV": "Navigationsseitenleiste umschalten",
-      "SHARE": "Freigeben"
+      "SHARE": "Freigeben",
+      "BLOCKCHAIN_SIGN": "Blockchain sign",
+      "BLOCKCHAIN_VERIFY": "Blockchain verify"
     },
     "DIALOGS": {
       "CONFIRM_PURGE": {

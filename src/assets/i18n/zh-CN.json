@@ -128,7 +128,9 @@
       "DETAILS": "查看详细信息",
       "VERSIONS": "管理版本",
       "TOGGLE-SIDENAV": "切换侧导航栏",
-      "SHARE": "共享"
+      "SHARE": "共享",
+      "BLOCKCHAIN_SIGN": "Blockchain sign",
+      "BLOCKCHAIN_VERIFY": "Blockchain verify"
     },
     "DIALOGS": {
       "CONFIRM_PURGE": {

@@ -23,3 +23,8 @@ aca-search-results,
 ng-component {
     @include flex-column;
 }
+
+.snackbarBlockchain {
+    white-space: pre-wrap;
+    max-width: 800px !important;
+}
