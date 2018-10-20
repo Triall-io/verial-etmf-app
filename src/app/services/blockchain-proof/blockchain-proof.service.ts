@@ -124,7 +124,6 @@ export class BlockchainProofService {
 
     private buildVerifyResponseMessage(entry, verifyContentResponse: VerifyContentResponse) {
         const messageBuilder = [];
-        messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_WAS'), entry.name));
 
         var registrationState = null;
         var registrationTime = null;
@@ -141,16 +140,21 @@ export class BlockchainProofService {
             }
         }
 
-        messageBuilder.push(' ');
         if (registrationTime != null) {
+            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_WAS'), entry.name));
+            messageBuilder.push(' ');
             messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED_ON'));
             messageBuilder.push(' ');
             messageBuilder.push(registrationTime);
         }
         else if (registrationState == 'PENDING') {
+            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
+            messageBuilder.push(' ');
             messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PENDING'));
         }
         else {
+            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
+            messageBuilder.push(' ');
             messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.NOT_REGISTERED'));
         }
         messageBuilder.push('.');

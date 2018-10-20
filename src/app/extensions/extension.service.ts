@@ -98,7 +98,9 @@ export class AppExtensionService implements RuleContext {
     protected loadNavBar(config: ExtensionConfig): Array<NavBarGroupRef> {
         const elements = this.loader.getElements<NavBarGroupRef>(config, 'features.navbar');
 
-        elements[0].items.splice(0,1); // Temp workaround, the folder needs to be turned off in the repository config on the server side
+        elements[0].items.splice(0,1); // Temp workaround, the folders need to be turned off in the repository config on the server side
+        elements[1].items.splice(0,1);
+
         return elements.map(group => {
             return {
                 ...group,

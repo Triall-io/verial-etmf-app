@@ -129,8 +129,8 @@
             "VERSIONS": "Manage Versions",
             "TOGGLE-SIDENAV": "Toggle side navigation bar",
             "SHARE": "Share",
-            "BLOCKCHAIN_SIGN": "Blockchain sign",
-            "BLOCKCHAIN_VERIFY": "Blockchain verify"
+            "BLOCKCHAIN_SIGN": "Register on Blockchain",
+            "BLOCKCHAIN_VERIFY": "Verify on Blockchain"
         },
         "DIALOGS": {
             "CONFIRM_PURGE": {
@@ -235,6 +235,7 @@
                 "LIBRARY_DELETED": "Library deleted",
                 "BLOCKCHAIN": {
                     "FILE_WAS": "File %s was",
+                    "FILE_IS": "File %s is",
                     "REGISTRATION_STARTED": "The registration process was successfully started for file %s",
                     "PROCESS_FAILED": "The %s process has failed for file %s",
                     "REGISTERED_ON": "registered on",

@@ -70,6 +70,7 @@ export function canShareFile(
     context: RuleContext,
     ...args: RuleParameter[]
 ): boolean {
+/* TODO: make configurable
     if (
         isNotTrashcan(context, ...args) &&
         isNotSharedFiles(context, ...args) &&
@@ -77,6 +78,7 @@ export function canShareFile(
     ) {
         return true;
     }
+*/
     return false;
 }
 

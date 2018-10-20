@@ -129,8 +129,8 @@
       "VERSIONS": "Управление версиями",
       "TOGGLE-SIDENAV": "Переключить боковую панель навигации",
       "SHARE": "Открыть доступ",
-      "BLOCKCHAIN_SIGN": "Blockchain sign",
-      "BLOCKCHAIN_VERIFY": "Blockchain verify"
+      "BLOCKCHAIN_SIGN": "Register on Blockchain",
+      "BLOCKCHAIN_VERIFY": "Verify on Blockchain"
     },
     "DIALOGS": {
       "CONFIRM_PURGE": {

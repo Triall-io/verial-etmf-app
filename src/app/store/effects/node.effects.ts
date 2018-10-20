@@ -80,7 +80,7 @@ export class NodeEffects {
         private notification: NotificationService,
     ) {
         this.snackBarConfig = new MatSnackBarConfig();
-        this.snackBarConfig.duration = 150000;
+        this.snackBarConfig.duration = 15000;
         this.snackBarConfig.panelClass = 'snackbarBlockchain';
         this.snackBarConfig.politeness = 'assertive';
     }

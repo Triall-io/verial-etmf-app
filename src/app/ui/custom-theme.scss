@@ -64,8 +64,42 @@ $grey-scale: (
 
 @include mat-core();
 
+$triall-accent-blue: (
+    50: #b9fffc,
+    100: #88c9ea,
+    200: #0eb2d7,
+    300: #1299c3,
+    400: #0e88a5,
+    500: #0e6985,
+    600: #0e5772,
+    700: #0e435f,
+    800: #0e435f,
+    900: #4a2000,
+    A100: #b9fffc,
+    A200: #0eb2d7,
+    A400: #0e6985,
+    A700: #0e435f,
+    contrast: (
+        50: $white-87-opacity,
+        100: $white-87-opacity,
+        200: $white-87-opacity,
+        300: $white-87-opacity,
+        400: $white-87-opacity,
+        500: $white-87-opacity,
+        600: $white-87-opacity,
+        700: $white-87-opacity,
+        800: white,
+        900: white,
+        A100: $black-87-opacity,
+        A200: $black-87-opacity,
+        A400: $black-87-opacity,
+        A700: black,
+    )
+);
+
+
 $custom-theme-primary: mat-palette($grey-scale, A400);
-$custom-theme-accent: mat-palette($alfresco-accent-orange);
+$custom-theme-accent: mat-palette($triall-accent-blue);
 $custom-theme-warn: mat-palette($alfresco-warn);
 $custom-theme: mat-light-theme($custom-theme-primary, $custom-theme-accent);
 

@@ -129,7 +129,7 @@
             "VERSIONS": "Versies beheren",
             "TOGGLE-SIDENAV": "Zij-navigatiebalk in- of uitschakelen",
             "SHARE": "Delen",
-            "BLOCKCHAIN_SIGN": "Blockchain ondertekenen",
+            "BLOCKCHAIN_SIGN": "Ondertekenen op blockchain ",
             "BLOCKCHAIN_VERIFY": "Blockchain controle"
         },
         "DIALOGS": {
@@ -235,6 +235,7 @@
                 "LIBRARY_DELETED": "Bibliotheek verwijderd",
                 "BLOCKCHAIN": {
                     "FILE_WAS": "Bestand %s was",
+                    "FILE_IS": "Bestand %s is",
                     "REGISTRATION_STARTED": "Het opstarten van registratieproces was successvol voor bestand %s",
                     "PROCESS_FAILED": "het %sproces is mislukt voor bestand %s",
                     "REGISTERED_ON": "geregistreerd op",
