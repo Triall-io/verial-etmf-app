@@ -462,7 +462,7 @@
                         "id": "app.toolbar.blockchain-sign",
                         "order": 1200,
                         "title": "APP.ACTIONS.BLOCKCHAIN_SIGN",
-                        "icon": "blockchain",
+                        "icon": "edit",
                         "actions": {
                             "click": "BLOCKCHAIN_SIGN"
                         },
@@ -474,7 +474,7 @@
                         "id": "app.toolbar.blockchain-verify",
                         "order": 1300,
                         "title": "APP.ACTIONS.BLOCKCHAIN_VERIFY",
-                        "icon": "blockchain",
+                        "icon": "check",
                         "actions": {
                             "click": "BLOCKCHAIN_VERIFY"
                         },
@@ -656,7 +656,7 @@
                 "id": "app.context.menu.blockchain-sign",
                 "order": 1400,
                 "title": "APP.ACTIONS.BLOCKCHAIN_SIGN",
-                "icon": "blockchain",
+                "icon": "edit",
                 "actions": {
                     "click": "BLOCKCHAIN_SIGN"
                 },
@@ -668,7 +668,7 @@
                 "id": "app.context.menu.blockchain-verify",
                 "order": 1500,
                 "title": "APP.ACTIONS.BLOCKCHAIN_VERIFY",
-                "icon": "blockchain",
+                "icon": "check",
                 "actions": {
                     "click": "BLOCKCHAIN_VERIFY"
                 },
@@ -789,7 +789,7 @@
                     "id": "app.viewer.blockchain-sign",
                     "order": 900,
                     "title": "APP.ACTIONS.BLOCKCHAIN_SIGN",
-                    "icon": "blockchain",
+                    "icon": "edit",
                     "actions": {
                         "click": "BLOCKCHAIN_SIGN"
                     },
@@ -801,7 +801,7 @@
                     "id": "app.viewer.blockchain-verify",
                     "order": 1000,
                     "title": "APP.ACTIONS.BLOCKCHAIN_VERIFY",
-                    "icon": "blockchain",
+                    "icon": "check",
                     "actions": {
                         "click": "BLOCKCHAIN_VERIFY"
                     },

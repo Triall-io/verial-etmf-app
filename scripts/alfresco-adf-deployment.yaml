@@ -35,6 +35,14 @@ spec:
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+        volumeMounts:
+        - name: triall-app-config
+          mountPath: "/usr/share/nginx/html/app.config.json"
+          subPath: app.config.json
+      volumes:
+      - name: triall-app-config
+        configMap:
+            name: triall-app-config
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler

@@ -57,13 +57,21 @@ export class BlockchainProofService {
                 content: Buffer.from(value).toString('base64')
             };
             const response = this.registrationService.registerUsingContent('demo', contentRequest, null, null,
-                '01020304', null);
+                null, null);
             response.subscribe((registerContentResponse: models.RegisterContentResponse) => {
                 const messageBuilder = [];
                 messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION_STARTED'), entity.entry.name));
                 messageBuilder.push('.');
                 const message = messageBuilder.join('');
                 console.log(message);
+                console.log("Calculated hash: " + registerContentResponse.hash);
+                console.log("Calculated signature: " + registerContentResponse.hexSignature);
+                if(registerContentResponse.perHashProofChain != null) {
+                    console.log("Per hash proof chain id: " + registerContentResponse.perHashProofChain.chainId);
+                }
+                if(registerContentResponse.singleProofChain != null) {
+                    console.log("Single proof chain id: " + registerContentResponse.singleProofChain.chainId);
+                }
                 observable.next(message);
                 atomicItemCounter.incrementIndex();
                 if (atomicItemCounter.isLast()) {
@@ -105,10 +113,18 @@ export class BlockchainProofService {
                 content: Buffer.from(value).toString('base64')
             };
             const response = this.verificationService.verifyUsingContent('demo', contentRequest, null, null,
-                '01020304', null);
+                null, null);
             response.subscribe((verifyContentResponse: models.VerifyContentResponse) => {
                 const message = this.buildVerifyResponseMessage(entity.entry, verifyContentResponse);
                 console.log(message);
+                console.log("Calculated hash: " + verifyContentResponse.hash);
+                console.log("Calculated signature: " + verifyContentResponse.hexSignature);
+                if(verifyContentResponse.perHashProofChain != null) {
+                    console.log("Per hash proof chain id: " + verifyContentResponse.perHashProofChain.chainId);
+                }
+                if(verifyContentResponse.singleProofChain != null) {
+                    console.log("Single proof chain id: " + verifyContentResponse.singleProofChain.chainId);
+                }
                 observable.next(message);
                 atomicItemCounter.incrementIndex();
                 if (atomicItemCounter.isLast()) {
