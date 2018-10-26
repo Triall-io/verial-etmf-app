@@ -86,7 +86,15 @@ export class FilesComponent extends PageComponent implements OnInit, OnDestroy {
                             );
                         }
                     },
-                    () => this.isValidPath = false
+                    () => this.isValidPath = false,
+                    () => {
+                        this.contentApi
+                            .getNodeChildren(nodeId).subscribe(value => {
+                                value.list.entries.forEach(fileNode => {
+                                    console.log('File ' + fileNode.entry.id);
+                                });
+                        });
+                    }
                 );
         });
 

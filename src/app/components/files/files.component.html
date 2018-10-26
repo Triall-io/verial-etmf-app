@@ -81,6 +81,14 @@
                             key="modifiedByUser.displayName"
                             title="APP.DOCUMENT_LIST.COLUMNS.MODIFIED_BY">
                         </data-column>
+
+                        <data-column
+                            *ngIf="!isSmallScreen"
+                            class="adf-data-table-cell--ellipsis"
+                            key="properties.bc.RegistrationState"
+                            title="APP.DOCUMENT_LIST.COLUMNS.BC_REGISTRATION_STATE">
+                        </data-column>
+
                     </data-columns>
                 </adf-document-list>
 
