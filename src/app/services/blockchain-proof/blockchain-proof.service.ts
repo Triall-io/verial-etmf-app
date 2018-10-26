@@ -57,7 +57,7 @@ export class BlockchainProofService {
                 content: Buffer.from(value).toString('base64')
             };
             const response = this.registrationService.registerUsingContent('demo', contentRequest, null, null,
-                null, null);
+                '01020304', null);
             response.subscribe((registerContentResponse: models.RegisterContentResponse) => {
                 const messageBuilder = [];
                 messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION_STARTED'), entity.entry.name));
@@ -113,7 +113,7 @@ export class BlockchainProofService {
                 content: Buffer.from(value).toString('base64')
             };
             const response = this.verificationService.verifyUsingContent('demo', contentRequest, null, null,
-                null, null);
+                '01020304', null);
             response.subscribe((verifyContentResponse: models.VerifyContentResponse) => {
                 const message = this.buildVerifyResponseMessage(entity.entry, verifyContentResponse);
                 console.log(message);
