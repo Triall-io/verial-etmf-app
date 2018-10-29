@@ -45,7 +45,7 @@ import {
     SHARE_NODE
 } from '../actions';
 import { ContentManagementService } from '../../services/content-management.service';
-import { BlockchainProofService } from '../../services/blockchain-proof/blockchain-proof.service';
+import { BlockchainFactomService } from '../../services/factom/blockchain-factom.service';
 import { NotificationService } from '@alfresco/adf-core';
 import { currentFolder, appSelection } from '../selectors/app.selectors';
 import {
@@ -76,7 +76,7 @@ export class NodeEffects {
         private store: Store<AppStore>,
         private actions$: Actions,
         private contentService: ContentManagementService,
-        private blockchainProofService: BlockchainProofService,
+        private blockchainFactomService: BlockchainFactomService,
         private notification: NotificationService,
     ) {
         this.snackBarConfig = new MatSnackBarConfig();
@@ -334,7 +334,7 @@ export class NodeEffects {
     private signNodes(selection) {
         const messageBuilder = [];
         Observable.zip(
-            this.blockchainProofService.signSelection(selection.nodes)
+            this.blockchainFactomService.signSelection(selection.nodes)
         ).subscribe(
             (result) => {
                 if(result != null) {
@@ -375,7 +375,7 @@ export class NodeEffects {
     private verifyNodes(selection) {
         const messageBuilder = [];
         Observable.zip(
-            this.blockchainProofService.verifySelection(selection.nodes)
+            this.blockchainFactomService.verifySelection(selection.nodes)
         ).subscribe(
             (result) => {
                 if(result != null) {

@@ -25,7 +25,18 @@ export class BlockchainFactomService {
                 private http: HttpClient) {
 
         this.contentService = contentService;
-        this.factomCli = new FactomCli();
+        this.factomCli = new FactomCli({
+            factomd: {
+                host: secrets.factomdHost,
+                port: secrets.factomdPort
+            },
+            walletd: {
+                host: secrets.walletdHost,
+                port: secrets.walletdPort
+            },
+            protocol: 'http',
+            rejectUnauthorized: false
+        });
     }
 
 
@@ -48,7 +59,7 @@ export class BlockchainFactomService {
     }
 
 
-    private signEntry(entity, atomicItemCounter: AtomicItemCounter, observable: Subject<string>) {
+    private async signEntry(entity, atomicItemCounter: AtomicItemCounter, observable: Subject<string>) {
         console.log('Signing entry ' + entity.entry.id);
         this.contentService.getNodeContent(entity.entry.id).subscribe(value => {
 
@@ -61,33 +72,25 @@ export class BlockchainFactomService {
                 .build();
 
             const chain = new Chain(firstEntry);
-            this.factomCli.add(chain, 'Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym');
+            const txId = this.factomCli.add(chain, secrets.entryCreditAddress)
+                .catch(function (e) {
+                    const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
+                        this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION'), entity.entry.name);
+                    this.handleApiError(e, userMessage, observable);
+                });
 
-
-            response.subscribe((registerContentResponse: models.RegisterContentResponse) => {
-                const messageBuilder = [];
-                messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION_STARTED'), entity.entry.name));
-                messageBuilder.push('.');
-                const message = messageBuilder.join('');
-                console.log(message);
-                console.log('Calculated hash: ' + registerContentResponse.hash);
-                console.log('Calculated signature: ' + registerContentResponse.hexSignature);
-                if (registerContentResponse.perHashProofChain != null) {
-                    console.log('Per hash proof chain id: ' + registerContentResponse.perHashProofChain.chainId);
-                }
-                if (registerContentResponse.singleProofChain != null) {
-                    console.log('Single proof chain id: ' + registerContentResponse.singleProofChain.chainId);
-                }
-                observable.next(message);
-                atomicItemCounter.incrementIndex();
-                if (atomicItemCounter.isLast()) {
-                    observable.complete();
-                }
-            }, error => {
-                const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
-                    this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION'), entity.entry.name);
-                this.handleApiError(error, userMessage, observable);
-            });
+            const messageBuilder = [];
+            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION_STARTED'), entity.entry.name));
+            messageBuilder.push('.');
+            const message = messageBuilder.join('');
+            console.log(message);
+            console.log('Calculated hash: ' + hash);
+            console.log('Per hash proof chain id: ' + txId);
+            observable.next(message);
+            atomicItemCounter.incrementIndex();
+            if (atomicItemCounter.isLast()) {
+                observable.complete();
+            }
         });
     }
 
@@ -116,67 +119,70 @@ export class BlockchainFactomService {
         this.contentService.getNodeContent(entity.entry.id).subscribe(value => {
 
 
-            response.subscribe((verifyContentResponse: models.VerifyContentResponse) => {
-                const message = this.buildVerifyResponseMessage(entity.entry, verifyContentResponse);
-                console.log(message);
-                console.log('Calculated hash: ' + verifyContentResponse.hash);
-                console.log('Calculated signature: ' + verifyContentResponse.hexSignature);
-                if (verifyContentResponse.perHashProofChain != null) {
-                    console.log('Per hash proof chain id: ' + verifyContentResponse.perHashProofChain.chainId);
-                }
-                if (verifyContentResponse.singleProofChain != null) {
-                    console.log('Single proof chain id: ' + verifyContentResponse.singleProofChain.chainId);
-                }
-                observable.next(message);
-                atomicItemCounter.incrementIndex();
-                if (atomicItemCounter.isLast()) {
-                    observable.complete();
-                }
-            }, error => {
-                const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
-                    this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), entity.entry.name);
-                this.handleApiError(error, userMessage, observable);
-            });
+            /*
+                        response.subscribe((verifyContentResponse: models.VerifyContentResponse) => {
+                            const message = this.buildVerifyResponseMessage(entity.entry, verifyContentResponse);
+                            console.log(message);
+                            console.log('Calculated hash: ' + verifyContentResponse.hash);
+                            console.log('Calculated signature: ' + verifyContentResponse.hexSignature);
+                            if (verifyContentResponse.perHashProofChain != null) {
+                                console.log('Per hash proof chain id: ' + verifyContentResponse.perHashProofChain.chainId);
+                            }
+                            if (verifyContentResponse.singleProofChain != null) {
+                                console.log('Single proof chain id: ' + verifyContentResponse.singleProofChain.chainId);
+                            }
+                            observable.next(message);
+                            atomicItemCounter.incrementIndex();
+                            if (atomicItemCounter.isLast()) {
+                                observable.complete();
+                            }
+                        }, error => {
+                            const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
+                                this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), entity.entry.name);
+                            this.handleApiError(error, userMessage, observable);
+                        });
+            */
         });
     }
 
-    private buildVerifyResponseMessage(entry, verifyContentResponse: VerifyContentResponse) {
-        const messageBuilder = [];
+    /*
+        private buildVerifyResponseMessage(entry, verifyContentResponse: VerifyContentResponse) {
+            const messageBuilder = [];
 
-        let registrationState = null;
-        let registrationTime = null;
-        if (verifyContentResponse.perHashProofChain != null) {
-            registrationState = verifyContentResponse.perHashProofChain.registrationState;
-            if (registrationState == 'REGISTERED') {
-                registrationTime = verifyContentResponse.perHashProofChain.registrationTime;
+            let registrationState = null;
+            let registrationTime = null;
+            if (verifyContentResponse.perHashProofChain != null) {
+                registrationState = verifyContentResponse.perHashProofChain.registrationState;
+                if (registrationState == 'REGISTERED') {
+                    registrationTime = verifyContentResponse.perHashProofChain.registrationTime;
+                }
             }
-        }
-        if (registrationTime == null && verifyContentResponse.singleProofChain != null) {
-            registrationState = verifyContentResponse.singleProofChain.registrationState;
-            if (registrationState == 'REGISTERED') {
-                registrationTime = verifyContentResponse.singleProofChain.registrationTime;
+            if (registrationTime == null && verifyContentResponse.singleProofChain != null) {
+                registrationState = verifyContentResponse.singleProofChain.registrationState;
+                if (registrationState == 'REGISTERED') {
+                    registrationTime = verifyContentResponse.singleProofChain.registrationTime;
+                }
             }
-        }
 
-        if (registrationTime != null) {
-            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_WAS'), entry.name));
-            messageBuilder.push(' ');
-            messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED_ON'));
-            messageBuilder.push(' ');
-            messageBuilder.push(registrationTime);
-        } else if (registrationState == 'PENDING') {
-            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
-            messageBuilder.push(' ');
-            messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PENDING'));
-        } else {
-            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
-            messageBuilder.push(' ');
-            messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.NOT_REGISTERED'));
-        }
-        messageBuilder.push('.');
-        const message = messageBuilder.join('');
-        return message;
-    }
+            if (registrationTime != null) {
+                messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_WAS'), entry.name));
+                messageBuilder.push(' ');
+                messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED_ON'));
+                messageBuilder.push(' ');
+                messageBuilder.push(registrationTime);
+            } else if (registrationState == 'PENDING') {
+                messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
+                messageBuilder.push(' ');
+                messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PENDING'));
+            } else {
+                messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
+                messageBuilder.push(' ');
+                messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.NOT_REGISTERED'));
+            }
+            messageBuilder.push('.');
+            const message = messageBuilder.join('');
+            return message;
+        }*/
 
     private translate(key: string) {
         return this.translation.instant(key);
@@ -200,11 +206,6 @@ export class BlockchainFactomService {
         observable.error(new Error(userMessage));
     }
 
-    apiConfig() {
-        const config = new ApiClientConfiguration();
-        config.accessToken = secrets.bcproofFixedToken;
-        return config;
-    }
 
     isEntryEntitiesArray(contentEntities: any[]): boolean {
         if (contentEntities && contentEntities.length) {
