@@ -138,3 +138,6 @@ Promise.all = function(values: any): Promise<any> {
   }
   return promise;
 };
+
+
+(window as any).global = window;

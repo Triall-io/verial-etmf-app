@@ -11,12 +11,11 @@ import {secrets} from '../../../environments/secrets';
 import {sprintf} from 'sprintf-js';
 import {FactomCli, Entry, Chain} from 'factom';
 import {logging} from 'selenium-webdriver';
+import {ApiClientConfiguration} from '../blockchain-proof/sdk';
 
 
 @Injectable()
 export class BlockchainFactomService {
-
-    private factomCli: FactomCli;
 
 
     constructor(private contentService: ContentService,
@@ -27,17 +26,23 @@ export class BlockchainFactomService {
         this.contentService = contentService;
         this.factomCli = new FactomCli({
             factomd: {
-                host: secrets.factomdHost,
-                port: secrets.factomdPort
+                host: 'localhost',
+                port: '4200',
+                path: '/factomd/v2'
             },
             walletd: {
-                host: secrets.walletdHost,
-                port: secrets.walletdPort
+                host: 'localhost',
+                port: '4200',
+                path: '/walletd/v2'
             },
             protocol: 'http',
             rejectUnauthorized: false
         });
     }
+
+    private factomCli: FactomCli;
+
+private;
 
 
     signSelection(contentEntities: Array<MinimalNodeEntity>): Subject<string> {
@@ -72,25 +77,28 @@ export class BlockchainFactomService {
                 .build();
 
             const chain = new Chain(firstEntry);
-            const txId = this.factomCli.add(chain, secrets.entryCreditAddress)
+            const addResponse = this.factomCli.add(chain, secrets.entryCreditAddress)
                 .catch(function (e) {
                     const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
                         this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION'), entity.entry.name);
                     this.handleApiError(e, userMessage, observable);
                 });
 
-            const messageBuilder = [];
-            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION_STARTED'), entity.entry.name));
-            messageBuilder.push('.');
-            const message = messageBuilder.join('');
-            console.log(message);
-            console.log('Calculated hash: ' + hash);
-            console.log('Per hash proof chain id: ' + txId);
-            observable.next(message);
-            atomicItemCounter.incrementIndex();
-            if (atomicItemCounter.isLast()) {
-                observable.complete();
-            }
+            addResponse.then(response => {
+                const messageBuilder = [];
+                messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION_STARTED'), entity.entry.name));
+                messageBuilder.push('.');
+                const message = messageBuilder.join('');
+                console.log(message);
+                console.log('Calculated hash: ' + hash);
+                console.log('Per hash proof chain id: ' + response.chainId);
+                console.log('Per hash proof entryHash: ' + response.entryHash);
+                observable.next(message);
+                atomicItemCounter.incrementIndex();
+                if (atomicItemCounter.isLast()) {
+                    observable.complete();
+                }
+            });
         });
     }
 
@@ -118,71 +126,63 @@ export class BlockchainFactomService {
         console.log('Verifying entry ' + entity.entry.id);
         this.contentService.getNodeContent(entity.entry.id).subscribe(value => {
 
+            const hash = shajs('sha256').update(Buffer.from(value)).digest('hex');
 
-            /*
-                        response.subscribe((verifyContentResponse: models.VerifyContentResponse) => {
-                            const message = this.buildVerifyResponseMessage(entity.entry, verifyContentResponse);
-                            console.log(message);
-                            console.log('Calculated hash: ' + verifyContentResponse.hash);
-                            console.log('Calculated signature: ' + verifyContentResponse.hexSignature);
-                            if (verifyContentResponse.perHashProofChain != null) {
-                                console.log('Per hash proof chain id: ' + verifyContentResponse.perHashProofChain.chainId);
-                            }
-                            if (verifyContentResponse.singleProofChain != null) {
-                                console.log('Single proof chain id: ' + verifyContentResponse.singleProofChain.chainId);
-                            }
-                            observable.next(message);
-                            atomicItemCounter.incrementIndex();
-                            if (atomicItemCounter.isLast()) {
-                                observable.complete();
-                            }
-                        }, error => {
-                            const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
-                                this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), entity.entry.name);
-                            this.handleApiError(error, userMessage, observable);
-                        });
-            */
+            const firstEntry = Entry.builder()
+                .extId('Hash')
+                .extId(hash)
+                .content(hash, 'utf8')
+                .build();
+
+            const chain = new Chain(firstEntry);
+            const revealResponse = this.factomCli.revealChain(chain)
+                .catch(function (e) {
+                    const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
+                        this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), entity.entry.name);
+                    this.handleApiError(e, userMessage, observable);
+                });
+            revealResponse.then(response => {
+                const message = this.buildVerifyResponseMessage(entity.entry, response);
+                console.log(message);
+                console.log('Calculated hash: ' + response.hash);
+                console.log('Per hash proof chain id: ' + response.chainId);
+                console.log('Per hash proof entryHash: ' + response.entryHash);
+                observable.next(message);
+                atomicItemCounter.incrementIndex();
+                if (atomicItemCounter.isLast()) {
+                    observable.complete();
+                }
+            });
         });
     }
 
-    /*
-        private buildVerifyResponseMessage(entry, verifyContentResponse: VerifyContentResponse) {
-            const messageBuilder = [];
 
-            let registrationState = null;
-            let registrationTime = null;
-            if (verifyContentResponse.perHashProofChain != null) {
-                registrationState = verifyContentResponse.perHashProofChain.registrationState;
-                if (registrationState == 'REGISTERED') {
-                    registrationTime = verifyContentResponse.perHashProofChain.registrationTime;
-                }
-            }
-            if (registrationTime == null && verifyContentResponse.singleProofChain != null) {
-                registrationState = verifyContentResponse.singleProofChain.registrationState;
-                if (registrationState == 'REGISTERED') {
-                    registrationTime = verifyContentResponse.singleProofChain.registrationTime;
-                }
-            }
+    private buildVerifyResponseMessage(entry, response) {
+        const messageBuilder = [];
 
-            if (registrationTime != null) {
-                messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_WAS'), entry.name));
-                messageBuilder.push(' ');
-                messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED_ON'));
-                messageBuilder.push(' ');
-                messageBuilder.push(registrationTime);
-            } else if (registrationState == 'PENDING') {
-                messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
-                messageBuilder.push(' ');
-                messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PENDING'));
-            } else {
-                messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
-                messageBuilder.push(' ');
-                messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.NOT_REGISTERED'));
-            }
-            messageBuilder.push('.');
-            const message = messageBuilder.join('');
-            return message;
-        }*/
+        const registrationState = '';
+        const registrationTime = '';
+
+        if (registrationTime != null) {
+            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_WAS'), entry.name));
+            messageBuilder.push(' ');
+            messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED_ON'));
+            messageBuilder.push(' ');
+            messageBuilder.push(registrationTime);
+        } else if (registrationState == 'PENDING') {
+            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
+            messageBuilder.push(' ');
+            messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PENDING'));
+        } else {
+            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
+            messageBuilder.push(' ');
+            messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.NOT_REGISTERED'));
+        }
+        messageBuilder.push('.');
+        const message = messageBuilder.join('');
+        return message;
+    }
+
 
     private translate(key: string) {
         return this.translation.instant(key);
@@ -206,6 +206,11 @@ export class BlockchainFactomService {
         observable.error(new Error(userMessage));
     }
 
+    apiConfig() {
+        const config = new ApiClientConfiguration();
+        config.accessToken = secrets.bcproofFixedToken;
+        return config;
+    }
 
     isEntryEntitiesArray(contentEntities: any[]): boolean {
         if (contentEntities && contentEntities.length) {
@@ -219,8 +224,8 @@ export class BlockchainFactomService {
 
 class AtomicItemCounter {
 
-    private count = 0;
-    private index = 0;
+    private count: number = 0;
+    private index: number = 0;
 
     incrementCount() {
         this.count++;
@@ -230,7 +235,7 @@ class AtomicItemCounter {
         this.index++;
     }
 
-    isLast(): boolean {
+    isLast() : boolean {
         return this.index >= this.count;
     }
 }
