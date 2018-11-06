@@ -38,5 +38,6 @@ sleep 10
 echo "Creating new deployment $KUBE_DEPLOYMENT_NAME"
 kubectl -n $KUBE_NAMESPACE create configmap triall-app-config --from-file=src/app.config.json
 kubectl apply -f scripts/alfresco-adf-deployment.yaml
-kubectl -n $KUBE_NAMESPACE expose deployment alfresco-adf-demo --port=80,80 --name=alfresco-adf-demo
-kubectl apply -f scripts/alfresco-adf-ingress.yaml
+kubectl -n $KUBE_NAMESPACE expose deployment alfresco-adf-demo --port=80 --name=alfresco-adf-demo
+kubectl -n $KUBE_NAMESPACE label service alfresco-adf-demo app=alfresco-adf-demo
+kubectl -n $KUBE_NAMESPACE apply -f scripts/alfresco-adf-ingress.yaml

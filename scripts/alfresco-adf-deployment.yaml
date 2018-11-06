@@ -4,7 +4,7 @@ metadata:
   labels:
     app: alfresco-adf-demo
   name: alfresco-adf-demo
-  namespace: alfresco
+  namespace: triall
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
