@@ -22,14 +22,14 @@ export class BlockchainFactomService {
         this.contentService = contentService;
         this.factomCli = new FactomCli({
             factomd: {
-                host: 'localhost',
-                port: '4200',
-                path: '/factomd/v2'
+                host: '36.144.204.97',
+                port: '8088',
+                path: '/v2'
             },
             walletd: {
-                host: 'localhost',
-                port: '4200',
-                path: '/walletd/v2'
+                host: '36.144.204.97',
+                port: '8089',
+                path: '/v2'
             },
             protocol: 'http',
             rejectUnauthorized: false,

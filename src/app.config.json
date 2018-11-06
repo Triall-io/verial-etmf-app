@@ -8,6 +8,15 @@
         "copyright":
             "© 2017 - 2018 Triall, Alfresco Software, Inc. All rights reserved."
     },
+    "blockchain": {
+        "protocol": "http",
+        "factomdHost": "localhost",
+        "factomdPort": 4200,
+        "factomdPath": "/factomd/v2",
+        "walletdHost": "localhost",
+        "walletdPort": 4200,
+        "walletdPath": "/walletd/v2"
+    },
     "experimental": {
         "cardview": false,
         "extensions": false,
