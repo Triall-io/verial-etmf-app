@@ -74,7 +74,11 @@ export class BlockchainFactomService {
 
             const message: AtomicString = new AtomicString();
             const chain = new Chain(firstEntry);
-            this.factomCli.add(chain, secrets.entryCreditAddress)
+            const options = {
+                commitTimeout: 1,
+                revealTimeout: 1
+            }
+            this.factomCli.add(chain, secrets.entryCreditAddress, options)
                 .then(response => {
                     const messageBuilder = [];
                     messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION_STARTED'), entity.entry.name));
