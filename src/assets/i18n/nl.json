@@ -241,6 +241,7 @@
                     "REGISTERED_ON": "geregistreerd op",
                     "PENDING": "in afwachting van registratie",
                     "NOT_REGISTERED": "niet geregistreerd",
+                    "ALREADY_REGISTERED": "al eerder geregistreerd",
                     "REGISTRATION": "registratie",
                     "VERIFICATION": "controle"
                 }

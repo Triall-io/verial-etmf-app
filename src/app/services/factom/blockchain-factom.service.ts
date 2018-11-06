@@ -32,16 +32,15 @@ export class BlockchainFactomService {
                 path: '/walletd/v2'
             },
             protocol: 'http',
-            rejectUnauthorized: false
+            rejectUnauthorized: false,
+            timeout: 180
         });
     }
 
     private factomCli: FactomCli;
 
-    private;
 
-
-    signSelection(contentEntities: Array<MinimalNodeEntity>): Subject<string> {
+    public signSelection(contentEntities: Array<MinimalNodeEntity>): Subject<string> {
         const observable: Subject<string> = new Subject<string>();
 
         if (!this.isEntryEntitiesArray(contentEntities)) {
@@ -49,7 +48,7 @@ export class BlockchainFactomService {
         } else {
             const atomicItemCounter: AtomicItemCounter = new AtomicItemCounter();
             contentEntities.forEach(entity => {
-                if (entity.entry.isFile) {
+                if (entity !== undefined && entity.entry.isFile) {
                     atomicItemCounter.incrementCount();
                     this.signEntry(entity, atomicItemCounter, observable);
                 }
@@ -74,10 +73,13 @@ export class BlockchainFactomService {
 
             const message: AtomicString = new AtomicString();
             const chain = new Chain(firstEntry);
+            const thiz = this;
+
             const options = {
-                commitTimeout: 1,
-                revealTimeout: 1
-            }
+                commitTimeout: -1,
+                revealTimeout: -1,
+                timeout: 180
+            };
             this.factomCli.add(chain, secrets.entryCreditAddress, options)
                 .then(response => {
                     const messageBuilder = [];
@@ -88,18 +90,24 @@ export class BlockchainFactomService {
                     console.log('Calculated hash: ' + hash);
                     console.log('Per hash proof chain id: ' + response.chainId);
                     console.log('Per hash proof entryHash: ' + response.entryHash);
-                }).catch(function (e) {
-                const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
-                    this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION'), entity.entry.name);
-                message.set(userMessage);
-                this.handleApiError(e, userMessage, observable);
-            }).finally(() => {
-                observable.next(message.get());
-                atomicItemCounter.incrementIndex();
-                if (atomicItemCounter.isLast()) {
-                    observable.complete();
-                }
-            });
+                })
+                .catch(function (e) {
+                    if (e.code === -32011) {
+                        message.set(thiz.buildResponseMessage(entity.entry, 'REPEAT'));
+                    } else {
+                        const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
+                            thiz.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION'), entity.entry.name);
+                        message.set(userMessage);
+                        thiz.handleApiError(e, userMessage, observable);
+                    }
+                })
+                .finally(() => {
+                    observable.next(message.get());
+                    atomicItemCounter.incrementIndex();
+                    if (atomicItemCounter.isLast()) {
+                        observable.complete();
+                    }
+                });
         });
     }
 
@@ -143,13 +151,13 @@ export class BlockchainFactomService {
                     console.log('Calculated hash: ' + hash);
                     console.log('Per hash proof chain id: ' + chain.id);
                     console.log('Per hash proof entryHash: ' + response.content);
-                    message.set(thiz.buildVerifyResponseMessage(entity.entry, response));
+                    message.set(thiz.buildResponseMessage(entity.entry, response));
                 })
                 .catch(function (e) {
                     if (e.code === -32009) {
-                        message.set(thiz.buildVerifyResponseMessage(entity.entry));
+                        message.set(thiz.buildResponseMessage(entity.entry));
                     } else if (e.message !== undefined && e.message.indexOf('Chain not yet included in a Directory Block') > -1) {
-                        message.set(thiz.buildVerifyResponseMessage(entity.entry, 'PENDING'));
+                        message.set(thiz.buildResponseMessage(entity.entry, 'PENDING'));
                     } else {
                         const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
                             thiz.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), entity.entry.name);
@@ -167,7 +175,7 @@ export class BlockchainFactomService {
     }
 
 
-    private buildVerifyResponseMessage(entry, entryResponse = undefined): string {
+    private buildResponseMessage(entry, entryResponse = undefined): string {
         const messageBuilder = [];
 
         if (entryResponse === undefined) {
@@ -178,6 +186,10 @@ export class BlockchainFactomService {
             messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
             messageBuilder.push(' ');
             messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PENDING'));
+        } else if (entryResponse === 'REPEAT') {
+            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_WAS'), entry.name));
+            messageBuilder.push(' ');
+            messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.ALREADY_REGISTERED'));
         } else {
             const registrationTime = new Date(entryResponse.timestamp);
 

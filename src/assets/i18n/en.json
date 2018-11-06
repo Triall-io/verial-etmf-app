@@ -241,6 +241,7 @@
                     "REGISTERED_ON": "registered on",
                     "PENDING": "pending registration",
                     "NOT_REGISTERED": "not registered",
+                    "ALREADY_REGISTERED": "already registered",
                     "REGISTRATION": "registration",
                     "VERIFICATION": "verification"
                 }

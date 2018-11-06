@@ -2,16 +2,16 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    app: alfresco-adf-demo
-  name: alfresco-adf-demo
-  namespace: alfresco
+    app: alfresco-factom-demo
+  name: alfresco-factom-demo
+  namespace: triall
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      run: alfresco-adf-demo
+      run: alfresco-factom-demo
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -21,14 +21,14 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        run: alfresco-adf-demo
+        run: alfresco-factom-demo
     spec:
       imagePullSecrets:
         - name: sphereonregistrydev
       containers:
       - image: sphereonregistrydev.azurecr.io/alfresco/adf-demo:latest
         imagePullPolicy: Always
-        name: alfresco-adf-demo
+        name: alfresco-factom-demo
         ports:
         - containerPort: 4200
           protocol: TCP
