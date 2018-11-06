@@ -151,7 +151,10 @@
                 "LOCATION": "Location",
                 "SHARED_BY": "Shared by",
                 "DELETED_ON": "Deleted",
-                "DELETED_BY": "Deleted by"
+                "DELETED_BY": "Deleted by",
+                "BC_REGISTRATION_STATE": "Registration state",
+                "BC_REGISTRATION_TIME": "Registration time",
+                "BC_LAST_VERIFICATION_TIME": "Last verification time"
             },
             "TOOLBAR": {
                 "CARDVIEW": "Card view mode",

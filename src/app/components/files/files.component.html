@@ -81,6 +81,36 @@
                             key="modifiedByUser.displayName"
                             title="APP.DOCUMENT_LIST.COLUMNS.MODIFIED_BY">
                         </data-column>
+
+                        <data-column
+                            key="properties.bc:StateIcon"
+                            type="image"
+                            [sortable]="false"
+                            class="image-table-cell"
+                            title="APP.DOCUMENT_LIST.COLUMNS.BC_REGISTRATION_STATE">
+                        </data-column>
+
+                        <data-column
+                            *ngIf="!isSmallScreen"
+                            class="adf-data-table-cell--ellipsis"
+                            key="properties.bc:RegistrationState"
+                            title="APP.DOCUMENT_LIST.COLUMNS.BC_REGISTRATION_STATE">
+                        </data-column>
+
+                        <data-column
+                            *ngIf="!isSmallScreen"
+                            class="adf-data-table-cell--ellipsis"
+                            key="properties.bc:RegistrationTime"
+                            title="APP.DOCUMENT_LIST.COLUMNS.BC_REGISTRATION_TIME">
+                        </data-column>
+
+                        <data-column
+                            *ngIf="!isSmallScreen"
+                            class="adf-data-table-cell--ellipsis"
+                            key="properties.bc:LastVerificationTime"
+                            title="APP.DOCUMENT_LIST.COLUMNS.BC_LAST_VERIFICATION_TIME">
+                        </data-column>
+
                     </data-columns>
                 </adf-document-list>
 

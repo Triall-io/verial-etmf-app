@@ -87,6 +87,7 @@ export class FilesComponent extends PageComponent implements OnInit, OnDestroy {
                         }
                     },
                     () => this.isValidPath = false
+
                 );
         });
 
