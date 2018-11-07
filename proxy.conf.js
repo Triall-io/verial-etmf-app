@@ -12,7 +12,10 @@ module.exports = {
         }
     },
     "/factomd": {
-        "target": "http://136.144.204.97:8088",
+        "target": "http://factomd.testnet.sphereon.com",
+/*
+        "target": "https://triall.dev.sphereon.com/factom-demo/factomd",
+*/
         "secure": false,
         "changeOrigin": true,
         "pathRewrite": {
@@ -20,7 +23,10 @@ module.exports = {
         }
     },
     "/walletd": {
-        "target": "http://136.144.204.97:8089",
+        "target": "http://walletd.testnet.sphereon.com",
+/*
+        "target": "https://triall.dev.sphereon.com/factom-demo/walletd",
+*/
         "secure": false,
         "changeOrigin": true,
         "pathRewrite": {

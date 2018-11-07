@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {ContentService, NotificationService, TranslationService} from '@alfresco/adf-core';
+import {AppConfigService, ContentService, NotificationService, TranslationService} from '@alfresco/adf-core';
 import {MinimalNodeEntity, MinimalNodeEntryEntity} from 'alfresco-js-api';
 import {HttpClient} from '@angular/common/http';
 import * as shajs from 'sha.js';
@@ -17,24 +17,43 @@ export class BlockchainFactomService {
     constructor(private contentService: ContentService,
                 private notification: NotificationService,
                 private translation: TranslationService,
+                private config: AppConfigService,
                 private http: HttpClient) {
 
         this.contentService = contentService;
-        this.factomCli = new FactomCli({
-            factomd: {
-                host: '36.144.204.97',
-                port: '8088',
-                path: '/v2'
-            },
-            walletd: {
-                host: '36.144.204.97',
-                port: '8089',
-                path: '/v2'
-            },
-            protocol: 'http',
-            rejectUnauthorized: false,
-            timeout: 180
-        });
+        try {
+            const factomConfig = {
+                factomd: {
+                    protocol: 'http',
+                    host: 'localhost',
+                    port: 4200,
+                    path: '/factomd'
+                },
+                walletd: {
+                    protocol: 'http',
+                    host: 'localhost',
+                    port: 4200,
+                    path: '/walletd'
+                },
+/*
+                factomd: {
+                    protocol: 'http',
+                    host: 'factomd.testnet.sphereon.com',
+                    port: 80,
+                },
+                walletd: {
+                    protocol: 'http',
+                    host: 'walletd.testnet.sphereon.com',
+                    port: 80,
+                },
+*/
+                rejectUnauthorized: false,
+                timeout: 180
+            };
+            this.factomCli = new FactomCli(factomConfig);
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     private factomCli: FactomCli;
@@ -63,7 +82,7 @@ export class BlockchainFactomService {
         console.log('Signing entry ' + entity.entry.id);
         this.contentService.getNodeContent(entity.entry.id).subscribe(value => {
 
-            const hash = shajs('sha256').update(Buffer.from(value)).digest('hex');
+            const hash = shajs('sha256').update(value).digest('hex');
 
             const firstEntry = Entry.builder()
                 .extId('Hash')
@@ -135,7 +154,7 @@ export class BlockchainFactomService {
         console.log('Verifying entry ' + entity.entry.id);
         this.contentService.getNodeContent(entity.entry.id).subscribe(value => {
 
-            const hash = shajs('sha256').update(Buffer.from(value)).digest('hex');
+            const hash = shajs('sha256').update(value).digest('hex');
 
             const firstEntry = Entry.builder()
                 .extId('Hash')
