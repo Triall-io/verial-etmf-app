@@ -13,9 +13,6 @@ module.exports = {
     },
     "/factomd": {
         "target": "http://factomd.testnet.sphereon.com",
-/*
-        "target": "https://triall.dev.sphereon.com/factom-demo/factomd",
-*/
         "secure": false,
         "changeOrigin": true,
         "pathRewrite": {
@@ -24,9 +21,6 @@ module.exports = {
     },
     "/walletd": {
         "target": "http://walletd.testnet.sphereon.com",
-/*
-        "target": "https://triall.dev.sphereon.com/factom-demo/walletd",
-*/
         "secure": false,
         "changeOrigin": true,
         "pathRewrite": {
