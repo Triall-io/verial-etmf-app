@@ -23,20 +23,6 @@ export class BlockchainFactomService {
         this.contentService = contentService;
         try {
             const factomConfig = {
-/*
-                factomd: {
-                    protocol: 'http',
-                    host: 'localhost',
-                    port: 4200,
-                    path: '/factomd/v2'
-                },
-                walletd: {
-                    protocol: 'http',
-                    host: 'localhost',
-                    port: 4200,
-                    path: '/walletd/v2'
-                },
-*/
                 factomd: {
                     protocol: 'https',
                     host: 'factomd.testnet.sphereon.com',

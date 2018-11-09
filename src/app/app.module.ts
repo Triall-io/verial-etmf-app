@@ -66,7 +66,6 @@ import { AppExtensionsModule } from './extensions.module';
 import { CoreExtensionsModule } from './extensions/core.extensions.module';
 import { SearchResultsRowComponent } from './components/search/search-results-row/search-results-row.component';
 import { NodePermissionsDialogComponent } from './dialogs/node-permissions/node-permissions.dialog';
-import { BlockchainFactomService } from './services/factom/blockchain-factom.service';
 import { PermissionsManagerComponent } from './components/permission-manager/permissions-manager.component';
 import { AppRouteReuseStrategy } from './app.routes.strategy';
 import { AppInfoDrawerModule } from './components/info-drawer/info.drawer.module';
@@ -141,8 +140,7 @@ import { HttpClientModule } from '@angular/common/http';
         NodePermissionService,
         ProfileResolver,
         ExperimentalGuard,
-        ContentApiService,
-        BlockchainFactomService
+        ContentApiService
     ],
     entryComponents: [
         LibraryDialogComponent,

@@ -45,8 +45,6 @@ import {
     SHARE_NODE
 } from '../actions';
 import {ContentManagementService} from '../../services/content-management.service';
-import {BlockchainFactomService} from '../../services/factom/blockchain-factom.service';
-import {NotificationService} from '@alfresco/adf-core';
 import {currentFolder, appSelection} from '../selectors/app.selectors';
 import {
     UnshareNodesAction,
@@ -59,13 +57,7 @@ import {
     MANAGE_PERMISSIONS,
     ManageVersionsAction,
     MANAGE_VERSIONS,
-    BlockchainSignAction,
-    BLOCKCHAIN_SIGN,
-    BlockchainVerifyAction,
-    BLOCKCHAIN_VERIFY
 } from '../actions/node.actions';
-import {Observable} from 'rxjs';
-import {MatSnackBarConfig} from '@angular/material';
 
 @Injectable()
 export class NodeEffects {
@@ -74,16 +66,9 @@ export class NodeEffects {
         private store: Store<AppStore>,
         private actions$: Actions,
         private contentService: ContentManagementService,
-        private blockchainFactomService: BlockchainFactomService,
-        private notification: NotificationService,
     ) {
-        this.snackBarConfig = new MatSnackBarConfig();
-        this.snackBarConfig.duration = 15000;
-        this.snackBarConfig.panelClass = 'snackbarBlockchain';
-        this.snackBarConfig.politeness = 'assertive';
     }
 
-    private snackBarConfig: MatSnackBarConfig;
 
     @Effect({dispatch: false})
     shareNode$ = this.actions$.pipe(
@@ -311,89 +296,4 @@ export class NodeEffects {
             }
         })
     );
-
-    @Effect({dispatch: false})
-    blockchainSignNodes$ = this.actions$.pipe(
-        ofType<BlockchainSignAction>(BLOCKCHAIN_SIGN),
-        map(action => {
-            if (action.payload && action.payload.length > 0) {
-                this.signNodes(action);
-            } else {
-                this.store
-                    .select(appSelection)
-                    .pipe(take(1))
-                    .subscribe(selection => {
-                        if (selection && !selection.isEmpty) {
-                            this.signNodes(selection);
-                        }
-                    });
-            }
-        })
-    );
-
-    @Effect({dispatch: false})
-    blockchainVerifyNodes$ = this.actions$.pipe(
-        ofType<BlockchainVerifyAction>(BLOCKCHAIN_VERIFY),
-        map(action => {
-            if (action.payload && action.payload.length > 0) {
-                this.verifyNodes(action.payload);
-            } else {
-                this.store
-                    .select(appSelection)
-                    .pipe(take(1))
-                    .subscribe(selection => {
-                        if (selection && !selection.isEmpty) {
-                            this.verifyNodes(selection);
-                        }
-                    });
-            }
-        })
-    );
-
-    private signNodes(selection) {
-        const messageBuilder = [];
-        Observable.zip(
-            this.blockchainFactomService.signSelection(selection.nodes)
-        ).subscribe(
-            (result) => {
-                if (result != null) {
-                    result.forEach((message) => {
-                        messageBuilder.push(message);
-                        messageBuilder.push('\n');
-                    });
-                }
-            },
-            (error) => {
-                this.toastMessage(error.message);
-            }, () => {
-                this.toastMessage(messageBuilder.join(''));
-            }
-        );
-    }
-
-
-    private verifyNodes(selection) {
-        const messageBuilder = [];
-        Observable.zip(
-            this.blockchainFactomService.verifySelection(selection.nodes)
-        ).subscribe(
-            (result) => {
-                if (result != null) {
-                    result.forEach((message) => {
-                        messageBuilder.push(message);
-                        messageBuilder.push('\n');
-                    });
-                }
-            },
-            (error) => {
-                this.toastMessage(error.message);
-            }, () => {
-                this.toastMessage(messageBuilder.join(''));
-            }
-        );
-    }
-
-    private toastMessage(message: any) {
-        this.notification.openSnackMessageAction(message, '', this.snackBarConfig);
-    }
 }
