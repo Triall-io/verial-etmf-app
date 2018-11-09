@@ -39,10 +39,16 @@ spec:
         - name: triall-app-config
           mountPath: "/usr/share/nginx/html/app.config.json"
           subPath: app.config.json
+        - name: factom-demo-nginx-config
+          mountPath: "/etc/nginx/conf.d/default.conf"
+          subPath: "nginx.conf"
       volumes:
       - name: triall-app-config
         configMap:
             name: triall-app-config
+      - name: factom-demo-nginx-config
+        configMap:
+            name: factom-demo-nginx-config
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler

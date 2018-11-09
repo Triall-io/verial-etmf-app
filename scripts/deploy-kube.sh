@@ -37,6 +37,7 @@ kubectl -n $KUBE_NAMESPACE delete deployment $KUBE_DEPLOYMENT_NAME
 sleep 10
 echo "Creating new deployment $KUBE_DEPLOYMENT_NAME"
 kubectl -n $KUBE_NAMESPACE create configmap triall-app-config --from-file=src/app.config.json
+kubectl -n $KUBE_NAMESPACE create configmap factom-demo-nginx-config --from-file=scripts/nginx.conf
 kubectl apply -f scripts/alfresco-adf-deployment.yaml
 kubectl -n $KUBE_NAMESPACE expose deployment alfresco-factom-demo --port=80 --name=alfresco-factom-demo
 kubectl -n $KUBE_NAMESPACE label service alfresco-factom-demo app=alfresco-factom-demo

@@ -40,8 +40,6 @@ export const COPY_NODES = 'COPY_NODES';
 export const MOVE_NODES = 'MOVE_NODES';
 export const MANAGE_PERMISSIONS = 'MANAGE_PERMISSIONS';
 export const MANAGE_VERSIONS = 'MANAGE_VERSIONS';
-export const BLOCKCHAIN_SIGN = 'BLOCKCHAIN_SIGN';
-export const BLOCKCHAIN_VERIFY = 'BLOCKCHAIN_VERIFY';
 
 
 export class SetSelectedNodesAction implements Action {
@@ -113,14 +111,3 @@ export class ManageVersionsAction implements Action {
     readonly type = MANAGE_VERSIONS;
     constructor(public payload: MinimalNodeEntity) {}
 }
-
-export class BlockchainSignAction implements Action {
-    readonly type = BLOCKCHAIN_SIGN;
-    constructor(public payload: Array<MinimalNodeEntity>) {}
-}
-
-export class BlockchainVerifyAction implements Action {
-    readonly type = BLOCKCHAIN_VERIFY;
-    constructor(public payload: Array<MinimalNodeEntity>) {}
-}
-
