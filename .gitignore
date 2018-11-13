@@ -24,6 +24,7 @@
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+.history
 
 # misc
 /.sass-cache
@@ -33,6 +34,7 @@
 npm-debug.log
 testem.log
 /typings
+/www
 
 # e2e
 /e2e/*.js

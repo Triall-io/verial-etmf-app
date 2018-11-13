@@ -24,100 +24,60 @@
  */
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { RouterTestingModule } from '@angular/router/testing';
 import { Router } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
-import { TranslateModule } from '@ngx-translate/core';
 import { Location } from '@angular/common';
-import { TestBed, async } from '@angular/core/testing';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 import {
-    AuthenticationService, UserPreferencesService, TranslationService,
-    TranslationMock, AppConfigService, StorageService, AlfrescoApiService,
-    CookieService, LogService
+  AuthenticationService,
+  UserPreferencesService,
+  AppConfigPipe
 } from '@alfresco/adf-core';
-
 import { LoginComponent } from './login.component';
+import { AppTestingModule } from '../../testing/app-testing.module';
 
 describe('LoginComponent', () => {
-    let component;
-    let fixture;
-    let router;
-    let userPreference;
-    let auth;
-    let location;
+  let fixture: ComponentFixture<LoginComponent>;
+  let router: Router;
+  let userPreference: UserPreferencesService;
+  let auth: AuthenticationService;
+  let location: Location;
 
-    beforeEach(async(() => {
-        TestBed.configureTestingModule({
-            imports: [
-                HttpClientModule,
-                TranslateModule.forRoot(),
-                RouterTestingModule
-            ],
-            declarations: [
-                LoginComponent
-            ],
-            providers: [
-                { provide: TranslationService, useClass: TranslationMock },
-                Location,
-                CookieService,
-                LogService,
-                StorageService,
-                AlfrescoApiService,
-                AppConfigService,
-                AuthenticationService,
-                UserPreferencesService
-            ],
-            schemas: [ NO_ERRORS_SCHEMA ]
-        });
-
-        fixture = TestBed.createComponent(LoginComponent);
-        component = fixture.componentInstance;
-
-        router = TestBed.get(Router);
-        location = TestBed.get(Location);
-        auth = TestBed.get(AuthenticationService);
-        userPreference = TestBed.get(UserPreferencesService);
-    }));
-
-    beforeEach(() => {
-        spyOn(userPreference, 'setStoragePrefix');
-        spyOn(router, 'navigateByUrl');
-        spyOn(auth, 'getRedirectUrl').and.returnValue('/some-url');
-        spyOn(location, 'forward');
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [AppTestingModule],
+      declarations: [LoginComponent, AppConfigPipe],
+      providers: [Location],
+      schemas: [NO_ERRORS_SCHEMA]
     });
 
-    describe('OnInit()', () => {
-        it('should perform normal login when user is not logged in', () => {
-            spyOn(auth, 'isEcmLoggedIn').and.returnValue(false);
-            fixture.detectChanges();
+    fixture = TestBed.createComponent(LoginComponent);
 
-            expect(location.forward).not.toHaveBeenCalled();
-        });
+    router = TestBed.get(Router);
+    spyOn(router, 'navigateByUrl');
 
-        it('should redirect when user is logged in', () => {
-            spyOn(auth, 'isEcmLoggedIn').and.returnValue(true);
-            fixture.detectChanges();
+    location = TestBed.get(Location);
+    spyOn(location, 'forward');
 
-            expect(location.forward).toHaveBeenCalled();
-        });
+    auth = TestBed.get(AuthenticationService);
+    spyOn(auth, 'getRedirect').and.returnValue('/some-url');
+
+    userPreference = TestBed.get(UserPreferencesService);
+    spyOn(userPreference, 'setStoragePrefix');
+  });
+
+  describe('OnInit()', () => {
+    it('should perform normal login when user is not logged in', () => {
+      spyOn(auth, 'isEcmLoggedIn').and.returnValue(false);
+      fixture.detectChanges();
+
+      expect(location.forward).not.toHaveBeenCalled();
     });
 
-    describe('onLoginSuccess()', () => {
-        beforeEach(() => {
-            spyOn(auth, 'isEcmLoggedIn').and.returnValue(false);
-            fixture.detectChanges();
-        });
+    it('should redirect when user is logged in', () => {
+      spyOn(auth, 'isEcmLoggedIn').and.returnValue(true);
+      fixture.detectChanges();
 
-        it('should redirect on success', () => {
-            component.onLoginSuccess();
-
-            expect(router.navigateByUrl).toHaveBeenCalledWith('/personal-files');
-        });
-
-        it('should set user preference store prefix', () => {
-            component.onLoginSuccess({ username: 'bogus' });
-
-            expect(userPreference.setStoragePrefix).toHaveBeenCalledWith('bogus');
-        });
+      expect(location.forward).toHaveBeenCalled();
     });
+  });
 });

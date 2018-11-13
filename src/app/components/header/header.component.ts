@@ -23,35 +23,63 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DomSanitizer } from '@angular/platform-browser';
-import { Component, ViewEncapsulation, SecurityContext } from '@angular/core';
-import { AppConfigService } from '@alfresco/adf-core';
+import {
+  Component,
+  ViewEncapsulation,
+  Output,
+  EventEmitter,
+  OnInit
+} from '@angular/core';
+import { Store } from '@ngrx/store';
+import { AppStore } from 'src/app/store/states';
+import { Observable } from 'rxjs';
+import {
+  selectHeaderColor,
+  selectAppName,
+  selectLogoPath
+} from 'src/app/store/selectors/app.selectors';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { ContentActionRef } from '@alfresco/adf-extensions';
+import { AppExtensionService } from '../../extensions/extension.service';
 
 @Component({
-    selector: 'app-header',
-    templateUrl: './header.component.html',
-    styleUrls: [ './header.component.scss' ],
-    encapsulation: ViewEncapsulation.None
+  selector: 'app-header',
+  templateUrl: 'header.component.html',
+  encapsulation: ViewEncapsulation.None,
+  host: { class: 'app-header' }
 })
-export class HeaderComponent {
-    private defaultPath = '/assets/images/alfresco-logo-white.svg';
-    private defaultBackgroundColor = '#2196F3';
+export class AppHeaderComponent implements OnInit {
+  @Output()
+  toggleClicked = new EventEmitter();
 
-    constructor(
-        private appConfig: AppConfigService,
-        private sanitizer: DomSanitizer
-    ) {}
+  appName$: Observable<string>;
+  headerColor$: Observable<string>;
+  logo$: Observable<string>;
 
-    get appName(): string {
-        return <string>this.appConfig.get('application.name');
-    }
+  isSmallScreen = false;
+  actions: Array<ContentActionRef> = [];
 
-    get logo() {
-        return this.appConfig.get('application.logo', this.defaultPath);
-    }
+  constructor(
+    store: Store<AppStore>,
+    private breakpointObserver: BreakpointObserver,
+    private appExtensions: AppExtensionService
+  ) {
+    this.headerColor$ = store.select(selectHeaderColor);
+    this.appName$ = store.select(selectAppName);
+    this.logo$ = store.select(selectLogoPath);
+  }
 
-    get backgroundColor() {
-        const color = this.appConfig.get('headerColor', this.defaultBackgroundColor);
-        return this.sanitizer.sanitize(SecurityContext.STYLE, color);
-    }
+  ngOnInit() {
+    this.actions = this.appExtensions.getHeaderActions();
+
+    this.breakpointObserver
+      .observe([Breakpoints.HandsetPortrait, Breakpoints.HandsetLandscape])
+      .subscribe(result => {
+        this.isSmallScreen = result.matches;
+      });
+  }
+
+  trackByActionId(index: number, action: ContentActionRef) {
+    return action.id;
+  }
 }

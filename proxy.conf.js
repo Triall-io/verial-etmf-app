@@ -1,6 +1,6 @@
 module.exports = {
     "/alfresco": {
-        "target": "http://0.0.0.0:8080",
+        "target": "https://triall.dev.sphereon.com",
         "secure": false,
         "changeOrigin": true,
         // workaround for REPO-2260
@@ -9,6 +9,22 @@ module.exports = {
             if (header && header.startsWith('Basic')) {
                 proxyRes.headers['www-authenticate'] = 'x' + header;
             }
+        }
+    },
+    "/factomd": {
+        "target": "http://factomd.testnet.sphereon.com",
+        "secure": false,
+        "changeOrigin": true,
+        "pathRewrite": {
+            "^/factomd": ""
+        }
+    },
+    "/walletd": {
+        "target": "http://walletd.testnet.sphereon.com",
+        "secure": false,
+        "changeOrigin": true,
+        "pathRewrite": {
+            "^/walletd": ""
         }
     }
 };

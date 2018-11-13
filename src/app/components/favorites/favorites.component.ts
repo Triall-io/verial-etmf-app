@@ -23,106 +23,93 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs/Rx';
-
-import { MinimalNodeEntryEntity, MinimalNodeEntity, PathElementEntity, PathInfo } from 'alfresco-js-api';
-import { ContentService, NodesApiService, UserPreferencesService } from '@alfresco/adf-core';
-import { DocumentListComponent } from '@alfresco/adf-content-services';
-
-import { ContentManagementService } from '../../common/services/content-management.service';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import {
+  MinimalNodeEntity,
+  MinimalNodeEntryEntity,
+  PathElementEntity,
+  PathInfo
+} from 'alfresco-js-api';
+import { ContentManagementService } from '../../services/content-management.service';
+import { AppStore } from '../../store/states/app.state';
 import { PageComponent } from '../page.component';
+import { ContentApiService } from '../../services/content-api.service';
+import { AppExtensionService } from '../../extensions/extension.service';
+import { map } from 'rxjs/operators';
 
 @Component({
-    templateUrl: './favorites.component.html'
+  templateUrl: './favorites.component.html'
 })
-export class FavoritesComponent extends PageComponent implements OnInit, OnDestroy {
+export class FavoritesComponent extends PageComponent implements OnInit {
+  isSmallScreen = false;
 
-    @ViewChild(DocumentListComponent)
-    documentList: DocumentListComponent;
+  columns: any[] = [];
 
-    private subscriptions: Subscription[] = [];
+  constructor(
+    private router: Router,
+    store: Store<AppStore>,
+    extensions: AppExtensionService,
+    private contentApi: ContentApiService,
+    content: ContentManagementService,
+    private breakpointObserver: BreakpointObserver
+  ) {
+    super(store, extensions, content);
+  }
 
-    sorting = [ 'modifiedAt', 'desc' ];
+  ngOnInit() {
+    super.ngOnInit();
 
-    constructor(private router: Router,
-                private route: ActivatedRoute,
-                private nodesApi: NodesApiService,
-                private contentService: ContentService,
-                private content: ContentManagementService,
-                preferences: UserPreferencesService) {
-        super(preferences);
+    this.subscriptions = this.subscriptions.concat([
+      this.content.nodesDeleted.subscribe(() => this.reload()),
+      this.content.nodesRestored.subscribe(() => this.reload()),
+      this.content.folderEdited.subscribe(() => this.reload()),
+      this.content.nodesMoved.subscribe(() => this.reload()),
+      this.content.favoriteRemoved.subscribe(() => this.reload()),
+      this.content.favoriteToggle.subscribe(() => this.reload()),
 
-        const sortingKey = preferences.get(`${this.prefix}.sorting.key`) || 'modifiedAt';
-        const sortingDirection = preferences.get(`${this.prefix}.sorting.direction`) || 'desc';
+      this.breakpointObserver
+        .observe([Breakpoints.HandsetPortrait, Breakpoints.HandsetLandscape])
+        .subscribe(result => {
+          this.isSmallScreen = result.matches;
+        })
+    ]);
 
-        this.sorting = [sortingKey, sortingDirection];
+    this.columns = this.extensions.documentListPresets.favorites;
+  }
+
+  navigate(favorite: MinimalNodeEntryEntity) {
+    const { isFolder, id } = favorite;
+
+    // TODO: rework as it will fail on non-English setups
+    const isSitePath = (path: PathInfo): boolean => {
+      return path.elements.some(
+        ({ name }: PathElementEntity) => name === 'Sites'
+      );
+    };
+
+    if (isFolder) {
+      this.contentApi
+        .getNode(id)
+        .pipe(map(node => node.entry))
+        .subscribe(({ path }: MinimalNodeEntryEntity) => {
+          const routeUrl = isSitePath(path) ? '/libraries' : '/personal-files';
+          this.router.navigate([routeUrl, id]);
+        });
     }
+  }
 
-    ngOnInit() {
-        this.subscriptions = this.subscriptions.concat([
-            this.content.nodeDeleted.subscribe(() => this.refresh()),
-            this.content.nodeRestored.subscribe(() => this.refresh()),
-            this.contentService.folderEdit.subscribe(() => this.refresh()),
-            this.content.nodeMoved.subscribe(() => this.refresh())
-        ]);
+  onNodeDoubleClick(node: MinimalNodeEntity) {
+    if (node && node.entry) {
+      if (node.entry.isFolder) {
+        this.navigate(node.entry);
+      }
+
+      if (node.entry.isFile) {
+        this.showPreview(node);
+      }
     }
-
-    ngOnDestroy() {
-        this.subscriptions.forEach(s => s.unsubscribe());
-    }
-
-    fetchNodes(): void {
-        // todo: remove once all views migrate to native data source
-    }
-
-    navigate(favorite: MinimalNodeEntryEntity) {
-        const { isFolder, id } = favorite;
-
-        // TODO: rework as it will fail on non-English setups
-        const isSitePath = (path: PathInfo): boolean => {
-            return path.elements.some(({ name }: PathElementEntity) => (name === 'Sites'));
-        };
-
-        if (isFolder) {
-            this.nodesApi
-                .getNode(id)
-                .subscribe(({ path }: MinimalNodeEntryEntity) => {
-                    const routeUrl = isSitePath(path) ? '/libraries' : '/personal-files';
-                    this.router.navigate([ routeUrl, id ]);
-                });
-        }
-    }
-
-    onNodeDoubleClick(node: MinimalNodeEntryEntity) {
-        if (node) {
-            if (node.isFolder) {
-                this.navigate(node);
-            }
-
-            if (node.isFile) {
-                this.router.navigate(['./preview', node.id], { relativeTo: this.route });
-            }
-        }
-    }
-
-    showEditOption(selection: MinimalNodeEntity[]) {
-        return selection && selection.length === 1 && selection[0].entry.isFolder;
-    }
-
-    refresh(): void {
-        if (this.documentList) {
-            this.documentList.reload();
-        }
-    }
-
-    onSortingChanged(event: CustomEvent) {
-        this.preferences.set(`${this.prefix}.sorting.key`, event.detail.key || 'modifiedAt');
-        this.preferences.set(`${this.prefix}.sorting.direction`, event.detail.direction || 'desc');
-    }
-
-    private get prefix() {
-        return this.route.snapshot.data.preferencePrefix;
-    }
+  }
 }

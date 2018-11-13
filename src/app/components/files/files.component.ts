@@ -23,297 +23,281 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Observable, Subscription } from 'rxjs/Rx';
-import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import { MinimalNodeEntity, MinimalNodeEntryEntity, PathElementEntity, NodePaging, PathElement } from 'alfresco-js-api';
+import { FileUploadEvent, UploadService } from '@alfresco/adf-core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import {
-    UploadService, FileUploadEvent, NodesApiService,
-    ContentService, AlfrescoApiService, UserPreferencesService
-} from '@alfresco/adf-core';
-
-import { BrowsingFilesService } from '../../common/services/browsing-files.service';
-import { ContentManagementService } from '../../common/services/content-management.service';
-import { NodeActionsService } from '../../common/services/node-actions.service';
-
+  MinimalNodeEntity,
+  MinimalNodeEntryEntity,
+  PathElement,
+  PathElementEntity
+} from 'alfresco-js-api';
+import { ContentManagementService } from '../../services/content-management.service';
+import { NodeActionsService } from '../../services/node-actions.service';
+import { AppStore } from '../../store/states/app.state';
 import { PageComponent } from '../page.component';
+import { ContentApiService } from '../../services/content-api.service';
+import { AppExtensionService } from '../../extensions/extension.service';
+import { SetCurrentFolderAction } from '../../store/actions';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
-    templateUrl: './files.component.html'
+  templateUrl: './files.component.html'
 })
 export class FilesComponent extends PageComponent implements OnInit, OnDestroy {
+  isValidPath = true;
+  isSmallScreen = false;
 
-    private routeData: any = {};
-    isValidPath = true;
+  private nodePath: PathElement[];
 
-    private nodePath: PathElement[];
-    private subscriptions: Subscription[] = [];
+  columns: any[] = [];
 
-    sorting = [ 'modifiedAt', 'desc' ];
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private contentApi: ContentApiService,
+    store: Store<AppStore>,
+    private nodeActionsService: NodeActionsService,
+    private uploadService: UploadService,
+    content: ContentManagementService,
+    extensions: AppExtensionService,
+    private breakpointObserver: BreakpointObserver
+  ) {
+    super(store, extensions, content);
+  }
 
-    constructor(private router: Router,
-                private zone: NgZone,
-                private route: ActivatedRoute,
-                private nodesApi: NodesApiService,
-                private nodeActionsService: NodeActionsService,
-                private uploadService: UploadService,
-                private contentManagementService: ContentManagementService,
-                private browsingFilesService: BrowsingFilesService,
-                private contentService: ContentService,
-                private apiService: AlfrescoApiService,
-                preferences: UserPreferencesService) {
-        super(preferences);
+  ngOnInit() {
+    super.ngOnInit();
 
-        const sortingKey = this.preferences.get(`${this.prefix}.sorting.key`) || 'modifiedAt';
-        const sortingDirection = this.preferences.get(`${this.prefix}.sorting.direction`) || 'desc';
+    const { route, content, nodeActionsService, uploadService } = this;
+    const { data } = route.snapshot;
 
-        this.sorting = [sortingKey, sortingDirection];
-    }
+    this.title = data.title;
 
-    ngOnInit() {
-        const { route, contentManagementService, contentService, nodeActionsService, uploadService } = this;
-        const { data } = route.snapshot;
+    route.params.subscribe(({ folderId }: Params) => {
+      const nodeId = folderId || data.defaultNodeId;
 
-        this.routeData = data;
-        this.title = data.i18nTitle;
+      this.contentApi.getNode(nodeId).subscribe(
+        node => {
+          this.isValidPath = true;
 
-        route.params.subscribe(({ folderId }: Params) => {
-            const nodeId = folderId || data.defaultNodeId;
-            this.isLoading = true;
-
-            this.fetchNode(nodeId)
-                .do((node) => {
-                    if (node.isFolder) {
-                        this.updateCurrentNode(node);
-                    } else {
-                        this.router.navigate(['/personal-files', node.parentId], { replaceUrl: true });
-                    }
-                })
-                .skipWhile(node => !node.isFolder)
-                .flatMap((node) => this.fetchNodes(node.id))
-                .subscribe(
-                    (page) => {
-                        this.isValidPath = true;
-                        this.onPageLoaded(page);
-                    },
-                    error => {
-                        this.isValidPath = false;
-                        this.onFetchError(error);
-                    }
-                );
-        });
-
-        this.subscriptions = this.subscriptions.concat([
-            nodeActionsService.contentCopied.subscribe((nodes) => this.onContentCopied(nodes)),
-            contentService.folderCreate.subscribe(() => this.load(false, this.pagination)),
-            contentService.folderEdit.subscribe(() => this.load(false, this.pagination)),
-            contentManagementService.nodeDeleted.subscribe(() => this.load(false, this.pagination)),
-            contentManagementService.nodeMoved.subscribe(() => this.load(false, this.pagination)),
-            contentManagementService.nodeRestored.subscribe(() => this.load(false, this.pagination)),
-            uploadService.fileUploadComplete.subscribe(file => this.onFileUploadedEvent(file)),
-            uploadService.fileUploadDeleted.subscribe((file) => this.onFileUploadedEvent(file))
-        ]);
-    }
-
-    ngOnDestroy() {
-        this.subscriptions.forEach(s => s.unsubscribe());
-
-        this.browsingFilesService.onChangeParent.next(null);
-    }
-
-    fetchNode(nodeId: string): Observable<MinimalNodeEntryEntity> {
-        return this.nodesApi.getNode(nodeId);
-    }
-
-    fetchNodes(parentNodeId?: string, options: any = {}): Observable<NodePaging> {
-        const defaults = {
-            include: [ 'isLocked', 'path', 'properties', 'allowableOperations' ]
-        };
-
-        const queryOptions = Object.assign({}, defaults, options);
-
-        return this.nodesApi.getNodeChildren(parentNodeId, queryOptions);
-    }
-
-    navigate(nodeId: string = null) {
-        const commands = [ './' ];
-
-        if (nodeId && !this.isRootNode(nodeId)) {
-            commands.push(nodeId);
-        }
-
-        this.router.navigate(commands, {
-            relativeTo: this.route.parent
-        });
-    }
-
-    onNodeDoubleClick(event) {
-        if (!!event.detail && !!event.detail.node) {
-
-            const node: MinimalNodeEntryEntity = event.detail.node.entry;
-            if (node) {
-
-                if (node.isFolder) {
-                    this.navigate(node.id);
-                }
-
-                if (PageComponent.isLockedNode(node)) {
-                    event.preventDefault();
-
-                } else if (node.isFile) {
-                    this.router.navigate(['./preview', node.id], { relativeTo: this.route });
-                }
-            }
-
-        }
-    }
-
-    showPreview(node: MinimalNodeEntryEntity) {
-        if (node) {
-            if (node.isFile) {
-                this.router.navigate(['./preview', node.id], { relativeTo: this.route });
-            }
-        }
-    }
-
-    onBreadcrumbNavigate(route: PathElementEntity) {
-        // todo: review this approach once 5.2.3 is out
-        if (this.nodePath && this.nodePath.length > 2) {
-            if (this.nodePath[1].name === 'Sites' && this.nodePath[2].id === route.id) {
-                return this.navigate(this.nodePath[3].id);
-            }
-        }
-        this.navigate(route.id);
-    }
-
-    onFileUploadedEvent(event: FileUploadEvent) {
-        if (event && event.file.options.parentId === this.getParentNodeId()) {
-            this.load(false, this.pagination);
-        }
-    }
-
-    onContentCopied(nodes: MinimalNodeEntity[]) {
-        const newNode = nodes
-            .find((node) => {
-                return node && node.entry && node.entry.parentId === this.getParentNodeId();
+          if (node.entry && node.entry.isFolder) {
+            this.updateCurrentNode(node.entry);
+          } else {
+            this.router.navigate(['/personal-files', node.entry.parentId], {
+              replaceUrl: true
             });
-        if (newNode) {
-            this.load(false, this.pagination);
-        }
+          }
+        },
+        () => (this.isValidPath = false)
+      );
+    });
+
+    this.subscriptions = this.subscriptions.concat([
+      nodeActionsService.contentCopied.subscribe(nodes =>
+        this.onContentCopied(nodes)
+      ),
+      content.folderCreated.subscribe(() => this.documentList.reload()),
+      content.folderEdited.subscribe(() => this.documentList.reload()),
+      content.nodesDeleted.subscribe(() => this.documentList.reload()),
+      content.nodesMoved.subscribe(() => this.documentList.reload()),
+      content.nodesRestored.subscribe(() => this.documentList.reload()),
+      uploadService.fileUploadComplete
+        .pipe(debounceTime(300))
+        .subscribe(file => this.onFileUploadedEvent(file)),
+      uploadService.fileUploadDeleted
+        .pipe(debounceTime(300))
+        .subscribe(file => this.onFileUploadedEvent(file)),
+
+      this.breakpointObserver
+        .observe([Breakpoints.HandsetPortrait, Breakpoints.HandsetLandscape])
+        .subscribe(result => {
+          this.isSmallScreen = result.matches;
+        })
+    ]);
+
+    this.columns = this.extensions.documentListPresets.files || [];
+  }
+
+  ngOnDestroy() {
+    super.ngOnDestroy();
+    this.store.dispatch(new SetCurrentFolderAction(null));
+  }
+
+  navigate(nodeId: string = null) {
+    const commands = ['./'];
+
+    if (nodeId && !this.isRootNode(nodeId)) {
+      commands.push(nodeId);
     }
 
-    canCreateContent(parentNode: MinimalNodeEntryEntity): boolean {
-        if (parentNode) {
-            return this.contentService.hasPermission(parentNode, 'create');
-        }
+    this.router.navigate(commands, {
+      relativeTo: this.route.parent
+    });
+  }
 
-        return false;
+  navigateTo(node: MinimalNodeEntity) {
+    if (node && node.entry) {
+      const { id, isFolder } = node.entry;
+
+      if (isFolder) {
+        this.navigate(id);
+        return;
+      }
+
+      if (PageComponent.isLockedNode(node.entry)) {
+        event.preventDefault();
+        return;
+      }
+
+      this.showPreview(node);
     }
+  }
 
-    load(showIndicator: boolean = false, pagination: any = {}) {
-        this.isLoading = showIndicator;
-
-        this.fetchNodes(this.getParentNodeId(), pagination)
-            .flatMap((page) => {
-                if (this.isCurrentPageEmpty(page) && this.isNotFirstPage(page)) {
-                    const newSkipCount = pagination.skipCount - pagination.maxItems;
-
-                    return this.fetchNodes(this.getParentNodeId(), {skipCount: newSkipCount, maxItems: pagination.maxItems});
-                }
-
-                return Observable.of(page);
-            })
-            .subscribe(
-                (page) => this.zone.run(() => this.onPageLoaded(page)),
-                error => this.onFetchError(error)
-            );
-    }
-
-    isCurrentPageEmpty(page): boolean {
-        return !this.hasPageEntries(page);
-    }
-
-    hasPageEntries(page): boolean {
-        return page && page.list && page.list.entries && page.list.entries.length > 0;
-    }
-
-    isNotFirstPage(page): boolean {
-        return (page.list.pagination.skipCount >= page.list.pagination.maxItems);
-    }
-
+  onBreadcrumbNavigate(route: PathElementEntity) {
     // todo: review this approach once 5.2.3 is out
-    private async updateCurrentNode(node: MinimalNodeEntryEntity) {
-        this.nodePath = null;
+    if (this.nodePath && this.nodePath.length > 2) {
+      if (
+        this.nodePath[1].name === 'Sites' &&
+        this.nodePath[2].id === route.id
+      ) {
+        return this.navigate(this.nodePath[3].id);
+      }
+    }
+    this.navigate(route.id);
+  }
 
-        if (node && node.path && node.path.elements) {
-            const elements = node.path.elements;
+  onFileUploadedEvent(event: FileUploadEvent) {
+    const node: MinimalNodeEntity = event.file.data;
 
-            this.nodePath = elements.map(pathElement => {
-                return Object.assign({}, pathElement);
-            });
+    // check root and child nodes
+    if (node && node.entry && node.entry.parentId === this.getParentNodeId()) {
+      this.documentList.reload();
+      return;
+    }
 
-            if (elements.length > 1) {
-                if (elements[1].name === 'User Homes') {
-                    elements.splice(0, 2);
-                } else if (elements[1].name === 'Sites') {
-                    await this.normalizeSitePath(node);
-                }
-            }
+    // check the child nodes to show dropped folder
+    if (event && event.file.options.parentId === this.getParentNodeId()) {
+      this.displayFolderParent(event.file.options.path, 0);
+      return;
+    }
+
+    if (event && event.file.options.parentId) {
+      if (this.nodePath) {
+        const correspondingNodePath = this.nodePath.find(
+          pathItem => pathItem.id === event.file.options.parentId
+        );
+
+        // check if the current folder has the 'trigger-upload-folder' as one of its parents
+        if (correspondingNodePath) {
+          const correspondingIndex =
+            this.nodePath.length - this.nodePath.indexOf(correspondingNodePath);
+          this.displayFolderParent(event.file.options.path, correspondingIndex);
         }
-
-        this.node = node;
-        this.browsingFilesService.onChangeParent.next(node);
+      }
     }
+  }
 
-    // todo: review this approach once 5.2.3 is out
-    private async normalizeSitePath(node: MinimalNodeEntryEntity) {
-        const elements = node.path.elements;
+  displayFolderParent(filePath = '', index) {
+    const parentName = filePath.split('/')[index];
+    const currentFoldersDisplayed: any = this.documentList.data.getRows() || [];
 
-        // remove 'Sites'
-        elements.splice(1, 1);
+    const alreadyDisplayedParentFolder = currentFoldersDisplayed.find(
+      row => row.node.entry.isFolder && row.node.entry.name === parentName
+    );
 
-        if (this.isSiteContainer(node)) {
-            // rename 'documentLibrary' entry to the target site display name
-            // clicking on the breadcrumb entry loads the site content
-            const parentNode = await this.apiService.nodesApi.getNodeInfo(node.parentId);
-            node.name = parentNode.properties['cm:title'] || parentNode.name;
+    if (alreadyDisplayedParentFolder) {
+      return;
+    }
+    this.documentList.reload();
+  }
 
-            // remove the site entry
-            elements.splice(1, 1);
-        } else {
-            // remove 'documentLibrary' in the middle of the path
-            const docLib = elements.findIndex(el => el.name === 'documentLibrary');
-            if (docLib > -1) {
-                const siteFragment = elements[docLib - 1];
-                const siteNode = await this.apiService.nodesApi.getNodeInfo(siteFragment.id);
+  onContentCopied(nodes: MinimalNodeEntity[]) {
+    const newNode = nodes.find(node => {
+      return (
+        node && node.entry && node.entry.parentId === this.getParentNodeId()
+      );
+    });
+    if (newNode) {
+      this.documentList.reload();
+    }
+  }
 
-                // apply Site Name to the parent fragment
-                siteFragment.name = siteNode.properties['cm:title'] || siteNode.name;
-                elements.splice(docLib, 1);
-            }
+  // todo: review this approach once 5.2.3 is out
+  private async updateCurrentNode(node: MinimalNodeEntryEntity) {
+    this.nodePath = null;
+
+    if (node && node.path && node.path.elements) {
+      const elements = node.path.elements;
+
+      this.nodePath = elements.map(pathElement => {
+        return Object.assign({}, pathElement);
+      });
+
+      if (elements.length > 1) {
+        if (elements[1].name === 'User Homes') {
+          elements.splice(0, 2);
+        } else if (elements[1].name === 'Sites') {
+          await this.normalizeSitePath(node);
         }
+      }
     }
 
-    isSiteContainer(node: MinimalNodeEntryEntity): boolean {
-        if (node && node.aspectNames && node.aspectNames.length > 0) {
-            return node.aspectNames.indexOf('st:siteContainer') >= 0;
-        }
-        return false;
-    }
+    this.node = node;
+    this.store.dispatch(new SetCurrentFolderAction(node));
+  }
 
-    isRootNode(nodeId: string): boolean {
-        if (this.node && this.node.path && this.node.path.elements && this.node.path.elements.length > 0) {
-            return this.node.path.elements[0].id === nodeId;
-        }
-        return false;
-    }
+  // todo: review this approach once 5.2.3 is out
+  private async normalizeSitePath(node: MinimalNodeEntryEntity) {
+    const elements = node.path.elements;
 
-    onSortingChanged(event: CustomEvent) {
-        this.preferences.set(`${this.prefix}.sorting.key`, event.detail.key || 'modifiedAt');
-        this.preferences.set(`${this.prefix}.sorting.direction`, event.detail.direction || 'desc');
-    }
+    // remove 'Sites'
+    elements.splice(1, 1);
 
-    private get prefix() {
-        return this.route.snapshot.data.preferencePrefix;
+    if (this.isSiteContainer(node)) {
+      // rename 'documentLibrary' entry to the target site display name
+      // clicking on the breadcrumb entry loads the site content
+      const parentNode = await this.contentApi
+        .getNodeInfo(node.parentId)
+        .toPromise();
+      node.name = parentNode.properties['cm:title'] || parentNode.name;
+
+      // remove the site entry
+      elements.splice(1, 1);
+    } else {
+      // remove 'documentLibrary' in the middle of the path
+      const docLib = elements.findIndex(el => el.name === 'documentLibrary');
+      if (docLib > -1) {
+        const siteFragment = elements[docLib - 1];
+        const siteNode = await this.contentApi
+          .getNodeInfo(siteFragment.id)
+          .toPromise();
+
+        // apply Site Name to the parent fragment
+        siteFragment.name = siteNode.properties['cm:title'] || siteNode.name;
+        elements.splice(docLib, 1);
+      }
     }
+  }
+
+  isSiteContainer(node: MinimalNodeEntryEntity): boolean {
+    if (node && node.aspectNames && node.aspectNames.length > 0) {
+      return node.aspectNames.indexOf('st:siteContainer') >= 0;
+    }
+    return false;
+  }
+
+  isRootNode(nodeId: string): boolean {
+    if (
+      this.node &&
+      this.node.path &&
+      this.node.path.elements &&
+      this.node.path.elements.length > 0
+    ) {
+      return this.node.path.elements[0].id === nodeId;
+    }
+    return false;
+  }
 }

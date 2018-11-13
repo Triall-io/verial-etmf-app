@@ -23,56 +23,62 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Subscription } from 'rxjs/Rx';
-
-import { Component, OnInit, OnDestroy } from '@angular/core';
-
-import { MinimalNodeEntryEntity } from 'alfresco-js-api';
-import { ContentService, AppConfigService } from '@alfresco/adf-core';
-
-import { BrowsingFilesService } from '../../common/services/browsing-files.service';
+import {
+  Component,
+  Input,
+  OnInit,
+  ViewEncapsulation,
+  OnDestroy
+} from '@angular/core';
+import { AppExtensionService } from '../../extensions/extension.service';
+import { NavBarGroupRef } from '@alfresco/adf-extensions';
+import { Store } from '@ngrx/store';
+import { AppStore } from '../../store/states';
+import { ruleContext } from '../../store/selectors/app.selectors';
+import { Subject } from 'rxjs';
+import { takeUntil, distinctUntilChanged, map } from 'rxjs/operators';
 
 @Component({
-    selector: 'app-sidenav',
-    templateUrl: './sidenav.component.html',
-    styleUrls: ['./sidenav.component.scss']
+  selector: 'app-sidenav',
+  templateUrl: './sidenav.component.html',
+  styleUrls: ['./sidenav.component.scss'],
+  encapsulation: ViewEncapsulation.None,
+  host: { class: 'app-sidenav' }
 })
 export class SidenavComponent implements OnInit, OnDestroy {
-    node: MinimalNodeEntryEntity = null;
-    navigation = [];
+  private onDestroy$: Subject<boolean> = new Subject<boolean>();
 
-    private subscriptions: Subscription[] = [];
+  @Input()
+  showLabel: boolean;
 
-    constructor(
-        private browsingFilesService: BrowsingFilesService,
-        private contentService: ContentService,
-        private appConfig: AppConfigService
-    ) {}
+  groups: Array<NavBarGroupRef> = [];
 
-    ngOnInit() {
-        this.navigation = this.buildMenu();
+  constructor(
+    private store: Store<AppStore>,
+    private extensions: AppExtensionService
+  ) {}
 
-        this.subscriptions.concat([
-            this.browsingFilesService.onChangeParent
-                .subscribe((node: MinimalNodeEntryEntity) => this.node = node)
-        ]);
-    }
+  ngOnInit() {
+    this.store
+      .select(ruleContext)
+      .pipe(
+        map(rules => rules.repository),
+        distinctUntilChanged(),
+        takeUntil(this.onDestroy$)
+      )
+      .subscribe(() => {
+        this.groups = this.extensions.getApplicationNavigation(
+          this.extensions.navbar
+        );
+      });
+  }
 
-    ngOnDestroy() {
-        this.subscriptions.forEach(s => s.unsubscribe());
-    }
+  trackById(index: number, obj: { id: string }) {
+    return obj.id;
+  }
 
-    canCreateContent(parentNode: MinimalNodeEntryEntity): boolean {
-        if (parentNode) {
-            return this.contentService.hasPermission(parentNode, 'create');
-        }
-        return false;
-    }
-
-    private buildMenu() {
-        const schema = this.appConfig.get('navigation');
-        const data = Array.isArray(schema) ? { main: schema } : schema;
-
-        return Object.keys(data).map((key) => data[key]);
-    }
+  ngOnDestroy() {
+    this.onDestroy$.next(true);
+    this.onDestroy$.complete();
+  }
 }
