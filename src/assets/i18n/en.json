@@ -129,7 +129,7 @@
             "VERSIONS": "Manage Versions",
             "TOGGLE-SIDENAV": "Toggle side navigation bar",
             "SHARE": "Share",
-            "BLOCKCHAIN_SIGN": "Register on Blockchain",
+            "BLOCKCHAIN_REGISTER": "Register on Blockchain",
             "BLOCKCHAIN_VERIFY": "Verify on Blockchain"
         },
         "DIALOGS": {

@@ -40,7 +40,7 @@ export const COPY_NODES = 'COPY_NODES';
 export const MOVE_NODES = 'MOVE_NODES';
 export const MANAGE_PERMISSIONS = 'MANAGE_PERMISSIONS';
 export const MANAGE_VERSIONS = 'MANAGE_VERSIONS';
-export const BLOCKCHAIN_SIGN = 'BLOCKCHAIN_SIGN';
+export const BLOCKCHAIN_REGISTER = 'BLOCKCHAIN_REGISTER';
 export const BLOCKCHAIN_VERIFY = 'BLOCKCHAIN_VERIFY';
 
 
@@ -115,7 +115,7 @@ export class ManageVersionsAction implements Action {
 }
 
 export class BlockchainSignAction implements Action {
-    readonly type = BLOCKCHAIN_SIGN;
+    readonly type = BLOCKCHAIN_REGISTER;
     constructor(public payload: Array<MinimalNodeEntity>) {}
 }
 

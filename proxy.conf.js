@@ -1,7 +1,7 @@
 module.exports = {
     "/alfresco": {
         "target": "https://triall.dev.sphereon.com",
-        "secure": true,
+        "secure": false,
         "changeOrigin": true,
         // workaround for REPO-2260
         onProxyRes: function (proxyRes, req, res) {

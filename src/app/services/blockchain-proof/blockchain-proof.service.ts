@@ -1,13 +1,10 @@
 import {Injectable} from '@angular/core';
-import {AlfrescoApiService, ContentService, NotificationService, TranslationService} from '@alfresco/adf-core';
+import {NodesApiService, NotificationService, TranslationService} from '@alfresco/adf-core';
 import {ApiClientConfiguration, RegistrationService, VerificationService, VerifyContentResponse} from './sdk';
-import {MinimalNodeEntity, MinimalNodeEntryEntity} from 'alfresco-js-api';
+import {MinimalNodeEntity} from 'alfresco-js-api';
 import {HttpClient} from '@angular/common/http';
-import {observable} from 'rxjs/symbol/observable';
 import * as models from './sdk/model/Models';
-import {AlfrescoApi, ContentApi} from 'alfresco-js-api';
-import {Subject} from 'rxjs/Rx';
-import {Buffer} from 'buffer';
+import {Subject} from 'rxjs';
 import {secrets} from '../../../environments/secrets';
 import {sprintf} from 'sprintf-js';
 
@@ -15,143 +12,137 @@ import {sprintf} from 'sprintf-js';
 @Injectable()
 export class BlockchainProofService {
 
-    private registrationService: RegistrationService;
-    private verificationService: VerificationService;
-
-
-    constructor(private contentService: ContentService,
+    constructor(private nodesApiService: NodesApiService,
                 private notification: NotificationService,
                 private translation: TranslationService,
                 private http: HttpClient) {
 
-        this.contentService = contentService;
-        this.registrationService = new RegistrationService(http, null, this.apiConfig());
-        this.verificationService = new VerificationService(http, null, this.apiConfig());
+        this.nodesApiService = nodesApiService;
     }
 
 
-    signSelection(contentEntities: Array<MinimalNodeEntity>): Subject<string> {
-        const observable: Subject<string> = new Subject<string>();
+    registerSelection(contentEntities: Array<MinimalNodeEntity>): Subject<string> {
+        const subject: Subject<string> = new Subject<string>();
 
         if (!this.isEntryEntitiesArray(contentEntities)) {
-            observable.error(new Error(JSON.stringify({error: {statusCode: 400}})));
+            subject.error(new Error(JSON.stringify({error: {statusCode: 400}})));
         } else {
-            const atomicItemCounter:AtomicItemCounter = new AtomicItemCounter();
+            const atomicItemCounter: AtomicItemCounter = new AtomicItemCounter();
             contentEntities.forEach(entity => {
                 if (entity.entry.isFile) {
                     atomicItemCounter.incrementCount();
-                    this.signEntry(entity, atomicItemCounter, observable);
+                    this.registerEntry(entity, atomicItemCounter, subject);
                 }
             });
         }
 
-        return observable;
+        return subject;
     }
 
 
-    private signEntry(entity, atomicItemCounter:AtomicItemCounter, observable: Subject<string>) {
-        console.log('Signing entry ' + entity.entry.id);
-        this.contentService.getNodeContent(entity.entry.id).subscribe(value => {
-            const contentRequest = {
-                hashProvider: models.ContentRequest.HashProviderEnum.SERVER,
-                content: Buffer.from(value).toString('base64')
-            };
-            const response = this.registrationService.registerUsingContent('demo', contentRequest, null, null,
-                '01020304', null);
-            response.subscribe((registerContentResponse: models.RegisterContentResponse) => {
-                const messageBuilder = [];
-                messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION_STARTED'), entity.entry.name));
-                messageBuilder.push('.');
-                const message = messageBuilder.join('');
-                console.log(message);
-                console.log("Calculated hash: " + registerContentResponse.hash);
-                console.log("Calculated signature: " + registerContentResponse.hexSignature);
-                if(registerContentResponse.perHashProofChain != null) {
-                    console.log("Per hash proof chain id: " + registerContentResponse.perHashProofChain.chainId);
-                }
-                if(registerContentResponse.singleProofChain != null) {
-                    console.log("Single proof chain id: " + registerContentResponse.singleProofChain.chainId);
-                }
-                observable.next(message);
-                atomicItemCounter.incrementIndex();
-                if (atomicItemCounter.isLast()) {
-                    observable.complete();
-                }
-            }, error => {
-                const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
-                    this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION'), entity.entry.name);
-                this.handleApiError(error, userMessage, observable);
-            });
+    private registerEntry(entity, atomicItemCounter: AtomicItemCounter, subject: Subject<string>) {
+
+        if ('Registered' === entity.entry.properties['bc:RegistrationState']) {
+            const messageBuilder = [];
+            messageBuilder.push('File ', entity.entry.name, ' is already registered, skipping.');
+            const message = messageBuilder.join('');
+            console.log(message);
+            subject.next(message);
+            return;
+        }
+
+        console.log('Marking entry for blockchain registration' + entity.entry.id);
+        const nodeBody = {
+            properties: {
+                'bc:RegistrationState': 'ToDo',
+                'bc:StateIcon': 'assets/images/pending-42x42.png'
+            }
+        };
+        this.nodesApiService.updateNode(entity.entry.id, nodeBody).subscribe(value => {
+            const messageBuilder = [];
+            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION_STARTED'), entity.entry.name));
+            messageBuilder.push('.');
+            const message = messageBuilder.join('');
+            console.log(message);
+            subject.next(message);
+            atomicItemCounter.incrementIndex();
+            if (atomicItemCounter.isLast()) {
+                subject.complete();
+            }
+        }, error => {
+            const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
+                this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION'), entity.entry.name);
+            this.handleApiError(error, userMessage, subject);
         });
     }
 
 
     verifySelection(contentEntities: Array<MinimalNodeEntity>): Subject<string> {
-        const observable: Subject<string> = new Subject<string>();
+        const subject: Subject<string> = new Subject<string>();
 
         if (!this.isEntryEntitiesArray(contentEntities)) {
-            observable.error(new Error(JSON.stringify({error: {statusCode: 400}})));
+            subject.error(new Error(JSON.stringify({error: {statusCode: 400}})));
         } else {
-            const atomicItemCounter:AtomicItemCounter = new AtomicItemCounter();
+            const atomicItemCounter: AtomicItemCounter = new AtomicItemCounter();
             contentEntities.forEach(entity => {
                 if (entity.entry.isFile) {
                     atomicItemCounter.incrementCount();
-                    this.verifyEntry(entity, atomicItemCounter, observable);
+                    this.verifyEntry(entity, atomicItemCounter, subject);
                 }
             });
         }
 
-        return observable;
+        return subject;
     }
 
 
-    private verifyEntry(entity, atomicItemCounter:AtomicItemCounter, observable: Subject<string>) {
+    private verifyEntry(entity, atomicItemCounter: AtomicItemCounter, subject: Subject<string>) {
         console.log('Verifying entry ' + entity.entry.id);
-        this.contentService.getNodeContent(entity.entry.id).subscribe(value => {
-            const contentRequest = {
-                hashProvider: models.ContentRequest.HashProviderEnum.SERVER,
-                content: Buffer.from(value).toString('base64')
-            };
-            const response = this.verificationService.verifyUsingContent('demo', contentRequest, null, null,
-                '01020304', null);
-            response.subscribe((verifyContentResponse: models.VerifyContentResponse) => {
-                const message = this.buildVerifyResponseMessage(entity.entry, verifyContentResponse);
-                console.log(message);
-                console.log("Calculated hash: " + verifyContentResponse.hash);
-                console.log("Calculated signature: " + verifyContentResponse.hexSignature);
-                if(verifyContentResponse.perHashProofChain != null) {
-                    console.log("Per hash proof chain id: " + verifyContentResponse.perHashProofChain.chainId);
-                }
-                if(verifyContentResponse.singleProofChain != null) {
-                    console.log("Single proof chain id: " + verifyContentResponse.singleProofChain.chainId);
-                }
-                observable.next(message);
-                atomicItemCounter.incrementIndex();
-                if (atomicItemCounter.isLast()) {
-                    observable.complete();
-                }
-            }, error => {
-                const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
-                    this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), entity.entry.name);
-                this.handleApiError(error, userMessage, observable);
-            });
-        });
+        /*        this.nodesApiService.getNodeContent(entity.entry.id).subscribe(value => {
+                    const contentRequest = {
+                        hashProvider: models.ContentRequest.HashProviderEnum.SERVER,
+                        content: Buffer.from(value).toString('base64')
+                    };
+                    const response = this.verificationService.verifyUsingContent('demo', contentRequest, null, null,
+                        '01020304', null);
+                    response.subscribe((verifyContentResponse: models.VerifyContentResponse) => {
+                        const message = this.buildVerifyResponseMessage(entity.entry, verifyContentResponse);
+                        console.log(message);
+                        console.log('Calculated hash: ' + verifyContentResponse.hash);
+                        console.log('Calculated signature: ' + verifyContentResponse.hexSignature);
+                        if (verifyContentResponse.perHashProofChain != null) {
+                            console.log('Per hash proof chain id: ' + verifyContentResponse.perHashProofChain.chainId);
+                        }
+                        if (verifyContentResponse.singleProofChain != null) {
+                            console.log('Single proof chain id: ' + verifyContentResponse.singleProofChain.chainId);
+                        }
+                        subject.next(message);
+                        atomicItemCounter.incrementIndex();
+                        if (atomicItemCounter.isLast()) {
+                            subject.complete();
+                        }
+                    }, error => {
+                        const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
+                            this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), entity.entry.name);
+                        this.handleApiError(error, userMessage, subject);
+                    });
+                });*/
     }
 
     private buildVerifyResponseMessage(entry, verifyContentResponse: VerifyContentResponse) {
         const messageBuilder = [];
 
-        var registrationState = null;
-        var registrationTime = null;
+        let registrationState = null;
+        let registrationTime = null;
         if (verifyContentResponse.perHashProofChain != null) {
             registrationState = verifyContentResponse.perHashProofChain.registrationState;
-            if (registrationState == 'REGISTERED') {
+            if (registrationState === 'REGISTERED') {
                 registrationTime = verifyContentResponse.perHashProofChain.registrationTime;
             }
         }
         if (registrationTime == null && verifyContentResponse.singleProofChain != null) {
             registrationState = verifyContentResponse.singleProofChain.registrationState;
-            if (registrationState == 'REGISTERED') {
+            if (registrationState === 'REGISTERED') {
                 registrationTime = verifyContentResponse.singleProofChain.registrationTime;
             }
         }
@@ -162,13 +153,11 @@ export class BlockchainProofService {
             messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED_ON'));
             messageBuilder.push(' ');
             messageBuilder.push(registrationTime);
-        }
-        else if (registrationState == 'PENDING') {
+        } else if (registrationState === 'PENDING') {
             messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
             messageBuilder.push(' ');
             messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PENDING'));
-        }
-        else {
+        } else {
             messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
             messageBuilder.push(' ');
             messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.NOT_REGISTERED'));
@@ -182,7 +171,7 @@ export class BlockchainProofService {
         return this.translation.instant(key);
     }
 
-    private handleApiError(error, userMessage, observable: Subject<string>) {
+    private handleApiError(error, userMessage, subject: Subject<string>) {
         const logMessageBuilder = [];
         logMessageBuilder.push(error.message);
         if (error.error && error.error.errors) {
@@ -197,7 +186,7 @@ export class BlockchainProofService {
         }
         console.log(logMessageBuilder.join(''));
 
-        observable.error(new Error(userMessage));
+        subject.error(new Error(userMessage));
     }
 
     apiConfig() {
@@ -218,8 +207,8 @@ export class BlockchainProofService {
 
 class AtomicItemCounter {
 
-    private count: number = 0;
-    private index: number = 0;
+    private count = 0;
+    private index = 0;
 
     incrementCount() {
         this.count++;
@@ -229,7 +218,7 @@ class AtomicItemCounter {
         this.index++;
     }
 
-    isLast() : boolean {
+    isLast(): boolean {
         return this.index >= this.count;
     }
 }

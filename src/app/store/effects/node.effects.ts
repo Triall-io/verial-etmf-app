@@ -23,11 +23,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Effect, Actions, ofType } from '@ngrx/effects';
-import { Injectable } from '@angular/core';
-import { map, take } from 'rxjs/operators';
-import { Store } from '@ngrx/store';
-import { AppStore } from '../states/app.state';
+import {Effect, Actions, ofType} from '@ngrx/effects';
+import {Injectable} from '@angular/core';
+import {map, take} from 'rxjs/operators';
+import {Store} from '@ngrx/store';
+import {AppStore} from '../states/app.state';
 import {
     PurgeDeletedNodesAction,
     PURGE_DELETED_NODES,
@@ -44,10 +44,10 @@ import {
     ShareNodeAction,
     SHARE_NODE
 } from '../actions';
-import { ContentManagementService } from '../../services/content-management.service';
-import { BlockchainProofService } from '../../services/blockchain-proof/blockchain-proof.service';
-import { NotificationService } from '@alfresco/adf-core';
-import { currentFolder, appSelection } from '../selectors/app.selectors';
+import {ContentManagementService} from '../../services/content-management.service';
+import {BlockchainProofService} from '../../services/blockchain-proof/blockchain-proof.service';
+import {NotificationService} from '@alfresco/adf-core';
+import {currentFolder, appSelection} from '../selectors/app.selectors';
 import {
     UnshareNodesAction,
     UNSHARE_NODES,
@@ -60,17 +60,15 @@ import {
     ManageVersionsAction,
     MANAGE_VERSIONS,
     BlockchainSignAction,
-    BLOCKCHAIN_SIGN,
+    BLOCKCHAIN_REGISTER,
     BlockchainVerifyAction,
     BLOCKCHAIN_VERIFY
 } from '../actions/node.actions';
 import {Observable} from 'rxjs';
-import {MatSnackBarConfig} from "@angular/material";
+import {MatSnackBarConfig} from '@angular/material';
 
 @Injectable()
 export class NodeEffects {
-
-    private snackBarConfig:MatSnackBarConfig;
 
     constructor(
         private store: Store<AppStore>,
@@ -85,7 +83,9 @@ export class NodeEffects {
         this.snackBarConfig.politeness = 'assertive';
     }
 
-    @Effect({ dispatch: false })
+    private snackBarConfig: MatSnackBarConfig;
+
+    @Effect({dispatch: false})
     shareNode$ = this.actions$.pipe(
         ofType<ShareNodeAction>(SHARE_NODE),
         map(action => {
@@ -104,7 +104,7 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     unshareNodes$ = this.actions$.pipe(
         ofType<UnshareNodesAction>(UNSHARE_NODES),
         map(action => {
@@ -123,7 +123,7 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     purgeDeletedNodes$ = this.actions$.pipe(
         ofType<PurgeDeletedNodesAction>(PURGE_DELETED_NODES),
         map(action => {
@@ -144,7 +144,7 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     restoreDeletedNodes$ = this.actions$.pipe(
         ofType<RestoreDeletedNodesAction>(RESTORE_DELETED_NODES),
         map(action => {
@@ -165,7 +165,7 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     deleteNodes$ = this.actions$.pipe(
         ofType<DeleteNodesAction>(DELETE_NODES),
         map(action => {
@@ -184,7 +184,7 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     undoDeleteNodes$ = this.actions$.pipe(
         ofType<UndoDeleteNodesAction>(UNDO_DELETE_NODES),
         map(action => {
@@ -194,7 +194,7 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     createFolder$ = this.actions$.pipe(
         ofType<CreateFolderAction>(CREATE_FOLDER),
         map(action => {
@@ -213,7 +213,7 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     editFolder$ = this.actions$.pipe(
         ofType<EditFolderAction>(EDIT_FOLDER),
         map(action => {
@@ -232,7 +232,7 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     copyNodes$ = this.actions$.pipe(
         ofType<CopyNodesAction>(COPY_NODES),
         map(action => {
@@ -251,7 +251,7 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     moveNodes$ = this.actions$.pipe(
         ofType<MoveNodesAction>(MOVE_NODES),
         map(action => {
@@ -270,7 +270,7 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     managePermissions = this.actions$.pipe(
         ofType<ManagePermissionsAction>(MANAGE_PERMISSIONS),
         map(action => {
@@ -291,7 +291,7 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     manageVersions$ = this.actions$.pipe(
         ofType<ManageVersionsAction>(MANAGE_VERSIONS),
         map(action => {
@@ -312,9 +312,9 @@ export class NodeEffects {
         })
     );
 
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     blockchainSignNodes$ = this.actions$.pipe(
-        ofType<BlockchainSignAction>(BLOCKCHAIN_SIGN),
+        ofType<BlockchainSignAction>(BLOCKCHAIN_REGISTER),
         map(action => {
             if (action.payload && action.payload.length > 0) {
                 this.signNodes(action);
@@ -331,28 +331,7 @@ export class NodeEffects {
         })
     );
 
-    private signNodes(selection) {
-        const messageBuilder = [];
-        Observable.zip(
-            this.blockchainProofService.signSelection(selection.nodes)
-        ).subscribe(
-            (result) => {
-                if(result != null) {
-                    result.forEach((message) => {
-                        messageBuilder.push(message);
-                        messageBuilder.push('\n');
-                    })
-                }
-            },
-            (error) => {
-                this.toastMessage(error.message);
-            }, () => {
-                this.toastMessage(messageBuilder.join(""));
-            }
-        );
-    }
-
-    @Effect({ dispatch: false })
+    @Effect({dispatch: false})
     blockchainVerifyNodes$ = this.actions$.pipe(
         ofType<BlockchainVerifyAction>(BLOCKCHAIN_VERIFY),
         map(action => {
@@ -371,26 +350,41 @@ export class NodeEffects {
         })
     );
 
+    private signNodes(selection) {
+        const messageBuilder = [];
+        this.blockchainProofService.registerSelection(selection.nodes).asObservable()
+            .subscribe(
+                (message) => {
+                    if (message != null) {
+                        messageBuilder.push(message);
+                        messageBuilder.push('\n');
+                    }
+                },
+                (error) => {
+                    this.toastMessage(error.message);
+                }, () => {
+                    this.toastMessage(messageBuilder.join(''));
+                }
+            );
+    }
+
 
     private verifyNodes(selection) {
         const messageBuilder = [];
-        Observable.zip(
-            this.blockchainProofService.verifySelection(selection.nodes)
-        ).subscribe(
-            (result) => {
-                if(result != null) {
-                    result.forEach((message) => {
+        this.blockchainProofService.verifySelection(selection.nodes).asObservable()
+            .subscribe(
+                (message) => {
+                    if (message != null) {
                         messageBuilder.push(message);
                         messageBuilder.push('\n');
-                    })
+                    }
+                },
+                (error) => {
+                    this.toastMessage(error.message);
+                }, () => {
+                    this.toastMessage(messageBuilder.join(''));
                 }
-            },
-            (error) => {
-                this.toastMessage(error.message);
-            }, () => {
-                this.toastMessage(messageBuilder.join(""));
-            }
-        );
+            );
     }
 
     private toastMessage(message: any) {
