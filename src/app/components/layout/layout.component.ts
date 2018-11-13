@@ -23,40 +23,162 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Rx';
-import { MinimalNodeEntryEntity } from 'alfresco-js-api';
-import { ContentService } from '@alfresco/adf-core';
-import { BrowsingFilesService } from '../../common/services/browsing-files.service';
+import {
+  AppConfigService,
+  SidenavLayoutComponent,
+  UserPreferencesService
+} from '@alfresco/adf-core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewEncapsulation
+} from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Subject, Observable } from 'rxjs';
+import { filter, takeUntil, map, withLatestFrom } from 'rxjs/operators';
+import { NodePermissionService } from '../../services/node-permission.service';
+import { currentFolder } from '../../store/selectors/app.selectors';
+import { AppStore } from '../../store/states';
+import { BreakpointObserver } from '@angular/cdk/layout';
 
 @Component({
-    selector: 'app-layout',
-    templateUrl: './layout.component.html',
-    styleUrls: ['./layout.component.scss']
+  selector: 'app-layout',
+  templateUrl: './layout.component.html',
+  styleUrls: ['./layout.component.scss'],
+  encapsulation: ViewEncapsulation.None,
+  host: { class: 'app-layout' }
 })
 export class LayoutComponent implements OnInit, OnDestroy {
-    node: MinimalNodeEntryEntity;
+  @ViewChild('layout')
+  layout: SidenavLayoutComponent;
 
-    private subscriptions: Subscription[] = [];
+  onDestroy$: Subject<boolean> = new Subject<boolean>();
+  isSmallScreen$: Observable<boolean>;
 
-    constructor(
-        private contentService: ContentService,
-        private browsingFilesService: BrowsingFilesService) {}
+  expandedSidenav: boolean;
+  currentFolderId: string;
+  canUpload = false;
 
-    ngOnInit() {
-        this.subscriptions.concat([
-            this.browsingFilesService.onChangeParent.subscribe((node: MinimalNodeEntryEntity) => this.node = node)
-        ]);
+  minimizeSidenav = false;
+  hideSidenav = false;
+
+  private minimizeConditions: string[] = ['search'];
+  private hideConditions: string[] = ['preview'];
+
+  constructor(
+    protected store: Store<AppStore>,
+    private permission: NodePermissionService,
+    private router: Router,
+    private userPreferenceService: UserPreferencesService,
+    private appConfigService: AppConfigService,
+    private breakpointObserver: BreakpointObserver
+  ) {}
+
+  ngOnInit() {
+    this.isSmallScreen$ = this.breakpointObserver
+      .observe(['(max-width: 600px)'])
+      .pipe(map(result => result.matches));
+
+    this.hideSidenav = this.hideConditions.some(el =>
+      this.router.routerState.snapshot.url.includes(el)
+    );
+
+    this.minimizeSidenav = this.minimizeConditions.some(el =>
+      this.router.routerState.snapshot.url.includes(el)
+    );
+
+    if (!this.minimizeSidenav) {
+      this.expandedSidenav = this.getSidenavState();
+    } else {
+      this.expandedSidenav = false;
     }
 
-    ngOnDestroy() {
-        this.subscriptions.forEach(s => s.unsubscribe());
+    this.store
+      .select(currentFolder)
+      .pipe(takeUntil(this.onDestroy$))
+      .subscribe(node => {
+        this.currentFolderId = node ? node.id : null;
+        this.canUpload = node && this.permission.check(node, ['create']);
+      });
+
+    this.router.events
+      .pipe(
+        withLatestFrom(this.isSmallScreen$),
+        filter(
+          ([event, isSmallScreen]) =>
+            isSmallScreen && event instanceof NavigationEnd
+        ),
+        takeUntil(this.onDestroy$)
+      )
+      .subscribe(() => {
+        this.layout.container.toggleMenu();
+      });
+
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.onDestroy$)
+      )
+      .subscribe((event: NavigationEnd) => {
+        this.minimizeSidenav = this.minimizeConditions.some(el =>
+          event.urlAfterRedirects.includes(el)
+        );
+        this.hideSidenav = this.hideConditions.some(el =>
+          event.urlAfterRedirects.includes(el)
+        );
+
+        this.updateState();
+      });
+  }
+
+  ngOnDestroy() {
+    this.onDestroy$.next(true);
+    this.onDestroy$.complete();
+  }
+
+  private updateState() {
+    if (this.minimizeSidenav && !this.layout.isMenuMinimized) {
+      this.layout.isMenuMinimized = true;
+      this.layout.container.toggleMenu();
     }
 
-    canCreateContent(node: MinimalNodeEntryEntity): boolean {
-        if (node) {
-            return this.contentService.hasPermission(node, 'create');
-        }
-        return false;
+    if (!this.minimizeSidenav) {
+      if (this.getSidenavState() && this.layout.isMenuMinimized) {
+        this.layout.isMenuMinimized = false;
+        this.layout.container.toggleMenu();
+      }
     }
+  }
+
+  onExpanded(state) {
+    if (
+      !this.minimizeSidenav &&
+      this.appConfigService.get('sideNav.preserveState')
+    ) {
+      this.userPreferenceService.set('expandedSidenav', state);
+    }
+  }
+
+  private getSidenavState(): boolean {
+    const expand = this.appConfigService.get<boolean>(
+      'sideNav.expandedSidenav',
+      true
+    );
+    const preserveState = this.appConfigService.get<boolean>(
+      'sideNav.preserveState',
+      true
+    );
+
+    if (preserveState) {
+      return (
+        this.userPreferenceService.get('expandedSidenav', expand.toString()) ===
+        'true'
+      );
+    }
+
+    return expand;
+  }
 }

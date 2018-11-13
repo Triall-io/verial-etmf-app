@@ -23,152 +23,99 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientModule } from '@angular/common/http';
-import { TestBed, async } from '@angular/core/testing';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 import {
-    NotificationService, TranslationService, TranslationMock,
-    NodesApiService, AlfrescoApiService, ContentService,
-    UserPreferencesService, LogService, AppConfigService,
-    StorageService, CookieService, ThumbnailService,
-    AuthenticationService, TimeAgoPipe, NodeNameTooltipPipe,
-    NodeFavoriteDirective, DataTableComponent
+  AlfrescoApiService,
+  TimeAgoPipe,
+  NodeNameTooltipPipe,
+  NodeFavoriteDirective,
+  DataTableComponent,
+  AppConfigPipe
 } from '@alfresco/adf-core';
 import { DocumentListComponent } from '@alfresco/adf-content-services';
-import { TranslateModule } from '@ngx-translate/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatMenuModule, MatSnackBarModule, MatIconModule } from '@angular/material';
-import { DocumentListService } from '@alfresco/adf-content-services';
-import { ContentManagementService } from '../../common/services/content-management.service';
-
+import { ContentManagementService } from '../../services/content-management.service';
 import { TrashcanComponent } from './trashcan.component';
+import { AppTestingModule } from '../../testing/app-testing.module';
+import { ExperimentalDirective } from '../../directives/experimental.directive';
 
 describe('TrashcanComponent', () => {
-    let fixture;
-    let component;
-    let alfrescoApi: AlfrescoApiService;
-    let contentService: ContentManagementService;
-    let preferenceService: UserPreferencesService;
-    let page;
+  let fixture: ComponentFixture<TrashcanComponent>;
+  let component: TrashcanComponent;
+  let alfrescoApi: AlfrescoApiService;
+  let contentService: ContentManagementService;
+  let page;
 
-    beforeEach(() => {
-        page = {
-            list: {
-                entries: [ { entry: { id: 1 } }, { entry: { id: 2 } } ],
-                pagination: { data: 'data'}
-            }
-        };
+  beforeEach(() => {
+    page = {
+      list: {
+        entries: [{ entry: { id: 1 } }, { entry: { id: 2 } }],
+        pagination: { data: 'data' }
+      }
+    };
+  });
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [AppTestingModule],
+      declarations: [
+        DataTableComponent,
+        TimeAgoPipe,
+        NodeNameTooltipPipe,
+        NodeFavoriteDirective,
+        DocumentListComponent,
+        TrashcanComponent,
+        AppConfigPipe,
+        ExperimentalDirective
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     });
 
-    beforeEach(async(() => {
-        TestBed.configureTestingModule({
-            imports: [
-                MatMenuModule,
-                NoopAnimationsModule,
-                HttpClientModule,
-                TranslateModule.forRoot(),
-                RouterTestingModule,
-                MatSnackBarModule, MatIconModule
-            ],
-            declarations: [
-                DataTableComponent,
-                TimeAgoPipe,
-                NodeNameTooltipPipe,
-                NodeFavoriteDirective,
-                DocumentListComponent,
-                TrashcanComponent
-            ],
-            providers: [
-                { provide: ActivatedRoute, useValue: {
-                    snapshot: { data: { preferencePrefix: 'prefix' } }
-                } } ,
-                { provide: TranslationService, useClass: TranslationMock },
-                AuthenticationService,
-                UserPreferencesService,
-                AppConfigService, StorageService, CookieService,
-                AlfrescoApiService,
-                LogService,
-                NotificationService,
-                ContentManagementService,
-                ContentService,
-                NodesApiService,
-                DocumentListService,
-                ThumbnailService
-            ],
-            schemas: [ NO_ERRORS_SCHEMA ]
-        })
-        .compileComponents()
-        .then(() => {
-            fixture = TestBed.createComponent(TrashcanComponent);
-            component = fixture.componentInstance;
+    fixture = TestBed.createComponent(TrashcanComponent);
+    component = fixture.componentInstance;
 
-            alfrescoApi = TestBed.get(AlfrescoApiService);
-            contentService = TestBed.get(ContentManagementService);
-            preferenceService = TestBed.get(UserPreferencesService);
+    alfrescoApi = TestBed.get(AlfrescoApiService);
+    alfrescoApi.reset();
+    contentService = TestBed.get(ContentManagementService);
 
-            component.documentList = {
-                loadTrashcan:  jasmine.createSpy('loadTrashcan'),
-                resetSelection: jasmine.createSpy('resetSelection')
-            };
-        });
-    }));
+    component.documentList = <any>{
+      reload: jasmine.createSpy('reload'),
+      resetSelection: jasmine.createSpy('resetSelection')
+    };
+  });
 
-    beforeEach(() => {
-        spyOn(alfrescoApi.nodesApi, 'getDeletedNodes').and.returnValue(Promise.resolve(page));
+  beforeEach(() => {
+    spyOn(alfrescoApi.nodesApi, 'getDeletedNodes').and.returnValue(
+      Promise.resolve(page)
+    );
+  });
+
+  it('should reload on nodes purged', () => {
+    component.ngOnInit();
+    spyOn(component, 'reload').and.stub();
+    contentService.nodesPurged.next({});
+    expect(component.reload).toHaveBeenCalled();
+  });
+
+  describe('onRestoreNode()', () => {
+    it('should call refresh()', () => {
+      spyOn(component, 'reload');
+      fixture.detectChanges();
+
+      contentService.nodesRestored.next();
+
+      expect(component.reload).toHaveBeenCalled();
+    });
+  });
+
+  describe('refresh()', () => {
+    it('calls child component to reload', () => {
+      component.reload();
+      expect(component.documentList.reload).toHaveBeenCalled();
     });
 
-    describe('onRestoreNode()', () => {
-        it('should call refresh()', () => {
-            spyOn(component, 'refresh');
-            fixture.detectChanges();
-
-            contentService.nodeRestored.next();
-
-            expect(component.refresh).toHaveBeenCalled();
-        });
+    it('calls child component to reset selection', () => {
+      component.reload();
+      expect(component.documentList.resetSelection).toHaveBeenCalled();
     });
-
-    describe('refresh()', () => {
-        it('calls child component to reload', () => {
-            component.refresh();
-            expect(component.documentList.loadTrashcan).toHaveBeenCalled();
-        });
-
-        it('calls child component to reset selection', () => {
-            component.refresh();
-            expect(component.documentList.resetSelection).toHaveBeenCalled();
-        });
-    });
-
-    describe('onSortingChanged', () => {
-        it('should save sorting input', () => {
-            spyOn(preferenceService, 'set');
-
-            const event = <any>{
-                detail: {
-                    key: 'some-name',
-                    direction: 'some-direction'
-                }
-             };
-
-            component.onSortingChanged(event);
-
-            expect(preferenceService.set).toHaveBeenCalledWith('prefix.sorting.key', 'some-name');
-            expect(preferenceService.set).toHaveBeenCalledWith('prefix.sorting.direction', 'some-direction');
-        });
-
-        it('should save default sorting when no input', () => {
-            spyOn(preferenceService, 'set');
-
-            const event = <any>{
-                detail: {}
-             };
-
-            component.onSortingChanged(event);
-
-            expect(preferenceService.set).toHaveBeenCalledWith('prefix.sorting.key', 'archivedAt');
-            expect(preferenceService.set).toHaveBeenCalledWith('prefix.sorting.direction', 'desc');
-        });
-    });
+  });
 });

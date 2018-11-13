@@ -23,57 +23,51 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs/Rx';
-import { Pagination } from 'alfresco-js-api';
-import { UserPreferencesService } from '@alfresco/adf-core';
-import { DocumentListComponent } from '@alfresco/adf-content-services';
-import { ContentManagementService } from '../../common/services/content-management.service';
+import { Component, OnInit } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { ContentManagementService } from '../../services/content-management.service';
+import { PageComponent } from '../page.component';
+import { Store } from '@ngrx/store';
+import { selectUser } from '../../store/selectors/app.selectors';
+import { AppStore } from '../../store/states/app.state';
+import { AppExtensionService } from '../../extensions/extension.service';
+import { Observable } from 'rxjs';
+import { ProfileState } from '@alfresco/adf-extensions';
 
 @Component({
-    templateUrl: './trashcan.component.html'
+  templateUrl: './trashcan.component.html'
 })
-export class TrashcanComponent implements OnInit, OnDestroy {
-    private subscriptions: Subscription[] = [];
+export class TrashcanComponent extends PageComponent implements OnInit {
+  isSmallScreen = false;
+  user$: Observable<ProfileState>;
 
-    @ViewChild(DocumentListComponent) documentList;
+  columns: any[] = [];
 
-    sorting = [ 'archivedAt', 'desc' ];
+  constructor(
+    content: ContentManagementService,
+    extensions: AppExtensionService,
+    store: Store<AppStore>,
+    private breakpointObserver: BreakpointObserver
+  ) {
+    super(store, extensions, content);
+    this.user$ = this.store.select(selectUser);
+  }
 
-    constructor(private contentManagementService: ContentManagementService,
-                private preferences: UserPreferencesService,
-                private route: ActivatedRoute) {
+  ngOnInit() {
+    super.ngOnInit();
 
-        const sortingKey = preferences.get(`${this.prefix}.sorting.key`) || 'archivedAt';
-        const sortingDirection = preferences.get(`${this.prefix}.sorting.direction`) || 'desc';
+    this.subscriptions.push(
+      this.content.nodesRestored.subscribe(() => this.reload()),
+      this.content.nodesPurged.subscribe(() => this.reload()),
+      this.content.nodesRestored.subscribe(() => this.reload()),
 
-        this.sorting = [sortingKey, sortingDirection];
-    }
+      this.breakpointObserver
+        .observe([Breakpoints.HandsetPortrait, Breakpoints.HandsetLandscape])
+        .subscribe(result => {
+          this.isSmallScreen = result.matches;
+        })
+    );
 
-    ngOnInit() {
-        this.subscriptions.push(this.contentManagementService.nodeRestored.subscribe(() => this.refresh()));
-    }
-
-    refresh(): void {
-        this.documentList.loadTrashcan();
-        this.documentList.resetSelection();
-    }
-
-    ngOnDestroy() {
-        this.subscriptions.forEach(s => s.unsubscribe());
-    }
-
-    onChangePageSize(event: Pagination): void {
-        this.preferences.paginationSize = event.maxItems;
-    }
-
-    onSortingChanged(event: CustomEvent) {
-        this.preferences.set(`${this.prefix}.sorting.key`, event.detail.key || 'archivedAt');
-        this.preferences.set(`${this.prefix}.sorting.direction`, event.detail.direction || 'desc');
-    }
-
-    private get prefix() {
-        return this.route.snapshot.data.preferencePrefix;
-    }
+    this.columns = this.extensions.documentListPresets.trashcan || [];
+  }
 }

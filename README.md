@@ -1,72 +1,74 @@
-# Alfresco Example Content Application
+   <p align="left"> <img title="Alfresco" src="alfresco.png" alt="Alfresco - make business flow"></p>
+   
+# Example Content Application
 
-<p align="center">
-    <img title="Alfresco" width="250px" src="alfresco.png" alt="Alfresco">
-</p>
+Testing Supported By<br/>
+<img width="160" src="docs/images/Browserstack-logo.svg" alt="BrowserStack"/>
 
 ## Introduction
 
 The Alfresco Content Application is an example application built using
-[Alfresco Application Development Framework (ADF)](https://github.com/Alfresco/alfresco-ng2-components) components and was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.6.6.
+[Alfresco Application Development Framework (ADF)](https://github.com/Alfresco/alfresco-ng2-components) components and was generated with [Angular CLI](https://github.com/angular/angular-cli).
 
 ### Who is this example application for
 
-This example application demonstrates to Angular software engineers
-how to construct a content application using the Alfresco ADF.
+This project demonstrates how to construct an application for Alfresco Content Services using the Alfresco ADF and it represents a meaningful composition of ADF components that provide end users with a simple easy to use interface for working with files in the content repository.
 
-This example application represents a meaningful composition of ADF components that provide end users
-with a simple and easy to use interface for working with files stored in the Alfresco Content Services repository.
+### Where to get help
+There are a number of resources available to help get you started with the Content App and the ADF:
+* [Content App Documentation](https://alfresco.github.io/alfresco-content-app/)
+* [Alfresco ADF Documentation](https://alfresco.github.io/adf-component-catalog/)
+* [Alfresco Community](https://community.alfresco.com/)
+* [ADF Gitter Channel](https://gitter.im/Alfresco/alfresco-ng2-components)
 
-[Public documentation](https://alfresco.github.io/alfresco-content-app/)
+To get help on Angular CLI use ng help or read the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
 ### Raising issues and feature requests
+Isuses can be raised in GitHub or in the Alfresco JIRA project. 
+Please include a clear description, steps to reproduce and screenshots where appropriate.All issues will be reviewed; bugs will be categorized if reproducible and enhancement/feature suggestions will be considered against existing priorities if the use case serves a general-purpose need.
 
-Log any issues in the ['ACA' JIRA project](https://issues.alfresco.com/jira/projects/ACA),
-please include a clear description, steps to reproduce and screenshots where appropriate.
+#### Features added in the latest release
+* Application Extensibility - Phase 2 
+  * Document list presets
+  * File viewer actions
+  * Create menu button
+  * Application header
+  * Metadata card configuration
+  * see [Documentation](https://alfresco.github.io/alfresco-content-app/#/extending) for details.
+* Sharing Files
+  * Set expiry date for shared links
+  * Right click action to access shared link settings
+  * Automatic disable of sharing based on respository configuration
 
-All issues will be reviewed; bugs will be categorized if reproducible and enhancement/feature suggestions
-will be considered against existing priorities if the use case serves a general-purpose need.
+Please refer to the [release notes](https://github.com/Alfresco/alfresco-content-app/releases) for details of all changes.
 
-## Development server
+#### High level features planned for H2 2018 (July - December)
+* Library Management
+  * For end users: Find, join and favorite libraries
+  * For managers: Create libraries, manage users and requests to join
 
-Run `npm start` for a dev server. Navigate to `http://localhost:3000/` (opens by default).
-The app will automatically reload if you change any of the source files.
+### Want to help?
+Want to file a bug, contribute some code, or improve documentation? Excellent! Read up on our guidelines for [contributing](https://github.com/Alfresco/alfresco-content-app/blob/master/CONTRIBUTING.md) and then check out one of our issues in the [Jira](https://issues.alfresco.com/jira/projects/ACA) or [GitHub](https://github.com/Alfresco/alfresco-content-app/issues)
 
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Running documentation locally
-
-For development purposes, you can run and test documentation locally.
-That is useful when working in different branches instead of a `master` one.
-
-Run the following command to install the lightweight development server [wsrv](https://denysvuika.gitlab.io/wsrv/#/):
-
-```sh
-npm install -g wsrv
-```
-
-Now you can use the next command to serve the documentation folder in the browser:
-
-```sh
-wsrv docs/ -s -l -o
-```
-
-The browser page is going to automatically reload upon changes.
+## Available Features
+| Feature          | Description                                                    | 
+|------------------|----------------------------------------------------------------|
+| Document List    | Folder/File browsing of Personal Files, and File Libraries     |
+| Shared Files	   | Lists all files that have shared.                              |
+| Recent Files	   | List files created and/or modified by the logged users within the last 30 days|
+| Favorites	       | Lists all favorited files for the user. |
+| Trash	           | Lists all deleted items stored in the trash can, users can restore or permanently remove. Admin user will see items deleted by all users.|
+| Upload	       | Files and folders can be uploaded through the New button or by dragging and dropping into the browser.|
+| Search	       | Quick search with live results, and full faceted search results page.| 
+| Actions	       | A number of actions can be performed on files and/or folders, either individually or multiples at a time|
+| Viewer           | Viewing files in natively in the browser, unsupported formats are transformed by the repository |                  
+| Metadata	       | The information drawer can be configured in the app.config.json to display metadata information, by default file the Properties Aspect is shown and images will also include EXIF information.|
+| Versioning	   | The version manager provides access and management of previous file versions, and the ability to upload new versions.|
 
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+
+[contributing]: https://github.com/Alfresco/alfresco-content-app/blob/master/CONTRIBUTING.md
+[github]: https://github.com/Alfresco/alfresco-content-app/issues
+[jira]: https://issues.alfresco.com/jira/projects/ACA
