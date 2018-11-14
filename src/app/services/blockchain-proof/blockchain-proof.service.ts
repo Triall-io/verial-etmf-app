@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {NodesApiService, NotificationService, TranslationService} from '@alfresco/adf-core';
-import {ApiClientConfiguration, RegistrationService, VerificationService, VerifyContentResponse} from './sdk';
+import {BlockchainService, VerifyContentResponse, Configuration} from './api';
 import {MinimalNodeEntity} from 'alfresco-js-api';
 import {HttpClient} from '@angular/common/http';
-import * as models from './sdk/model/Models';
+import * as models from './api/model/models';
 import {Subject} from 'rxjs';
 import {secrets} from '../../../environments/secrets';
 import {sprintf} from 'sprintf-js';
@@ -12,12 +12,15 @@ import {sprintf} from 'sprintf-js';
 @Injectable()
 export class BlockchainProofService {
 
+    private blockchainService: BlockchainService;
+
     constructor(private nodesApiService: NodesApiService,
                 private notification: NotificationService,
                 private translation: TranslationService,
                 private http: HttpClient) {
 
         this.nodesApiService = nodesApiService;
+        this.blockchainService = new BlockchainService(http, null, this.apiConfig());
     }
 
 
@@ -98,35 +101,33 @@ export class BlockchainProofService {
 
     private verifyEntry(entity, atomicItemCounter: AtomicItemCounter, subject: Subject<string>) {
         console.log('Verifying entry ' + entity.entry.id);
-        /*        this.nodesApiService.getNodeContent(entity.entry.id).subscribe(value => {
-                    const contentRequest = {
-                        hashProvider: models.ContentRequest.HashProviderEnum.SERVER,
-                        content: Buffer.from(value).toString('base64')
-                    };
-                    const response = this.verificationService.verifyUsingContent('demo', contentRequest, null, null,
-                        '01020304', null);
-                    response.subscribe((verifyContentResponse: models.VerifyContentResponse) => {
-                        const message = this.buildVerifyResponseMessage(entity.entry, verifyContentResponse);
-                        console.log(message);
-                        console.log('Calculated hash: ' + verifyContentResponse.hash);
-                        console.log('Calculated signature: ' + verifyContentResponse.hexSignature);
-                        if (verifyContentResponse.perHashProofChain != null) {
-                            console.log('Per hash proof chain id: ' + verifyContentResponse.perHashProofChain.chainId);
-                        }
-                        if (verifyContentResponse.singleProofChain != null) {
-                            console.log('Single proof chain id: ' + verifyContentResponse.singleProofChain.chainId);
-                        }
-                        subject.next(message);
-                        atomicItemCounter.incrementIndex();
-                        if (atomicItemCounter.isLast()) {
-                            subject.complete();
-                        }
-                    }, error => {
-                        const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
-                            this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), entity.entry.name);
-                        this.handleApiError(error, userMessage, subject);
-                    });
-                });*/
+        //       const nodeIds: Array<string> = [];
+//        nodeIds.push(entity.entry.id);
+        this.blockchainService.verifyEntries(entity.entry.id).subscribe(responseList => {
+            responseList.forEach(verifyContentResponse => {
+                if ('java.util.ArrayList' !== '' + verifyContentResponse) {
+                    const message = this.buildVerifyResponseMessage(entity.entry, verifyContentResponse[0]);
+                    console.log(message);
+                    console.log('Calculated hash: ' + verifyContentResponse.hash);
+                    console.log('Calculated signature: ' + verifyContentResponse.hexSignature);
+                    if (verifyContentResponse.perHashProofChain != null) {
+                        console.log('Per hash proof chain id: ' + verifyContentResponse.perHashProofChain.chainId);
+                    }
+                    if (verifyContentResponse.singleProofChain != null) {
+                        console.log('Single proof chain id: ' + verifyContentResponse.singleProofChain.chainId);
+                    }
+                    subject.next(message);
+                    atomicItemCounter.incrementIndex();
+                    if (atomicItemCounter.isLast()) {
+                        subject.complete();
+                    }
+                }
+            });
+        }, error => {
+            const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
+                this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), entity.entry.name);
+            this.handleApiError(error, userMessage, subject);
+        });
     }
 
     private buildVerifyResponseMessage(entry, verifyContentResponse: VerifyContentResponse) {
@@ -147,12 +148,16 @@ export class BlockchainProofService {
             }
         }
 
-        if (registrationTime != null) {
+        if (registrationState === 'REGISTERED') {
             messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_WAS'), entry.name));
             messageBuilder.push(' ');
-            messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED_ON'));
-            messageBuilder.push(' ');
-            messageBuilder.push(registrationTime);
+            if (registrationTime != null) {
+                messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED_ON'));
+                messageBuilder.push(' ');
+                messageBuilder.push(registrationTime);
+            } else {
+                messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED'));
+            }
         } else if (registrationState === 'PENDING') {
             messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
             messageBuilder.push(' ');
@@ -190,8 +195,8 @@ export class BlockchainProofService {
     }
 
     apiConfig() {
-        const config = new ApiClientConfiguration();
-        config.accessToken = secrets.bcproofFixedToken;
+        const config = new Configuration();
+        config.basePath = 'https://triall.dev.sphereon.com/agent/alfresco-blockchain';
         return config;
     }
 

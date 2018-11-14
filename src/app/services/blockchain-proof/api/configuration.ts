@@ -1,22 +1,3 @@
-/*!
- * @license
- * Copyright 2016 Alfresco Software, Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/* tslint:disable */
-
 export interface ConfigurationParameters {
     apiKeys?: {[ key: string ]: string};
     username?: string;
@@ -26,7 +7,7 @@ export interface ConfigurationParameters {
     withCredentials?: boolean;
 }
 
-export class ApiClientConfiguration {
+export class Configuration {
     apiKeys?: {[ key: string ]: string};
     username?: string;
     password?: string;
@@ -45,7 +26,7 @@ export class ApiClientConfiguration {
 
     /**
      * Select the correct content-type to use for a request.
-     * Uses {@link ApiClientConfiguration#isJsonMime} to determine the correct content-type.
+     * Uses {@link Configuration#isJsonMime} to determine the correct content-type.
      * If no content type is found return the first found type if the contentTypes is not empty
      * @param {string[]} contentTypes - the array of content types that are available for selection
      * @returns {string} the selected content-type or <code>undefined</code> if no selection could be made.
@@ -64,7 +45,7 @@ export class ApiClientConfiguration {
 
     /**
      * Select the correct accept content-type to use for a request.
-     * Uses {@link ApiClientConfiguration#isJsonMime} to determine the correct accept content-type.
+     * Uses {@link Configuration#isJsonMime} to determine the correct accept content-type.
      * If no content type is found return the first found type if the contentTypes is not empty
      * @param {string[]} accepts - the array of content types that are available for selection.
      * @returns {string} the selected content-type or <code>undefined</code> if no selection could be made.

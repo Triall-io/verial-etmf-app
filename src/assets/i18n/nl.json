@@ -238,6 +238,7 @@
                     "FILE_IS": "Bestand %s is",
                     "REGISTRATION_STARTED": "Het opstarten van registratieproces was successvol voor bestand %s",
                     "PROCESS_FAILED": "het %sproces is mislukt voor bestand %s",
+                    "REGISTERED": "geregistreerd",
                     "REGISTERED_ON": "geregistreerd op",
                     "PENDING": "in afwachting van registratie",
                     "NOT_REGISTERED": "niet geregistreerd",
