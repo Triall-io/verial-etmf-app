@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {NodesApiService, NotificationService, TranslationService} from '@alfresco/adf-core';
 import {BlockchainService, VerifyContentResponse, Configuration} from './api';
-import {MinimalNodeEntity} from 'alfresco-js-api';
+import {MinimalNodeEntity, MinimalNodeEntryEntity} from 'alfresco-js-api';
 import {HttpClient} from '@angular/common/http';
 import * as models from './api/model/models';
 import {Subject} from 'rxjs';
@@ -86,27 +86,41 @@ export class BlockchainProofService {
         if (!this.isEntryEntitiesArray(contentEntities)) {
             subject.error(new Error(JSON.stringify({error: {statusCode: 400}})));
         } else {
-            const atomicItemCounter: AtomicItemCounter = new AtomicItemCounter();
+            const fileEntries: Array<MinimalNodeEntryEntity> = [];
             contentEntities.forEach(entity => {
                 if (entity.entry.isFile) {
-                    atomicItemCounter.incrementCount();
-                    this.verifyEntry(entity, atomicItemCounter, subject);
+                    fileEntries.push(entity.entry);
                 }
             });
+            this.verifyEntry(fileEntries, subject);
         }
-
         return subject;
     }
 
 
-    private verifyEntry(entity, atomicItemCounter: AtomicItemCounter, subject: Subject<string>) {
-        console.log('Verifying entry ' + entity.entry.id);
-        //       const nodeIds: Array<string> = [];
-//        nodeIds.push(entity.entry.id);
-        this.blockchainService.verifyEntries(entity.entry.id).subscribe(responseList => {
-            responseList.forEach(verifyContentResponse => {
-                if ('java.util.ArrayList' !== '' + verifyContentResponse) {
-                    const message = this.buildVerifyResponseMessage(entity.entry, verifyContentResponse[0]);
+    private verifyEntry(entries: Array<MinimalNodeEntryEntity>, subject: Subject<string>) {
+        console.log('Verifying ' + entries.length + ' selected entries.');
+
+        const request = {
+            nodeIds: []
+        };
+        entries.forEach(entry => {
+            request.nodeIds.push(entry.id);
+        });
+
+        this.blockchainService.verifyEntries(request).subscribe();
+        this.blockchainService.verifyEntries(request).subscribe((verifyNodesResponse: models.VerifyNodesResponse) => {
+            const messageBuilder = [];
+            verifyNodesResponse.contentResponses.forEach(verifyContentResponse => {
+                let matchedEntry: MinimalNodeEntryEntity = null;
+                entries.forEach(entry => {
+                    if (entry.id === verifyContentResponse.requestId) {
+                        matchedEntry = entry;
+                    }
+                });
+                if (matchedEntry !== null) {
+                    const message = this.buildVerifyResponseMessage(matchedEntry, verifyContentResponse[0]);
+                    messageBuilder.push(message);
                     console.log(message);
                     console.log('Calculated hash: ' + verifyContentResponse.hash);
                     console.log('Calculated signature: ' + verifyContentResponse.hexSignature);
@@ -116,13 +130,10 @@ export class BlockchainProofService {
                     if (verifyContentResponse.singleProofChain != null) {
                         console.log('Single proof chain id: ' + verifyContentResponse.singleProofChain.chainId);
                     }
-                    subject.next(message);
-                    atomicItemCounter.incrementIndex();
-                    if (atomicItemCounter.isLast()) {
-                        subject.complete();
-                    }
                 }
             });
+            subject.next(messageBuilder.join(''));
+            subject.complete();
         }, error => {
             const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
                 this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), entity.entry.name);

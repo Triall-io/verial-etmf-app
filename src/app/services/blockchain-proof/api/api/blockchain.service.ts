@@ -19,7 +19,8 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 import { Observable }                                        from 'rxjs/Observable';
 
 import { ErrorResponse } from '../model/errorResponse';
-import { VerifyContentResponse } from '../model/verifyContentResponse';
+import { VerifyNodesRequest } from '../model/verifyNodesRequest';
+import { VerifyNodesResponse } from '../model/verifyNodesResponse';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -28,7 +29,7 @@ import { Configuration }                                     from '../configurat
 @Injectable()
 export class BlockchainService {
 
-    protected basePath = 'https://localhost:57870/triall-api/alfresco-blockchain/0.1';
+    protected basePath = 'https://https://triall.dev.sphereon.com/agent/alfresco-blockchain/';
     public defaultHeaders = new HttpHeaders();
     public configuration = new Configuration();
 
@@ -60,16 +61,16 @@ export class BlockchainService {
     /**
      * Verify alfresco entries
      * Performs verification on the blockchain for the given node entry id&#39;s.
-     * @param nodeId nodeId
+     * @param nodeIds verifyNodesRequest
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public verifyEntries(nodeId: string, observe?: 'body', reportProgress?: boolean): Observable<Array<VerifyContentResponse>>;
-    public verifyEntries(nodeId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<VerifyContentResponse>>>;
-    public verifyEntries(nodeId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<VerifyContentResponse>>>;
-    public verifyEntries(nodeId: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-        if (nodeId === null || nodeId === undefined) {
-            throw new Error('Required parameter nodeId was null or undefined when calling verifyEntries.');
+    public verifyEntries(nodeIds: VerifyNodesRequest, observe?: 'body', reportProgress?: boolean): Observable<VerifyNodesResponse>;
+    public verifyEntries(nodeIds: VerifyNodesRequest, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<VerifyNodesResponse>>;
+    public verifyEntries(nodeIds: VerifyNodesRequest, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<VerifyNodesResponse>>;
+    public verifyEntries(nodeIds: VerifyNodesRequest, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+        if (nodeIds === null || nodeIds === undefined) {
+            throw new Error('Required parameter nodeIds was null or undefined when calling verifyEntries.');
         }
 
         let headers = this.defaultHeaders;
@@ -92,8 +93,8 @@ export class BlockchainService {
             headers = headers.set("Content-Type", httpContentTypeSelected);
         }
 
-        return this.httpClient.post<Array<VerifyContentResponse>>(`${this.basePath}/verify/entries`,
-            nodeId,
+        return this.httpClient.post<VerifyNodesResponse>(`${this.basePath}/alfresco-blockchain/verify/entries`,
+            nodeIds,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
