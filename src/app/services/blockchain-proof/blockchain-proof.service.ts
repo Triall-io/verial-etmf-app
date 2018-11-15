@@ -108,7 +108,6 @@ export class BlockchainProofService {
             request.nodeIds.push(entry.id);
         });
 
-        this.blockchainService.verifyEntries(request).subscribe();
         this.blockchainService.verifyEntries(request).subscribe((verifyNodesResponse: models.VerifyNodesResponse) => {
             const messageBuilder = [];
             verifyNodesResponse.contentResponses.forEach(verifyContentResponse => {
@@ -136,7 +135,7 @@ export class BlockchainProofService {
             subject.complete();
         }, error => {
             const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
-                this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), entity.entry.name);
+                this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), ''); // TODO: join file names
             this.handleApiError(error, userMessage, subject);
         });
     }
@@ -207,7 +206,7 @@ export class BlockchainProofService {
 
     apiConfig() {
         const config = new Configuration();
-        config.basePath = 'https://triall.dev.sphereon.com/agent/alfresco-blockchain';
+        config.basePath = 'https://triall.dev.sphereon.com/agent';
         return config;
     }
 
