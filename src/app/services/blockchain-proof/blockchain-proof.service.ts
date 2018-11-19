@@ -196,7 +196,7 @@ export class BlockchainProofService {
 
     apiConfig() {
         const config = new Configuration();
-        config.basePath = 'https://triall.dev.sphereon.com/agent/alfresco-blockchain';
+        config.basePath = 'https://triall.sphereon.com/agent/alfresco-blockchain';
         return config;
     }
 
