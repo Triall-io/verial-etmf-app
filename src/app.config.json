@@ -4,7 +4,7 @@
     "authType" : "BASIC",
     "application": {
         "name": "",
-        "logo": "assets/images/triall-logo-44.png",
+        "logo": "assets/images/triall-logo-alt-44.png",
         "copyright":
             "© 2017 - 2018 Triall, Alfresco Software, Inc. All rights reserved."
     },
@@ -13,7 +13,7 @@
         "extensions": false,
         "external-plugins": false
     },
-    "headerColor": "#584E51",
+    "headerColor": "#092C38",
     "languagePicker": false,
     "pagination": {
         "size": 25,

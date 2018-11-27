@@ -40,4 +40,4 @@ kubectl -n $KUBE_NAMESPACE create configmap triall-app-config --from-file=src/ap
 kubectl apply -f scripts/alfresco-adf-deployment.yaml
 kubectl -n $KUBE_NAMESPACE expose deployment alfresco-adf-demo --port=80 --name=alfresco-adf-demo
 kubectl -n $KUBE_NAMESPACE label service alfresco-adf-demo app=alfresco-adf-demo
-kubectl -n $KUBE_NAMESPACE apply -f scripts/alfresco-adf-ingress.yaml
+#  kubectl -n $KUBE_NAMESPACE apply -f scripts/alfresco-adf-ingress.yaml
