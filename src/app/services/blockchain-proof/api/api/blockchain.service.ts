@@ -29,7 +29,7 @@ import { Configuration }                                     from '../configurat
 @Injectable()
 export class BlockchainService {
 
-    protected basePath = 'https://https://triall.dev.sphereon.com/agent/alfresco-blockchain/';
+    protected basePath = 'https://triall.dev.sphereon.com/agent/alfresco-blockchain/';
     public defaultHeaders = new HttpHeaders();
     public configuration = new Configuration();
 

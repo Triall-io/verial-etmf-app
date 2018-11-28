@@ -118,7 +118,7 @@ export class BlockchainProofService {
                     }
                 });
                 if (matchedEntry !== null) {
-                    const message = this.buildVerifyResponseMessage(matchedEntry, verifyContentResponse[0]);
+                    const message = this.buildVerifyResponseMessage(matchedEntry, verifyContentResponse);
                     messageBuilder.push(message);
                     console.log(message);
                     console.log('Calculated hash: ' + verifyContentResponse.hash);
@@ -131,7 +131,9 @@ export class BlockchainProofService {
                     }
                 }
             });
-            subject.next(messageBuilder.join(''));
+
+            const finalMessage = messageBuilder.join('');
+            subject.next(finalMessage.substring(0, finalMessage.length - 1));
             subject.complete();
         }, error => {
             const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
@@ -177,7 +179,7 @@ export class BlockchainProofService {
             messageBuilder.push(' ');
             messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.NOT_REGISTERED'));
         }
-        messageBuilder.push('.');
+        messageBuilder.push('.\n');
         const message = messageBuilder.join('');
         return message;
     }
