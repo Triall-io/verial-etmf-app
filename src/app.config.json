@@ -1,12 +1,11 @@
 {
     "ecmHost": "http://{hostname}{:port}",
     "providers": "ECM",
-    "authType" : "BASIC",
+    "authType": "BASIC",
     "application": {
         "name": "",
         "logo": "assets/images/triall-logo-alt-44.png",
-        "copyright":
-            "© 2017 - 2018 Triall, Alfresco Software, Inc. All rights reserved."
+        "copyright": "© 2017 - 2018 Triall, Alfresco Software, Inc. All rights reserved."
     },
     "experimental": {
         "cardview": false,
@@ -17,12 +16,21 @@
     "languagePicker": false,
     "pagination": {
         "size": 25,
-        "supportedPageSizes": [25, 50, 100]
+        "supportedPageSizes": [
+            25,
+            50,
+            100
+        ]
     },
     "files": {
-        "excluded": [".DS_Store", "desktop.ini", "Thumbs.db", ".git"],
+        "excluded": [
+            ".DS_Store",
+            "desktop.ini",
+            "Thumbs.db",
+            ".git"
+        ],
         "match-options": {
-          "nocase": true
+            "nocase": true
         }
     },
     "adf-version-manager": {
@@ -83,6 +91,28 @@
         "presets": {
             "custom": [
                 {
+                    "title": "APP.CONTENT_METADATA.PROPERTIES_GROUP_TITLE",
+                    "items": [
+                        {
+                            "properties": "basicProperties$"
+                        }
+                    ]
+                },
+                {
+                    "title": "APP.CONTENT_METADATA.BLOCKCHAIN_GROUP_TITLE",
+                    "items": [
+                        {
+                            "aspect": "bc:BlockchainRegistrationState",
+                            "properties": [
+                                "bc:RegistrationState",
+                                "bc:RegistrationTime",
+                                "bc:LastVerificationTime",
+                                "bc:ExternalLinks"
+                            ]
+                        }
+                    ]
+                },
+                {
                     "title": "APP.CONTENT_METADATA.EXIF_GROUP_TITLE",
                     "items": [
                         {
@@ -108,7 +138,11 @@
         }
     },
     "search": {
-        "include": ["path", "allowableOperations", "properties"],
+        "include": [
+            "path",
+            "allowableOperations",
+            "properties"
+        ],
         "sorting": {
             "options": [
                 {
@@ -178,27 +212,64 @@
             ]
         },
         "filterQueries": [
-            { "query": "TYPE:'cm:folder' OR TYPE:'cm:content'" },
-            { "query": "NOT cm:creator:System" },
-            { "query": "NOT TYPE:'dl:dataList' AND NOT TYPE:'dl:todoList' AND NOT TYPE:'dl:issue' AND NOT TYPE:'fm:topic' AND NOT TYPE:'lnk:link' AND NOT TYPE:'fm:post'" }
+            {
+                "query": "TYPE:'cm:folder' OR TYPE:'cm:content'"
+            },
+            {
+                "query": "NOT cm:creator:System"
+            },
+            {
+                "query": "NOT TYPE:'dl:dataList' AND NOT TYPE:'dl:todoList' AND NOT TYPE:'dl:issue' AND NOT TYPE:'fm:topic' AND NOT TYPE:'lnk:link' AND NOT TYPE:'fm:post'"
+            }
         ],
         "facetFields": {
             "expanded": true,
             "fields": [
-                { "field": "content.mimetype", "mincount": 0, "label": "SEARCH.FACET_FIELDS.FILE_TYPE" },
-                { "field": "creator", "mincount": 0, "label": "SEARCH.FACET_FIELDS.CREATOR" },
-                { "field": "modifier", "mincount": 0, "label": "SEARCH.FACET_FIELDS.MODIFIER" },
-                { "field": "SITE", "mincount": 0, "label": "SEARCH.FACET_FIELDS.LOCATION" }
+                {
+                    "field": "content.mimetype",
+                    "mincount": 0,
+                    "label": "SEARCH.FACET_FIELDS.FILE_TYPE"
+                },
+                {
+                    "field": "creator",
+                    "mincount": 0,
+                    "label": "SEARCH.FACET_FIELDS.CREATOR"
+                },
+                {
+                    "field": "modifier",
+                    "mincount": 0,
+                    "label": "SEARCH.FACET_FIELDS.MODIFIER"
+                },
+                {
+                    "field": "SITE",
+                    "mincount": 0,
+                    "label": "SEARCH.FACET_FIELDS.LOCATION"
+                }
             ]
         },
         "facetQueries": {
             "label": "SEARCH.CATEGORIES.MODIFIED_DATE",
             "queries": [
-                { "label": "Today", "query": "cm:modified:[TODAY to TODAY]" },
-                { "label": "This week", "query": "cm:modified:[NOW/DAY-7DAYS TO NOW/DAY+1DAY]" },
-                { "label": "This month", "query": "cm:modified:[NOW/DAY-1MONTH TO NOW/DAY+1DAY]"},
-                { "label": "In last 6 months", "query": "cm:modified:[NOW/DAY-6MONTHS TO NOW/DAY+1DAY]"},
-                { "label": "This year", "query": "cm:modified:[NOW/DAY-1YEAR TO NOW/DAY+1DAY]"}
+                {
+                    "label": "Today",
+                    "query": "cm:modified:[TODAY to TODAY]"
+                },
+                {
+                    "label": "This week",
+                    "query": "cm:modified:[NOW/DAY-7DAYS TO NOW/DAY+1DAY]"
+                },
+                {
+                    "label": "This month",
+                    "query": "cm:modified:[NOW/DAY-1MONTH TO NOW/DAY+1DAY]"
+                },
+                {
+                    "label": "In last 6 months",
+                    "query": "cm:modified:[NOW/DAY-6MONTHS TO NOW/DAY+1DAY]"
+                },
+                {
+                    "label": "This year",
+                    "query": "cm:modified:[NOW/DAY-1YEAR TO NOW/DAY+1DAY]"
+                }
             ]
         },
         "categories": [
@@ -210,10 +281,22 @@
                     "selector": "check-list",
                     "settings": {
                         "options": [
-                            { "name": "Small", "value": "content.size:[0 TO 1048576>" },
-                            { "name": "Medium", "value": "content.size:[1048576 TO 52428800]" },
-                            { "name": "Large", "value": "content.size:<52428800 TO 524288000]" },
-                            { "name": "Huge", "value": "content.size:<524288000 TO MAX]" }
+                            {
+                                "name": "Small",
+                                "value": "content.size:[0 TO 1048576>"
+                            },
+                            {
+                                "name": "Medium",
+                                "value": "content.size:[1048576 TO 52428800]"
+                            },
+                            {
+                                "name": "Large",
+                                "value": "content.size:<52428800 TO 524288000]"
+                            },
+                            {
+                                "name": "Huge",
+                                "value": "content.size:<524288000 TO MAX]"
+                            }
                         ]
                     }
                 }

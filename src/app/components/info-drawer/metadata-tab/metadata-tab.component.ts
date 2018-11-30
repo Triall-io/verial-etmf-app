@@ -34,6 +34,7 @@ import { NodePermissionService } from '../../../services/node-permission.service
             [readOnly]="!canUpdateNode"
             [displayEmpty]="canUpdateNode"
             [preset]="'custom'"
+            [displayDefaultProperties] = "false"
             [node]="node">
         </adf-content-metadata-card>
     `,

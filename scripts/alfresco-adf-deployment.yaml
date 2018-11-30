@@ -47,7 +47,7 @@ spec:
             securityContext: {}
             terminationGracePeriodSeconds: 30
             volumes:
+                name: triall-app-config
                 - configMap:
                       defaultMode: 420
                       name: triall-app-config
-                  name: triall-app-config

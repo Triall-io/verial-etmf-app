@@ -152,6 +152,7 @@
                 "SHARED_BY": "Shared by",
                 "DELETED_ON": "Deleted",
                 "DELETED_BY": "Deleted by",
+                "VERSION": "Last version",
                 "BC_REGISTRATION_STATE": "Registration state",
                 "BC_REGISTRATION_TIME": "Registration time",
                 "BC_LAST_VERIFICATION_TIME": "Last verification time"
@@ -251,6 +252,8 @@
             }
         },
         "CONTENT_METADATA": {
+            "PROPERTIES_GROUP_TITLE": "Properties",
+            "BLOCKCHAIN_GROUP_TITLE": "Blockchain info",
             "EXIF_GROUP_TITLE": "Image EXIF"
         },
         "INFO_DRAWER": {
