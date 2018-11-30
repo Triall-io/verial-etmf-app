@@ -94,7 +94,10 @@
                     "title": "APP.CONTENT_METADATA.PROPERTIES_GROUP_TITLE",
                     "items": [
                         {
-                            "properties": "basicProperties$"
+                            "aspect": "cm:versionable",
+                            "properties": [
+                                "cm:versionLabel"
+                            ]
                         }
                     ]
                 },
