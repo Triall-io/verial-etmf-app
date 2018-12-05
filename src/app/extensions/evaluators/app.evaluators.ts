@@ -81,6 +81,28 @@ export function canShareFile(
   return false;
 }
 
+export function isShared(
+  context: RuleContext,
+  ...args: RuleParameter[]
+): boolean {
+  if (isSharedFiles(context, ...args) && !context.selection.isEmpty) {
+    return true;
+  }
+
+  if (
+    (isNotTrashcan(context, ...args),
+    !context.selection.isEmpty && context.selection.file)
+  ) {
+    return !!(
+      context.selection.file.entry &&
+      context.selection.file.entry.properties &&
+      context.selection.file.entry.properties['qshare:sharedId']
+    );
+  }
+
+  return false;
+}
+
 export function canDeleteSelection(
   context: RuleContext,
   ...args: RuleParameter[]
@@ -182,6 +204,35 @@ export function hasLibrarySelected(
 ): boolean {
   const library = context.selection.library;
   return library ? true : false;
+}
+
+export function isPrivateLibrary(
+  context: RuleContext,
+  ...args: RuleParameter[]
+): boolean {
+  const library = context.selection.library;
+  return library
+    ? !!(
+        library.entry &&
+        library.entry.visibility &&
+        library.entry.visibility === 'PRIVATE'
+      )
+    : false;
+}
+
+export function hasLibraryRole(
+  context: RuleContext,
+  ...args: RuleParameter[]
+): boolean {
+  const library = context.selection.library;
+  return library ? !!(library.entry && library.entry.role) : false;
+}
+
+export function hasNoLibraryRole(
+  context: RuleContext,
+  ...args: RuleParameter[]
+): boolean {
+  return !hasLibraryRole(context, ...args);
 }
 
 export function hasFileSelected(

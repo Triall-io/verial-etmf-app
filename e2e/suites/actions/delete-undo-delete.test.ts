@@ -24,8 +24,7 @@
  */
 
 import { browser } from 'protractor';
-import { LoginPage, LogoutPage, BrowsingPage } from '../../pages/pages';
-import { SIDEBAR_LABELS } from '../../configs';
+import { LoginPage, BrowsingPage } from '../../pages/pages';
 import { RepoClient } from '../../utilities/repo-client/repo-client';
 import { Utils } from '../../utilities/utils';
 
@@ -38,7 +37,6 @@ describe('Delete and undo delete', () => {
   };
 
   const loginPage = new LoginPage();
-  const logoutPage = new LogoutPage();
   const page = new BrowsingPage();
   const { dataTable, toolbar } = page;
 
@@ -48,7 +46,7 @@ describe('Delete and undo delete', () => {
   });
 
   afterAll(async (done) => {
-    await apis.admin.trashcan.emptyTrash();
+    await apis.user.trashcan.emptyTrash();
     done();
   });
 
@@ -80,8 +78,7 @@ describe('Delete and undo delete', () => {
     });
 
     beforeEach(async (done) => {
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.PERSONAL_FILES);
-      await dataTable.waitForHeader();
+      await page.clickPersonalFilesAndWait();
       done();
     });
 
@@ -93,7 +90,6 @@ describe('Delete and undo delete', () => {
     afterAll(async (done) => {
       await apis.user.nodes.unlockFile(file4Id);
       await apis.user.nodes.unlockFile(fileLocked1Id);
-      await logoutPage.load();
       await apis.user.nodes.deleteNodesById([file1Id, file2Id, folder1Id, folder2Id, fileLocked1Id]);
       await apis.user.search.waitForApi(username, {expect: 0});
       done();
@@ -110,7 +106,7 @@ describe('Delete and undo delete', () => {
       expect(await dataTable.getRowByName(file1).isPresent()).toBe(false, 'Item was not removed from list');
       items--;
       expect(await page.pagination.range.getText()).toContain(`1-${items} of ${items}`);
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(file1).isPresent()).toBe(true, 'Item is not in trash');
 
       await apis.user.trashcan.restore(file1Id);
@@ -128,7 +124,7 @@ describe('Delete and undo delete', () => {
       expect(await dataTable.getRowByName(file2).isPresent()).toBe(false, `${file2} was not removed from list`);
       items = items - 2;
       expect(await page.pagination.range.getText()).toContain(`1-${items} of ${items}`);
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(file1).isPresent()).toBe(true, `${file1} is not in trash`);
       expect(await dataTable.getRowByName(file2).isPresent()).toBe(true, `${file2} is not in trash`);
 
@@ -145,7 +141,7 @@ describe('Delete and undo delete', () => {
       expect(await dataTable.getRowByName(folder1).isPresent()).toBe(false, 'Item was not removed from list');
       items--;
       expect(await page.pagination.range.getText()).toContain(`1-${items} of ${items}`);
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(folder1).isPresent()).toBe(true, 'Item is not in trash');
       expect(await dataTable.getRowByName(file3).isPresent()).toBe(false, 'Item is in trash');
 
@@ -159,7 +155,7 @@ describe('Delete and undo delete', () => {
       const message = await page.getSnackBarMessage();
       expect(message).toContain(`${folder2} couldn't be deleted`);
       expect(await dataTable.getRowByName(folder2).isPresent()).toBe(true, 'Item was removed from list');
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(folder2).isPresent()).toBe(false, 'Item is in trash');
       expect(await dataTable.getRowByName(file4).isPresent()).toBe(false, 'Item is in trash');
     });
@@ -258,8 +254,7 @@ describe('Delete and undo delete', () => {
     });
 
     beforeEach(async (done) => {
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.SHARED_FILES);
-      await dataTable.waitForHeader();
+      await page.clickSharedFilesAndWait();
       done();
     });
 
@@ -269,7 +264,6 @@ describe('Delete and undo delete', () => {
     });
 
     afterAll(async (done) => {
-      await logoutPage.load();
       await apis.user.nodes.deleteNodesById([sharedFile1Id, sharedFile2Id, sharedFile3Id, sharedFile4Id]);
       await apis.user.search.waitForApi(username, {expect: 0});
       done();
@@ -282,7 +276,7 @@ describe('Delete and undo delete', () => {
       const message = await page.getSnackBarMessage();
       expect(message).toContain(`${sharedFile1} deleted`);
       expect(await dataTable.getRowByName(sharedFile1).isPresent()).toBe(false, 'Item was not removed from list');
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(sharedFile1).isPresent()).toBe(true, 'Item is not in trash');
 
       await apis.user.trashcan.restore(sharedFile1Id);
@@ -298,7 +292,7 @@ describe('Delete and undo delete', () => {
       expect(message).toContain(`Deleted 2 items`);
       expect(await dataTable.getRowByName(sharedFile2).isPresent()).toBe(false, `${sharedFile2} was not removed from list`);
       expect(await dataTable.getRowByName(sharedFile3).isPresent()).toBe(false, `${sharedFile3} was not removed from list`);
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(sharedFile2).isPresent()).toBe(true, `${sharedFile2} is not in trash`);
       expect(await dataTable.getRowByName(sharedFile3).isPresent()).toBe(true, `${sharedFile3} is not in trash`);
 
@@ -323,7 +317,7 @@ describe('Delete and undo delete', () => {
       await toolbar.openMoreMenu();
       await toolbar.menu.clickMenuItem('Delete');
       await page.clickSnackBarAction();
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(sharedFile2).isPresent()).toBe(false, 'Item was not restored');
     });
 
@@ -332,7 +326,7 @@ describe('Delete and undo delete', () => {
       await toolbar.openMoreMenu();
       await toolbar.menu.clickMenuItem('Delete');
       await page.clickSnackBarAction();
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(sharedFile3).isPresent()).toBe(false, `${sharedFile3} was not restored`);
       expect(await dataTable.getRowByName(sharedFile4).isPresent()).toBe(false, `${sharedFile4} was not restored`);
     });
@@ -368,8 +362,7 @@ describe('Delete and undo delete', () => {
     });
 
     beforeEach(async (done) => {
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.FAVORITES);
-      await dataTable.waitForHeader();
+      await page.clickFavoritesAndWait();
       done();
     });
 
@@ -381,7 +374,6 @@ describe('Delete and undo delete', () => {
     afterAll(async (done) => {
       await apis.user.nodes.unlockFile(favoriteFile4Id);
       await apis.user.nodes.unlockFile(favoriteFileLocked1Id);
-      await logoutPage.load();
       await apis.user.nodes.deleteNodesById([
         favoriteFile1Id, favoriteFile2Id, favoriteFolder1Id, favoriteFolder2Id, favoriteFileLocked1Id
       ]);
@@ -400,7 +392,7 @@ describe('Delete and undo delete', () => {
       expect(await dataTable.getRowByName(favoriteFile1).isPresent()).toBe(false, 'Item was not removed from list');
       items--;
       expect(await page.pagination.range.getText()).toContain(`1-${items} of ${items}`);
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(favoriteFile1).isPresent()).toBe(true, 'Item is not in trash');
 
       await apis.user.trashcan.restore(favoriteFile1Id);
@@ -418,7 +410,7 @@ describe('Delete and undo delete', () => {
       expect(await dataTable.getRowByName(favoriteFile2).isPresent()).toBe(false, `${favoriteFile2} was not removed from list`);
       items = items - 2;
       expect(await page.pagination.range.getText()).toContain(`1-${items} of ${items}`);
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(favoriteFile1).isPresent()).toBe(true, `${favoriteFile1} is not in trash`);
       expect(await dataTable.getRowByName(favoriteFile2).isPresent()).toBe(true, `${favoriteFile2} is not in trash`);
 
@@ -434,7 +426,7 @@ describe('Delete and undo delete', () => {
       expect(await dataTable.getRowByName(favoriteFolder1).isPresent()).toBe(false, 'Item was not removed from list');
       items--;
       expect(await page.pagination.range.getText()).toContain(`1-${items} of ${items}`);
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(favoriteFolder1).isPresent()).toBe(true, 'Item is not in trash');
       expect(await dataTable.getRowByName(favoriteFile3).isPresent()).toBe(false, 'Item is in trash');
 
@@ -448,7 +440,7 @@ describe('Delete and undo delete', () => {
       const message = await page.getSnackBarMessage();
       expect(message).toContain(`${favoriteFolder2} couldn't be deleted`);
       expect(await dataTable.getRowByName(favoriteFolder2).isPresent()).toBe(true, 'Item was removed from list');
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(favoriteFolder2).isPresent()).toBe(false, 'Item is in trash');
       expect(await dataTable.getRowByName(favoriteFile4).isPresent()).toBe(false, 'Item is in trash');
     });
@@ -542,7 +534,7 @@ describe('Delete and undo delete', () => {
 
       await loginPage.loginWith(username);
 
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.RECENT_FILES);
+      await page.clickRecentFiles();
       const empty = await dataTable.isEmptyList();
       if (empty) {
         await browser.sleep(6000);
@@ -553,8 +545,7 @@ describe('Delete and undo delete', () => {
     });
 
     beforeEach(async (done) => {
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.RECENT_FILES);
-      await dataTable.waitForHeader();
+      await page.clickRecentFilesAndWait();
       done();
     });
 
@@ -564,7 +555,6 @@ describe('Delete and undo delete', () => {
     });
 
     afterAll(async (done) => {
-      await logoutPage.load();
       await apis.user.nodes.deleteNodesById([recentFile1Id, recentFile2Id, recentFile3Id, recentFile4Id]);
       done();
     });
@@ -576,7 +566,7 @@ describe('Delete and undo delete', () => {
       const message = await page.getSnackBarMessage();
       expect(message).toContain(`${recentFile1} deleted`);
       expect(await dataTable.getRowByName(recentFile1).isPresent()).toBe(false, 'Item was not removed from list');
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(recentFile1).isPresent()).toBe(true, 'Item is not in trash');
 
       await apis.user.trashcan.restore(recentFile1Id);
@@ -591,7 +581,7 @@ describe('Delete and undo delete', () => {
       expect(message).toContain(`Deleted 2 items`);
       expect(await dataTable.getRowByName(recentFile2).isPresent()).toBe(false, `${recentFile2} was not removed from list`);
       expect(await dataTable.getRowByName(recentFile3).isPresent()).toBe(false, `${recentFile3} was not removed from list`);
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(recentFile2).isPresent()).toBe(true, `${recentFile2} is not in trash`);
       expect(await dataTable.getRowByName(recentFile3).isPresent()).toBe(true, `${recentFile3} is not in trash`);
 
@@ -620,7 +610,7 @@ describe('Delete and undo delete', () => {
       await toolbar.openMoreMenu();
       await toolbar.menu.clickMenuItem('Delete');
       await page.clickSnackBarAction();
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(recentFile2).isPresent()).toBe(false, 'Item is in Trash');
     });
 
@@ -633,7 +623,7 @@ describe('Delete and undo delete', () => {
       await toolbar.openMoreMenu();
       await toolbar.menu.clickMenuItem('Delete');
       await page.clickSnackBarAction();
-      await page.sidenav.navigateToLinkByLabel(SIDEBAR_LABELS.TRASH);
+      await page.clickTrash();
       expect(await dataTable.getRowByName(recentFile3).isPresent()).toBe(false, `${recentFile3} is in Trash`);
       expect(await dataTable.getRowByName(recentFile4).isPresent()).toBe(false, `${recentFile4} is in Trash`);
     });

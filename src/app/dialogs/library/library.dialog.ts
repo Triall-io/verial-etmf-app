@@ -15,28 +15,45 @@
  * limitations under the License.
  */
 
-import { Observable } from 'rxjs';
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Observable, Subject, from } from 'rxjs';
+import {
+  Component,
+  OnInit,
+  Output,
+  EventEmitter,
+  OnDestroy,
+  ViewEncapsulation
+} from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormControl,
+  AbstractControl
+} from '@angular/forms';
 import { MatDialogRef } from '@angular/material';
-import { SiteBody, SiteEntry } from 'alfresco-js-api';
-import { ContentApiService } from '../../services/content-api.service';
-import { SiteIdValidator, forbidSpecialCharacters } from './form.validators';
-import { debounceTime } from 'rxjs/operators';
+import { SiteBody, SiteEntry, SitePaging } from 'alfresco-js-api';
+import { AlfrescoApiService } from '@alfresco/adf-core';
+import { debounceTime, mergeMap, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-library-dialog',
   styleUrls: ['./library.dialog.scss'],
-  templateUrl: './library.dialog.html'
+  templateUrl: './library.dialog.html',
+  encapsulation: ViewEncapsulation.None,
+  host: { class: 'app-library-dialog' }
 })
-export class LibraryDialogComponent implements OnInit {
+export class LibraryDialogComponent implements OnInit, OnDestroy {
   @Output()
   error: EventEmitter<any> = new EventEmitter<any>();
 
   @Output()
   success: EventEmitter<any> = new EventEmitter<any>();
 
+  onDestroy$: Subject<boolean> = new Subject<boolean>();
+
   createTitle = 'LIBRARY.DIALOG.CREATE_TITLE';
+  libraryTitleExists = false;
   form: FormGroup;
   visibilityOption: any;
   visibilityOptions = [
@@ -50,9 +67,9 @@ export class LibraryDialogComponent implements OnInit {
   ];
 
   constructor(
+    private alfrescoApiService: AlfrescoApiService,
     private formBuilder: FormBuilder,
-    private dialog: MatDialogRef<LibraryDialogComponent>,
-    private contentApi: ContentApiService
+    private dialog: MatDialogRef<LibraryDialogComponent>
   ) {}
 
   ngOnInit() {
@@ -60,7 +77,7 @@ export class LibraryDialogComponent implements OnInit {
       id: [
         Validators.required,
         Validators.maxLength(72),
-        forbidSpecialCharacters
+        this.forbidSpecialCharacters
       ],
       title: [Validators.required, Validators.maxLength(256)],
       description: [Validators.maxLength(512)]
@@ -68,24 +85,33 @@ export class LibraryDialogComponent implements OnInit {
 
     this.form = this.formBuilder.group({
       title: ['', validators.title],
-      id: ['', validators.id, SiteIdValidator.createValidator(this.contentApi)],
+      id: ['', validators.id, this.createSiteIdValidator()],
       description: ['', validators.description]
     });
 
     this.visibilityOption = this.visibilityOptions[0].value;
 
     this.form.controls['title'].valueChanges
-      .pipe(debounceTime(300))
-      .subscribe((titleValue: string) => {
-        if (!titleValue.trim().length) {
+      .pipe(
+        debounceTime(300),
+        mergeMap(title => this.checkLibraryNameExists(title), title => title),
+        takeUntil(this.onDestroy$)
+      )
+      .subscribe((title: string) => {
+        if (!title.trim().length) {
           return;
         }
 
         if (!this.form.controls['id'].dirty) {
-          this.form.patchValue({ id: this.sanitize(titleValue.trim()) });
+          this.form.patchValue({ id: this.sanitize(title.trim()) });
           this.form.controls['id'].markAsTouched();
         }
       });
+  }
+
+  ngOnDestroy() {
+    this.onDestroy$.next(true);
+    this.onDestroy$.complete();
   }
 
   get title(): string {
@@ -131,7 +157,7 @@ export class LibraryDialogComponent implements OnInit {
   }
 
   private create(): Observable<SiteEntry> {
-    const { contentApi, title, id, description, visibility } = this;
+    const { title, id, description, visibility } = this;
     const siteBody = <SiteBody>{
       id,
       title,
@@ -139,7 +165,7 @@ export class LibraryDialogComponent implements OnInit {
       visibility
     };
 
-    return contentApi.createSite(siteBody);
+    return from(this.alfrescoApiService.sitesApi.createSite(siteBody));
   }
 
   private sanitize(input: string) {
@@ -158,5 +184,57 @@ export class LibraryDialogComponent implements OnInit {
     }
 
     return error;
+  }
+
+  private async checkLibraryNameExists(libraryTitle: string) {
+    const { entries } = (await this.findLibraryByTitle(libraryTitle)).list;
+
+    if (entries.length) {
+      this.libraryTitleExists = entries[0].entry.title === libraryTitle;
+    } else {
+      this.libraryTitleExists = false;
+    }
+  }
+
+  private findLibraryByTitle(libraryTitle: string): Promise<SitePaging> {
+    return this.alfrescoApiService
+      .getInstance()
+      .core.queriesApi.findSites(libraryTitle, {
+        maxItems: 1,
+        fields: ['title']
+      })
+      .catch(() => ({ list: { entries: [] } }));
+  }
+
+  private forbidSpecialCharacters({ value }: FormControl) {
+    const validCharacters: RegExp = /[^A-Za-z0-9-]/;
+    const isValid: boolean = !validCharacters.test(value);
+
+    return isValid
+      ? null
+      : {
+          message: 'LIBRARY.ERRORS.ILLEGAL_CHARACTERS'
+        };
+  }
+
+  private createSiteIdValidator() {
+    let timer;
+
+    return (control: AbstractControl) => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+
+      return new Promise(resolve => {
+        timer = setTimeout(() => {
+          return from(
+            this.alfrescoApiService.sitesApi.getSite(control.value)
+          ).subscribe(
+            () => resolve({ message: 'LIBRARY.ERRORS.EXISTENT_SITE' }),
+            () => resolve(null)
+          );
+        }, 300);
+      });
+    };
   }
 }

@@ -26,7 +26,10 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule, RouteReuseStrategy } from '@angular/router';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {
+  BrowserAnimationsModule,
+  NoopAnimationsModule
+} from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   TRANSLATION_PROVIDER,
@@ -34,13 +37,17 @@ import {
   AppConfigService,
   DebugAppConfigService
 } from '@alfresco/adf-core';
-import { ContentModule } from '@alfresco/adf-content-services';
+import {
+  ContentModule,
+  CustomResourcesService
+} from '@alfresco/adf-content-services';
 
 import { AppComponent } from './app.component';
 import { APP_ROUTES } from './app.routes';
 
 import { FilesComponent } from './components/files/files.component';
 import { LibrariesComponent } from './components/libraries/libraries.component';
+import { FavoriteLibrariesComponent } from './components/favorite-libraries/favorite-libraries.component';
 import { NodeVersionsDialogComponent } from './dialogs/node-versions/node-versions.dialog';
 import { LibraryDialogComponent } from './dialogs/library/library.dialog';
 
@@ -67,11 +74,17 @@ import { AppSearchInputModule } from './components/search/search-input.module';
 import { AppSearchResultsModule } from './components/search/search-results.module';
 import { AppLoginModule } from './components/login/login.module';
 import { AppHeaderModule } from './components/header/header.module';
+import { environment } from '../environments/environment';
+import { LibraryMembershipDirective } from './directives/library-membership.directive';
+import { ToggleJoinLibraryComponent } from './components/toolbar/toggle-join-library/toggle-join-library.component';
+import { LibraryFavoriteDirective } from './directives/library-favorite.directive';
+import { ToggleFavoriteLibraryComponent } from './components/toolbar/toggle-favorite-library/toggle-favorite-library.component';
+import { AppDataService } from './services/data.service';
 
 @NgModule({
   imports: [
     BrowserModule,
-    BrowserAnimationsModule,
+    environment.e2e ? NoopAnimationsModule : BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forRoot(APP_ROUTES, {
@@ -106,12 +119,18 @@ import { AppHeaderModule } from './components/header/header.module';
     AppComponent,
     FilesComponent,
     LibrariesComponent,
+    FavoriteLibrariesComponent,
     NodeVersionsDialogComponent,
-    LibraryDialogComponent
+    LibraryDialogComponent,
+    LibraryMembershipDirective,
+    ToggleJoinLibraryComponent,
+    LibraryFavoriteDirective,
+    ToggleFavoriteLibraryComponent
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: AppRouteReuseStrategy },
     { provide: AppConfigService, useClass: DebugAppConfigService },
+    { provide: CustomResourcesService, useClass: AppDataService },
     {
       provide: TRANSLATION_PROVIDER,
       multi: true,
@@ -122,7 +141,12 @@ import { AppHeaderModule } from './components/header/header.module';
     },
     BlockchainProofService
   ],
-  entryComponents: [LibraryDialogComponent, NodeVersionsDialogComponent],
+  entryComponents: [
+    LibraryDialogComponent,
+    NodeVersionsDialogComponent,
+    ToggleJoinLibraryComponent,
+    ToggleFavoriteLibraryComponent
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
