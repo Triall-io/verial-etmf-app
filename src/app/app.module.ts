@@ -48,10 +48,7 @@ import { AppStoreModule } from './store/app-store.module';
 import { MaterialModule } from './material.module';
 import { AppExtensionsModule } from './extensions.module';
 import { CoreExtensionsModule } from './extensions/core.extensions.module';
-import { SearchResultsRowComponent } from './components/search/search-results-row/search-results-row.component';
-import { NodePermissionsDialogComponent } from './dialogs/node-permissions/node-permissions.dialog';
 import { BlockchainProofService } from './services/blockchain-proof/blockchain-proof.service';
-import { PermissionsManagerComponent } from './components/permission-manager/permissions-manager.component';
 import { AppRouteReuseStrategy } from './app.routes.strategy';
 import { AppInfoDrawerModule } from './components/info-drawer/info.drawer.module';
 import { DirectivesModule } from './directives/directives.module';
@@ -96,15 +93,14 @@ import { AppHeaderModule } from './components/header/header.module';
     ContextMenuModule,
     AppInfoDrawerModule,
     AppToolbarModule,
-    HttpClientModule
-    AppToolbarModule,
     AppSharedModule,
     AppSidenavModule,
     AppCreateMenuModule,
     AppPermissionsModule,
     AppSearchInputModule,
     AppSearchResultsModule,
-    AppHeaderModule
+    AppHeaderModule,
+    HttpClientModule
   ],
   declarations: [
     AppComponent,
@@ -124,12 +120,6 @@ import { AppHeaderModule } from './components/header/header.module';
         source: 'assets'
       }
     },
-    ContentManagementService,
-    NodeActionsService,
-    NodePermissionService,
-    ProfileResolver,
-    ExperimentalGuard,
-    ContentApiService,
     BlockchainProofService
   ],
   entryComponents: [LibraryDialogComponent, NodeVersionsDialogComponent],

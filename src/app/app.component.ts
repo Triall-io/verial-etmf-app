@@ -53,10 +53,6 @@ import { ContentApiService } from './services/content-api.service';
 import { DiscoveryEntry } from 'alfresco-js-api';
 import { AppService } from './services/app.service';
 import { Subject } from 'rxjs';
-import { filter } from 'rxjs/operators';
-import { MatIconRegistry } from '@angular/material/icon';
-import { DomSanitizer } from '@angular/platform-browser';
-
 
 @Component({
   selector: 'app-root',
@@ -77,11 +73,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private uploadService: UploadService,
     private extensions: AppExtensionService,
     private contentApi: ContentApiService,
-    private appService: AppServiceprivate matIconRegistry: MatIconRegistry,
-    private domSanitizer: DomSanitizer) {
-      const iconUrl = this.domSanitizer.bypassSecurityTrustResourceUrl('assets/images/bc.svg');
-      this.matIconRegistry.addSvgIcon('blockchain', iconUrl);
-}
+    private appService: AppService
+  ) {}
 
   ngOnInit() {
     this.alfrescoApiService.getInstance().on('error', error => {
@@ -89,7 +82,7 @@ export class AppComponent implements OnInit, OnDestroy {
         if (!this.authenticationService.isLoggedIn()) {
           this.store.dispatch(new CloseModalDialogsAction());
           this.router.navigate(['/login'], {
-            queryParams: { returnUrl: 'libraries' }
+            queryParams: {returnUrl: 'libraries'}
           });
         }
       }
@@ -97,7 +90,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.loadAppSettings();
 
-    const { router, pageTitle, route } = this;
+    const {router, pageTitle, route} = this;
 
     router.events
       .pipe(filter(event => event instanceof NavigationEnd))

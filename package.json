@@ -31,7 +31,8 @@
   "private": true,
   "dependencies": {
     "@alfresco/adf-content-services": "file:../../../home/sander/DEV/forked/alfresco-ng2-components/lib/dist/content-services",
-    "@alfresco/adf-core": "file:../../../home/sander/DEV/forked/alfresco-ng2-components/lib/dist/adf-core",    "@alfresco/adf-extensions": "2.6.0",
+    "@alfresco/adf-core": "file:../../../home/sander/DEV/forked/alfresco-ng2-components/lib/dist/core",
+    "@alfresco/adf-extensions": "2.6.1",
     "@angular/animations": "6.1.10",
     "@angular/cdk": "^6.4.7",
     "@angular/common": "6.1.10",
@@ -61,8 +62,8 @@
     "moment": "^2.22.2",
     "moment-es6": "1.0.0",
     "pdfjs-dist": "^2.0.489",
-    "rxjs": "^6.3.3",
     "rxjs-compat": "^6.3.3",
+    "rxjs": "^6.3.3",
     "showdown": "^1.8.6",
     "sprintf-js": "^1.1.1",
     "zone.js": "0.8.26"

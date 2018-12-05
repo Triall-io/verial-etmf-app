@@ -62,7 +62,7 @@ import {
   PRINT_FILE,
   PrintFileAction,
   FULLSCREEN_VIEWER,
-  FullscreenViewerAction
+  FullscreenViewerAction,
   BlockchainSignAction,
   BLOCKCHAIN_REGISTER,
   BlockchainVerifyAction,

@@ -134,7 +134,6 @@
             "assets": [
               "src/assets",
               "src/favicon-96x96.png",
-              "src/assets/bc.svg",
               "src/app.config.json",
               "src/versions.json",
               {
