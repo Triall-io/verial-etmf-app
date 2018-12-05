@@ -1,9 +1,9 @@
 @mixin adf-layout-header-theme($theme) {
-    $background: map-get($theme, background);
+  $background: map-get($theme, background);
 
-    .adf-layout-header {
-        .mat-toolbar-single-row {
-            color: #ffffff !important;
+  .adf-layout-header {
+    .mat-toolbar-single-row {
+      color: #ffffff !important;
 
             .adf-app-logo {
                 margin-left: 6px;
@@ -20,19 +20,19 @@
             .mat-icon-button {
                 margin-right: 0;
 
-                .mat-icon {
-                    font-size: 29px;
-                    padding: 0 5px 0 0;
-                }
-            }
+        .mat-icon {
+          font-size: 29px;
+          padding: 0 5px 0 0;
         }
-
-        .adf-toolbar-divider {
-            margin: 0 5px;
-
-            & > div {
-                background-color: mat-color($background, card, 1);
-            }
-        }
+      }
     }
+
+    .adf-toolbar-divider {
+      margin: 0 5px;
+
+      & > div {
+        background-color: mat-color($background, card, 1);
+      }
+    }
+  }
 }

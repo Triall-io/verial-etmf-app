@@ -29,40 +29,44 @@ import {map, take} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {AppStore} from '../states/app.state';
 import {
-    PurgeDeletedNodesAction,
-    PURGE_DELETED_NODES,
-    DeleteNodesAction,
-    DELETE_NODES,
-    UndoDeleteNodesAction,
-    UNDO_DELETE_NODES,
-    CreateFolderAction,
-    CREATE_FOLDER,
-    EditFolderAction,
-    EDIT_FOLDER,
-    RestoreDeletedNodesAction,
-    RESTORE_DELETED_NODES,
-    ShareNodeAction,
-    SHARE_NODE
+  PurgeDeletedNodesAction,
+  PURGE_DELETED_NODES,
+  DeleteNodesAction,
+  DELETE_NODES,
+  UndoDeleteNodesAction,
+  UNDO_DELETE_NODES,
+  CreateFolderAction,
+  CREATE_FOLDER,
+  EditFolderAction,
+  EDIT_FOLDER,
+  RestoreDeletedNodesAction,
+  RESTORE_DELETED_NODES,
+  ShareNodeAction,
+  SHARE_NODE
 } from '../actions';
 import {ContentManagementService} from '../../services/content-management.service';
 import {BlockchainProofService} from '../../services/blockchain-proof/blockchain-proof.service';
 import {NotificationService} from '@alfresco/adf-core';
 import {currentFolder, appSelection} from '../selectors/app.selectors';
 import {
-    UnshareNodesAction,
-    UNSHARE_NODES,
-    CopyNodesAction,
-    COPY_NODES,
-    MoveNodesAction,
-    MOVE_NODES,
-    ManagePermissionsAction,
-    MANAGE_PERMISSIONS,
-    ManageVersionsAction,
-    MANAGE_VERSIONS,
-    BlockchainSignAction,
-    BLOCKCHAIN_REGISTER,
-    BlockchainVerifyAction,
-    BLOCKCHAIN_VERIFY
+  UnshareNodesAction,
+  UNSHARE_NODES,
+  CopyNodesAction,
+  COPY_NODES,
+  MoveNodesAction,
+  MOVE_NODES,
+  ManagePermissionsAction,
+  MANAGE_PERMISSIONS,
+  ManageVersionsAction,
+  MANAGE_VERSIONS,
+  PRINT_FILE,
+  PrintFileAction,
+  FULLSCREEN_VIEWER,
+  FullscreenViewerAction
+  BlockchainSignAction,
+  BLOCKCHAIN_REGISTER,
+  BlockchainVerifyAction,
+  BLOCKCHAIN_VERIFY
 } from '../actions/node.actions';
 import {Observable} from 'rxjs';
 import {MatSnackBarConfig} from '@angular/material';
@@ -70,9 +74,9 @@ import {MatSnackBarConfig} from '@angular/material';
 @Injectable()
 export class NodeEffects {
 
-    constructor(
-        private store: Store<AppStore>,
-        private actions$: Actions,
+  constructor(
+    private store: Store<AppStore>,
+    private actions$: Actions,
         private contentService: ContentManagementService,
         private blockchainProofService: BlockchainProofService,
         private notification: NotificationService,
@@ -135,14 +139,12 @@ export class NodeEffects {
                     .pipe(take(1))
                     .subscribe(selection => {
                         if (selection && selection.count > 0) {
-                            this.contentService.purgeDeletedNodes(
-                                selection.nodes
-                            );
-                        }
-                    });
+              this.contentService.purgeDeletedNodes(selection.nodes);
             }
-        })
-    );
+          });
+      }
+    })
+  );
 
     @Effect({dispatch: false})
     restoreDeletedNodes$ = this.actions$.pipe(
@@ -156,14 +158,12 @@ export class NodeEffects {
                     .pipe(take(1))
                     .subscribe(selection => {
                         if (selection && selection.count > 0) {
-                            this.contentService.restoreDeletedNodes(
-                                selection.nodes
-                            );
-                        }
-                    });
+              this.contentService.restoreDeletedNodes(selection.nodes);
             }
-        })
-    );
+          });
+      }
+    })
+  );
 
     @Effect({dispatch: false})
     deleteNodes$ = this.actions$.pipe(
@@ -271,25 +271,23 @@ export class NodeEffects {
     );
 
     @Effect({dispatch: false})
-    managePermissions = this.actions$.pipe(
-        ofType<ManagePermissionsAction>(MANAGE_PERMISSIONS),
-        map(action => {
-            if (action && action.payload) {
-                this.contentService.managePermissions(action.payload);
-            } else {
-                this.store
-                    .select(appSelection)
-                    .pipe(take(1))
-                    .subscribe(selection => {
-                        if (selection && !selection.isEmpty) {
-                            this.contentService.managePermissions(
-                                selection.first
-                            );
-                        }
-                    });
+  managePermissions$ = this.actions$.pipe(
+    ofType<ManagePermissionsAction>(MANAGE_PERMISSIONS),
+    map(action => {
+      if (action && action.payload) {
+        this.contentService.managePermissions(action.payload);
+      } else {
+        this.store
+          .select(appSelection)
+          .pipe(take(1))
+          .subscribe(selection => {
+            if (selection && !selection.isEmpty) {
+              this.contentService.managePermissions(selection.first);
             }
-        })
-    );
+          });
+      }
+    })
+  );
 
     @Effect({dispatch: false})
     manageVersions$ = this.actions$.pipe(
@@ -303,14 +301,39 @@ export class NodeEffects {
                     .pipe(take(1))
                     .subscribe(selection => {
                         if (selection && selection.file) {
-                            this.contentService.manageVersions(
-                                selection.file
-                            );
-                        }
-                    });
+              this.contentService.manageVersions(selection.file);
             }
-        })
-    );
+          });
+      }
+    })
+  );
+
+  @Effect({ dispatch: false })
+  printFile$ = this.actions$.pipe(
+    ofType<PrintFileAction>(PRINT_FILE),
+    map(action => {
+      if (action && action.payload) {
+        this.contentService.printFile(action.payload);
+      } else {
+        this.store
+          .select(appSelection)
+          .pipe(take(1))
+          .subscribe(selection => {
+            if (selection && selection.file) {
+              this.contentService.printFile(selection.file);
+            }
+          });
+      }
+    })
+  );
+
+  @Effect({ dispatch: false })
+  fullscreenViewer$ = this.actions$.pipe(
+    ofType<FullscreenViewerAction>(FULLSCREEN_VIEWER),
+    map(() => {
+      this.contentService.fullscreenViewer();
+    })
+  );
 
     @Effect({dispatch: false})
     blockchainSignNodes$ = this.actions$.pipe(
