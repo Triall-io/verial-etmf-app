@@ -23,41 +23,54 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DomSanitizer } from '@angular/platform-browser';
-import { Component, Output, EventEmitter, ViewEncapsulation, SecurityContext } from '@angular/core';
-import { AppConfigService } from '@alfresco/adf-core';
+import {
+  Component,
+  ViewEncapsulation,
+  Output,
+  EventEmitter,
+  OnInit
+} from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import {
+  selectHeaderColor,
+  selectAppName,
+  selectLogoPath
+} from '../../store/selectors/app.selectors';
+import { ContentActionRef } from '@alfresco/adf-extensions';
+import { AppExtensionService } from '../../extensions/extension.service';
+import { AppStore } from '../../store/states';
 
 @Component({
-    selector: 'app-header',
-    templateUrl: './header.component.html',
-    styleUrls: [ './header.component.scss' ],
-    encapsulation: ViewEncapsulation.None
+  selector: 'app-header',
+  templateUrl: 'header.component.html',
+  encapsulation: ViewEncapsulation.None,
+  host: { class: 'app-header' }
 })
-export class HeaderComponent {
-    @Output() menu: EventEmitter<any> = new EventEmitter<any>();
+export class AppHeaderComponent implements OnInit {
+  @Output()
+  toggleClicked = new EventEmitter();
 
-    private defaultPath = '/assets/images/alfresco-logo-white.svg';
-    private defaultBackgroundColor = '#2196F3';
+  appName$: Observable<string>;
+  headerColor$: Observable<string>;
+  logo$: Observable<string>;
 
-    constructor(
-        private appConfig: AppConfigService,
-        private sanitizer: DomSanitizer
-    ) {}
+  actions: Array<ContentActionRef> = [];
 
-    toggleMenu() {
-        this.menu.emit();
-    }
+  constructor(
+    store: Store<AppStore>,
+    private appExtensions: AppExtensionService
+  ) {
+    this.headerColor$ = store.select(selectHeaderColor);
+    this.appName$ = store.select(selectAppName);
+    this.logo$ = store.select(selectLogoPath);
+  }
 
-    get appName(): string {
-        return <string>this.appConfig.get('application.name');
-    }
+  ngOnInit() {
+    this.actions = this.appExtensions.getHeaderActions();
+  }
 
-    get logo() {
-        return this.appConfig.get('application.logo', this.defaultPath);
-    }
-
-    get backgroundColor() {
-        const color = this.appConfig.get('headerColor', this.defaultBackgroundColor);
-        return this.sanitizer.sanitize(SecurityContext.STYLE, color);
-    }
+  trackByActionId(index: number, action: ContentActionRef) {
+    return action.id;
+  }
 }

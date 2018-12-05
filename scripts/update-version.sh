@@ -9,11 +9,12 @@ eval AUTO=false
 
 eval libs=( "core"
     "content-services"
+    "extensions"
     #"process-services"
     #"insights"
 )
 
-cd `dirname $0`/..
+cd ${DIR}/..
 
 prefix="@alfresco/adf-"
 

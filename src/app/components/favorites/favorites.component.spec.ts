@@ -23,306 +23,164 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Observable } from 'rxjs/Rx';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientModule } from '@angular/common/http';
-import { TestBed, async } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 import {
-    NotificationService, TranslationService, TranslationMock,
-    NodesApiService, AlfrescoApiService, ContentService,
-    UserPreferencesService, LogService, AppConfigService,
-    StorageService, CookieService, ThumbnailService,
-    AuthenticationService, TimeAgoPipe, NodeNameTooltipPipe,
-    NodeFavoriteDirective, DataTableComponent
+  AlfrescoApiService,
+  TimeAgoPipe,
+  NodeNameTooltipPipe,
+  NodeFavoriteDirective,
+  DataTableComponent,
+  AppConfigPipe
 } from '@alfresco/adf-core';
-import { DocumentListComponent, CustomResourcesService } from '@alfresco/adf-content-services';
-
-import { TranslateModule } from '@ngx-translate/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatMenuModule, MatSnackBarModule, MatIconModule } from '@angular/material';
-import { DocumentListService } from '@alfresco/adf-content-services';
-import { ContentManagementService } from '../../common/services/content-management.service';
-import { NodeInfoDirective } from '../../common/directives/node-info.directive';
-import { NodePermissionService } from '../../common/services/node-permission.service';
-
+import { DocumentListComponent } from '@alfresco/adf-content-services';
+import { ContentManagementService } from '../../services/content-management.service';
+import { of } from 'rxjs';
 import { FavoritesComponent } from './favorites.component';
+import { AppTestingModule } from '../../testing/app-testing.module';
+import { ContentApiService } from '../../services/content-api.service';
+import { ExperimentalDirective } from '../../directives/experimental.directive';
 
-describe('Favorites Routed Component', () => {
-    let fixture;
-    let component: FavoritesComponent;
-    let nodesApi: NodesApiService;
-    let alfrescoApi: AlfrescoApiService;
-    let alfrescoContentService: ContentService;
-    let contentService: ContentManagementService;
-    let preferenceService: UserPreferencesService;
-    let router: Router;
-    let page;
-    let node;
+describe('FavoritesComponent', () => {
+  let fixture: ComponentFixture<FavoritesComponent>;
+  let component: FavoritesComponent;
+  let alfrescoApi: AlfrescoApiService;
+  let contentService: ContentManagementService;
+  let contentApi: ContentApiService;
+  let router: Router;
+  let page;
+  let node;
 
-    beforeAll(() => {
-        // testing only functional-wise not time-wise
-        Observable.prototype.debounceTime = function () { return this; };
+  beforeEach(() => {
+    page = {
+      list: {
+        entries: [
+          { entry: { id: 1, target: { file: {} } } },
+          { entry: { id: 2, target: { folder: {} } } }
+        ],
+        pagination: { data: 'data' }
+      }
+    };
+
+    node = <any>{
+      id: 'folder-node',
+      isFolder: true,
+      isFile: false,
+      path: {
+        elements: []
+      }
+    };
+  });
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [AppTestingModule],
+      declarations: [
+        DataTableComponent,
+        TimeAgoPipe,
+        NodeNameTooltipPipe,
+        NodeFavoriteDirective,
+        DocumentListComponent,
+        FavoritesComponent,
+        AppConfigPipe,
+        ExperimentalDirective
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     });
 
+    fixture = TestBed.createComponent(FavoritesComponent);
+    component = fixture.componentInstance;
+
+    alfrescoApi = TestBed.get(AlfrescoApiService);
+    alfrescoApi.reset();
+    spyOn(alfrescoApi.favoritesApi, 'getFavorites').and.returnValue(
+      Promise.resolve(page)
+    );
+
+    contentApi = TestBed.get(ContentApiService);
+
+    contentService = TestBed.get(ContentManagementService);
+    router = TestBed.get(Router);
+  });
+
+  describe('Events', () => {
     beforeEach(() => {
-        page = {
-            list: {
-                entries: [
-                    { entry: { id: 1, target: { file: {} } } },
-                    { entry: { id: 2, target: { folder: {} } } }
-                ],
-                pagination: { data: 'data'}
-            }
-        };
-
-        node = <any> {
-            id: 'folder-node',
-            isFolder: true,
-            isFile: false,
-            path: {
-                elements: []
-            }
-        };
+      spyOn(component, 'reload');
+      fixture.detectChanges();
     });
 
-    beforeEach(async(() => {
-        TestBed.configureTestingModule({
-                imports: [
-                    MatMenuModule,
-                    NoopAnimationsModule,
-                    HttpClientModule,
-                    TranslateModule.forRoot(),
-                    RouterTestingModule,
-                    MatSnackBarModule, MatIconModule
-                ],
-                declarations: [
-                    DataTableComponent,
-                    TimeAgoPipe,
-                    NodeNameTooltipPipe,
-                    NodeFavoriteDirective,
-                    NodeInfoDirective,
-                    DocumentListComponent,
-                    FavoritesComponent
-                ],
-                providers: [
-                    { provide: ActivatedRoute, useValue: {
-                        snapshot: { data: { preferencePrefix: 'prefix' } }
-                    } } ,
-                    { provide: TranslationService, useClass: TranslationMock },
-                    AuthenticationService,
-                    UserPreferencesService,
-                    AppConfigService, StorageService, CookieService,
-                    AlfrescoApiService,
-                    CustomResourcesService,
-                    LogService,
-                    NotificationService,
-                    ContentManagementService,
-                    ContentService,
-                    NodesApiService,
-                    NodePermissionService,
-                    DocumentListService,
-                    ThumbnailService
-                ],
-                schemas: [ NO_ERRORS_SCHEMA ]
-        })
-        .compileComponents().then(() => {
-            fixture = TestBed.createComponent(FavoritesComponent);
-            component = fixture.componentInstance;
+    it('should refresh on editing folder event', () => {
+      contentService.folderEdited.next(null);
 
-            nodesApi = TestBed.get(NodesApiService);
-            alfrescoApi = TestBed.get(AlfrescoApiService);
-            alfrescoApi.reset();
-            alfrescoContentService = TestBed.get(ContentService);
-            contentService = TestBed.get(ContentManagementService);
-            preferenceService = TestBed.get(UserPreferencesService);
-            router = TestBed.get(Router);
-        });
-    }));
+      expect(component.reload).toHaveBeenCalled();
+    });
 
+    it('should refresh on move node event', () => {
+      contentService.nodesMoved.next(null);
+
+      expect(component.reload).toHaveBeenCalled();
+    });
+
+    it('should refresh on node deleted event', () => {
+      contentService.nodesDeleted.next(null);
+
+      expect(component.reload).toHaveBeenCalled();
+    });
+
+    it('should refresh on node restore event', () => {
+      contentService.nodesRestored.next(null);
+
+      expect(component.reload).toHaveBeenCalled();
+    });
+  });
+
+  describe('Node navigation', () => {
     beforeEach(() => {
-        spyOn(alfrescoApi.favoritesApi, 'getFavorites').and.returnValue(Promise.resolve(page));
+      spyOn(contentApi, 'getNode').and.returnValue(of({ entry: node }));
+      spyOn(router, 'navigate');
+      fixture.detectChanges();
     });
 
-    describe('Events', () => {
-        beforeEach(() => {
-            spyOn(component, 'refresh');
-            fixture.detectChanges();
-        });
+    it('navigates to `/libraries` if node path has `Sites`', () => {
+      node.path.elements = [{ name: 'Sites' }];
 
-        it('should refresh on editing folder event', () => {
-            alfrescoContentService.folderEdit.next(null);
+      component.navigate(node);
 
-            expect(component.refresh).toHaveBeenCalled();
-        });
-
-        it('should refresh on move node event', () => {
-            contentService.nodeMoved.next(null);
-
-            expect(component.refresh).toHaveBeenCalled();
-        });
-
-        it('should refresh on node deleted event', () => {
-            contentService.nodeDeleted.next(null);
-
-            expect(component.refresh).toHaveBeenCalled();
-        });
-
-        it('should refresh on node restore event', () => {
-            contentService.nodeRestored.next(null);
-
-            expect(component.refresh).toHaveBeenCalled();
-        });
+      expect(router.navigate).toHaveBeenCalledWith([
+        '/libraries',
+        'folder-node'
+      ]);
     });
 
-    describe('Node navigation', () => {
-        beforeEach(() => {
-            spyOn(nodesApi, 'getNode').and.returnValue(Observable.of(node));
-            spyOn(router, 'navigate');
-            fixture.detectChanges();
-        });
+    it('navigates to `/personal-files` if node path has no `Sites`', () => {
+      node.path.elements = [{ name: 'something else' }];
 
-        it('navigates to `/libraries` if node path has `Sites`', () => {
-            node.path.elements = [{ name: 'Sites' }];
+      component.navigate(node);
 
-            component.navigate(node);
-
-            expect(router.navigate).toHaveBeenCalledWith([ '/libraries', 'folder-node' ]);
-        });
-
-        it('navigates to `/personal-files` if node path has no `Sites`', () => {
-            node.path.elements = [{ name: 'something else' }];
-
-            component.navigate(node);
-
-            expect(router.navigate).toHaveBeenCalledWith([ '/personal-files', 'folder-node' ]);
-        });
-
-        it('does not navigate when node is not folder', () => {
-            node.isFolder = false;
-
-            component.navigate(node);
-
-            expect(router.navigate).not.toHaveBeenCalled();
-        });
+      expect(router.navigate).toHaveBeenCalledWith([
+        '/personal-files',
+        'folder-node'
+      ]);
     });
 
-    describe('onNodeDoubleClick', () => {
-        beforeEach(() => {
-            spyOn(nodesApi, 'getNode').and.returnValue(Observable.of(node));
-            fixture.detectChanges();
-        });
+    it('does not navigate when node is not folder', () => {
+      node.isFolder = false;
 
-        it('navigates if node is a folder', () => {
-            node.isFolder = true;
-            spyOn(router, 'navigate');
+      component.navigate(node);
 
-            component.onNodeDoubleClick(node);
-
-            expect(router.navigate).toHaveBeenCalled();
-        });
-
-        it('opens preview if node is a file', () => {
-            node.isFolder = false;
-            node.isFile = true;
-            spyOn(router, 'navigate').and.stub();
-
-            component.onNodeDoubleClick(node);
-
-            expect(router.navigate['calls'].argsFor(0)[0]).toEqual(['./preview', 'folder-node']);
-        });
+      expect(router.navigate).not.toHaveBeenCalled();
     });
+  });
 
-    describe('edit option', () => {
-        it('should return false if a file node is selected', () => {
-            const selection = [
-                {
-                    entry: {
-                        isFolder: false,
-                        isFile: true
-                    }
-                }
-            ];
+  describe('refresh', () => {
+    it('should call document list reload', () => {
+      spyOn(component.documentList, 'reload');
+      fixture.detectChanges();
 
-            const result = component.showEditOption(selection);
-            expect(result).toBe(false);
-        });
+      component.reload();
 
-        it('should return false if multiple nodes are selected', () => {
-            const selection = [
-                {
-                    entry: {
-                        isFolder: true,
-                        isFile: false
-                    }
-                },
-                {
-                    entry: {
-                        isFolder: true,
-                        isFile: false
-                    }
-                }
-            ];
-
-            const result = component.showEditOption(selection);
-            expect(result).toBe(false);
-        });
-
-        it('should return true if selected node is a folder', () => {
-            const selection = [
-                {
-                    entry: {
-                        isFolder: true,
-                        isFile: false
-                    }
-                }
-            ];
-
-            const result = component.showEditOption(selection);
-            expect(result).toBe(true);
-        });
+      expect(component.documentList.reload).toHaveBeenCalled();
     });
-
-    describe('refresh', () => {
-        it('should call document list reload', () => {
-            spyOn(component.documentList, 'reload');
-            fixture.detectChanges();
-
-            component.refresh();
-
-            expect(component.documentList.reload).toHaveBeenCalled();
-        });
-    });
-
-    describe('onSortingChanged', () => {
-        it('should save sorting input', () => {
-            spyOn(preferenceService, 'set');
-
-            const event = <any>{
-                detail: {
-                    key: 'some-name',
-                    direction: 'some-direction'
-                }
-             };
-
-            component.onSortingChanged(event);
-
-            expect(preferenceService.set).toHaveBeenCalledWith('prefix.sorting.key', 'some-name');
-            expect(preferenceService.set).toHaveBeenCalledWith('prefix.sorting.direction', 'some-direction');
-        });
-
-        it('should save default sorting when no input', () => {
-            spyOn(preferenceService, 'set');
-
-            const event = <any>{
-                detail: {}
-             };
-
-            component.onSortingChanged(event);
-
-            expect(preferenceService.set).toHaveBeenCalledWith('prefix.sorting.key', 'modifiedAt');
-            expect(preferenceService.set).toHaveBeenCalledWith('prefix.sorting.direction', 'desc');
-        });
-    });
+  });
 });

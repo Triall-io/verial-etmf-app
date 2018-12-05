@@ -1,32 +1,52 @@
 @mixin sidenav-component-theme($theme) {
-    $primary: map-get($theme, primary);
-    $accent: map-get($theme, accent);
-    $foreground: map-get($theme, foreground);
-    $background: map-get($theme, background);
+  $primary: map-get($theme, primary);
+  $accent: map-get($theme, accent);
+  $foreground: map-get($theme, foreground);
+  $background: map-get($theme, background);
 
-    $border: 1px solid mat-color($foreground, divider, .07);
+  $border: 1px solid mat-color($foreground, divider, 0.07);
 
-    .sidenav {
-        @include angular-material-theme($theme);
+  .sidenav {
+    @include angular-material-theme($theme);
 
-        background-color: mat-color($background, background);
-        border-right: $border;
+    background-color: mat-color($background, background);
 
-        &__section {
-            border-bottom: $border;
-        }
+    .mat-expansion-panel {
+      background-color: unset;
+      color: mat-color($primary, 0.87) !important;
+    }
 
-        .menu__item--label:not(.menu__item--active):hover {
-            color: mat-color($foreground, text);
-        }
+    .mat-expansion-panel {
+      box-shadow: none !important;
+    }
 
-        .menu__item--active {
-            color: mat-color($accent);
-        }
+    .mat-expansion-panel:not(.mat-expanded)
+      .mat-expansion-panel-header:not([aria-disabled='true']):hover {
+      background: none !important;
+    }
 
-        .menu__item--default {
-            color: mat-color($primary, .87);
-        }
+    .mat-expansion-panel-header {
+      font-size: 14px !important;
+    }
 
+    .adf-sidebar-action-menu-button {
+      background-color: mat-color($accent);
+    }
+
+    .section {
+      border-bottom: $border;
+    }
+
+    .item--label:not(.item--active):hover {
+      color: mat-color($foreground, text);
+    }
+
+    .item--active {
+      color: mat-color($accent);
+    }
+
+    .item--default {
+      color: mat-color($primary, 0.87);
     }
   }
+}

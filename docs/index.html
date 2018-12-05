@@ -11,80 +11,34 @@
 <body>
   <div id="app"></div>
   <script src="https://unpkg.com/docute@3/dist/docute.js"></script>
+  <script src="https://unpkg.com/prismjs/components/prism-typescript.js"></script>
   <script>
     docute.init({
+        toc: "toc.md",
         nav: [
             {
                 title: 'Home',
                 path: '/'
             },
             {
-                title: 'Features',
-                type: 'dropdown',
-                items: [
-                    {
-                        title: 'Introduction',
-                        path: 'features',
-                    },
-                    {
-                        title: 'Application Header',
-                        path: 'header'
-                    },
-                    {
-                        title: 'Side Navigation',
-                        path: 'side-nav'
-                    },
-                    {
-                        title: 'Document List',
-                        path: 'doc-list'
-                    },
-                    {
-                        title: 'File Viewer',
-                        path: 'file-viewer'
-                    }
-                ]
+                title: 'App features',
+                path: '/features/'
             },
             {
-                title: 'Building',
-                path: 'build'
+                title: 'Getting Started',
+                path: '/getting-started/'
             },
             {
-                title: 'Docker',
-                path: 'docker'
+                title: 'Extending',
+                path: '/extending/'
             },
             {
-                title: 'FAQ',
-                path: 'faq'
-            },
-            {
-                title: 'Guides',
-                type: 'dropdown',
-                items: [
-                    {
-                        title: 'Building',
-                        path: 'build'
-                    },
-                    {
-                        title: 'Internationalization (i18n)',
-                        path: 'i18n'
-                    },
-                    {
-                        title: 'CORS',
-                        path: 'cors'
-                    },
-                    {
-                        title: 'Configuration',
-                        path: 'configuration'
-                    },
-                    {
-                        title: 'Navigation',
-                        path: 'navigation'
-                    }
-                ]
+                title: 'Tutorials',
+                path: '/tutorials/'
             },
             {
                 title: 'Get Help',
-                path: 'help'
+                path: '/help'
             }
         ],
         icons: [

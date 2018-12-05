@@ -1,5 +1,10 @@
 {
-    "cSpell.words": [
-        "sidenav"
-    ]
+  "javascript.preferences.quoteStyle": "single",
+  "javascript.preferences.importModuleSpecifier": "relative",
+  "typescript.preferences.quoteStyle": "single",
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "editor.formatOnSave": true,
+  "[json]": {
+    "editor.formatOnSave": false
+  }
 }

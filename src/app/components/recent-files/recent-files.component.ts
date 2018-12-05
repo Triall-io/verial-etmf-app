@@ -23,78 +23,58 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Subscription } from 'rxjs/Rx';
-import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { MinimalNodeEntryEntity } from 'alfresco-js-api';
-import { UserPreferencesService } from '@alfresco/adf-core';
-import { DocumentListComponent } from '@alfresco/adf-content-services';
-
-import { ContentManagementService } from '../../common/services/content-management.service';
+import { Component, OnInit } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MinimalNodeEntity } from 'alfresco-js-api';
+import { ContentManagementService } from '../../services/content-management.service';
 import { PageComponent } from '../page.component';
+import { Store } from '@ngrx/store';
+import { AppStore } from '../../store/states/app.state';
+import { AppExtensionService } from '../../extensions/extension.service';
 
 @Component({
-    templateUrl: './recent-files.component.html'
+  templateUrl: './recent-files.component.html'
 })
-export class RecentFilesComponent extends PageComponent implements OnInit, OnDestroy {
+export class RecentFilesComponent extends PageComponent implements OnInit {
+  isSmallScreen = false;
 
-    @ViewChild(DocumentListComponent)
-    documentList: DocumentListComponent;
+  columns: any[] = [];
 
-    private subscriptions: Subscription[] = [];
+  constructor(
+    store: Store<AppStore>,
+    extensions: AppExtensionService,
+    content: ContentManagementService,
+    private breakpointObserver: BreakpointObserver
+  ) {
+    super(store, extensions, content);
+  }
 
-    sorting = [ 'modifiedAt', 'desc' ];
+  ngOnInit() {
+    super.ngOnInit();
 
-    constructor(
-        private router: Router,
-        private route: ActivatedRoute,
-        private content: ContentManagementService,
-        preferences: UserPreferencesService) {
-        super(preferences);
+    this.subscriptions = this.subscriptions.concat([
+      this.content.nodesDeleted.subscribe(() => this.reload()),
+      this.content.nodesMoved.subscribe(() => this.reload()),
+      this.content.nodesRestored.subscribe(() => this.reload()),
 
-        const sortingKey = preferences.get(`${this.prefix}.sorting.key`) || 'modifiedAt';
-        const sortingDirection = preferences.get(`${this.prefix}.sorting.direction`) || 'desc';
+      this.breakpointObserver
+        .observe([Breakpoints.HandsetPortrait, Breakpoints.HandsetLandscape])
+        .subscribe(result => {
+          this.isSmallScreen = result.matches;
+        })
+    ]);
 
-        this.sorting = [sortingKey, sortingDirection];
+    this.columns = this.extensions.documentListPresets.recent || [];
+  }
+
+  onNodeDoubleClick(node: MinimalNodeEntity) {
+    if (node && node.entry) {
+      if (PageComponent.isLockedNode(node.entry)) {
+        event.preventDefault();
+        return;
+      }
+
+      this.showPreview(node);
     }
-
-    ngOnInit() {
-        this.subscriptions = this.subscriptions.concat([
-            this.content.nodeDeleted.subscribe(() => this.refresh()),
-            this.content.nodeMoved.subscribe(() => this.refresh()),
-            this.content.nodeRestored.subscribe(() => this.refresh())
-        ]);
-    }
-
-    ngOnDestroy() {
-        this.subscriptions.forEach(s => s.unsubscribe());
-    }
-
-    onNodeDoubleClick(node: MinimalNodeEntryEntity) {
-        if (node && PageComponent.isLockedNode(node)) {
-            event.preventDefault();
-
-        } else if (node && node.isFile) {
-            this.router.navigate(['./preview', node.id], { relativeTo: this.route });
-        }
-    }
-
-    fetchNodes(): void {
-        // todo: remove once all views migrate to native data source
-    }
-
-    refresh(): void {
-        if (this.documentList) {
-            this.documentList.reload();
-        }
-    }
-
-    onSortingChanged(event: CustomEvent) {
-        this.preferences.set(`${this.prefix}.sorting.key`, event.detail.key || 'modifiedAt');
-        this.preferences.set(`${this.prefix}.sorting.direction`, event.detail.direction || 'desc');
-    }
-
-    private get prefix() {
-        return this.route.snapshot.data.preferencePrefix;
-    }
+  }
 }

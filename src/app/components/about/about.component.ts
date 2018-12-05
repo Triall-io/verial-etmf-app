@@ -23,80 +23,64 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { Http } from '@angular/http';
-import { DiscoveryApiService } from '@alfresco/adf-core';
-import { EcmProductVersionModel, ObjectDataTableAdapter  } from '@alfresco/adf-core';
-
+import { ExtensionRef } from '@alfresco/adf-extensions';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { RepositoryInfo } from 'alfresco-js-api';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { AppExtensionService } from '../../extensions/extension.service';
+import { ContentApiService } from '../../services/content-api.service';
+import { version, dependencies } from '../../../../package.json';
 @Component({
-    selector: 'app-about',
-    templateUrl: './about.component.html',
-    styleUrls: [ './about.component.scss' ]
+  selector: 'app-about',
+  templateUrl: './about.component.html',
+  encapsulation: ViewEncapsulation.None,
+  host: { class: 'app-about' }
 })
 export class AboutComponent implements OnInit {
-    ecmVersion: EcmProductVersionModel = null;
-    data: ObjectDataTableAdapter;
-    status: ObjectDataTableAdapter;
-    license: ObjectDataTableAdapter;
-    modules: ObjectDataTableAdapter;
-    githubUrlCommitAlpha = 'https://github.com/Alfresco/alfresco-content-app/commits';
-    releaseVersion = '';
+  repository: RepositoryInfo;
+  releaseVersion = version;
+  extensions$: Observable<ExtensionRef[]>;
+  dependencyEntries: Array<{ name: string; version: string }>;
+  statusEntries: Array<{ property: string; value: string }>;
+  licenseEntries: Array<{ property: string; value: string }>;
 
-    constructor(
-        private discovery: DiscoveryApiService,
-        private http: Http
-    ) {}
+  constructor(
+    private contentApi: ContentApiService,
+    appExtensions: AppExtensionService
+  ) {
+    this.extensions$ = appExtensions.references$;
+  }
 
-    ngOnInit() {
-        this.discovery.getEcmProductInfo().subscribe((ecmVers) => {
-            this.ecmVersion = ecmVers;
+  ngOnInit() {
+    this.dependencyEntries = Object.keys(dependencies).map(key => {
+      return {
+        name: key,
+        version: dependencies[key]
+      };
+    });
 
-            this.modules = new ObjectDataTableAdapter(this.ecmVersion.modules, [
-                {type: 'text', key: 'id', title: 'ID', sortable: true},
-                {type: 'text', key: 'title', title: 'Title', sortable: true},
-                {type: 'text', key: 'version', title: 'Description', sortable: true},
-                {type: 'text', key: 'installDate', title: 'Install Date', sortable: true},
-                {type: 'text', key: 'installState', title: 'Install State', sortable: true},
-                {type: 'text', key: 'versionMin', title: 'Version Minor', sortable: true},
-                {type: 'text', key: 'versionMax', title: 'Version Max', sortable: true}
-            ]);
+    this.contentApi
+      .getRepositoryInformation()
+      .pipe(map(node => node.entry.repository))
+      .subscribe(repository => {
+        this.repository = repository;
 
-            this.status = new ObjectDataTableAdapter([this.ecmVersion.status], [
-                {type: 'text', key: 'isReadOnly', title: 'Read Only', sortable: true},
-                {type: 'text', key: 'isAuditEnabled', title: 'Audit Enable', sortable: true},
-                {type: 'text', key: 'isQuickShareEnabled', title: 'Quick Shared Enable', sortable: true},
-                {type: 'text', key: 'isThumbnailGenerationEnabled', title: 'Thumbnail Generation', sortable: true}
-            ]);
-
-            this.license = new ObjectDataTableAdapter([this.ecmVersion.license], [
-                {type: 'text', key: 'issuedAt', title: 'Issued At', sortable: true},
-                {type: 'text', key: 'expiresAt', title: 'Expires At', sortable: true},
-                {type: 'text', key: 'remainingDays', title: 'Remaining Days', sortable: true},
-                {type: 'text', key: 'holder', title: 'Holder', sortable: true},
-                {type: 'text', key: 'mode', title: 'Type', sortable: true},
-                {type: 'text', key: 'isClusterEnabled', title: 'Cluster Enabled', sortable: true},
-                {type: 'text', key: 'isCryptodocEnabled', title: 'Cryptodoc Enable', sortable: true}
-            ]);
+        this.statusEntries = Object.keys(repository.status).map(key => {
+          return {
+            property: key,
+            value: repository.status[key]
+          };
         });
 
-        this.http.get('/versions.json')
-            .map(response => response.json())
-            .subscribe(response => {
-                const regexp = new RegExp('^(@alfresco|alfresco-)');
-
-                const alfrescoPackagesTableRepresentation = Object.keys(response.dependencies)
-                    .filter((val) => regexp.test(val))
-                    .map((val) => ({
-                        name: val,
-                        version: response.dependencies[val].version
-                    }));
-
-                this.data = new ObjectDataTableAdapter(alfrescoPackagesTableRepresentation, [
-                    {type: 'text', key: 'name', title: 'Name', sortable: true},
-                    {type: 'text', key: 'version', title: 'Version', sortable: true}
-                ]);
-
-                this.releaseVersion = response.version;
-            });
-    }
+        if (repository.license) {
+          this.licenseEntries = Object.keys(repository.license).map(key => {
+            return {
+              property: key,
+              value: repository.license[key]
+            };
+          });
+        }
+      });
+  }
 }

@@ -23,59 +23,62 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Subscription } from 'rxjs/Rx';
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { MinimalNodeEntryEntity } from 'alfresco-js-api';
-import { AppConfigService, NotificationService } from '@alfresco/adf-core';
-
-
-import { BrowsingFilesService } from '../../common/services/browsing-files.service';
-import { NodePermissionService } from '../../common/services/node-permission.service';
+import {
+  Component,
+  Input,
+  OnInit,
+  ViewEncapsulation,
+  OnDestroy
+} from '@angular/core';
+import { AppExtensionService } from '../../extensions/extension.service';
+import { NavBarGroupRef } from '@alfresco/adf-extensions';
+import { Store } from '@ngrx/store';
+import { AppStore } from '../../store/states';
+import { ruleContext } from '../../store/selectors/app.selectors';
+import { Subject } from 'rxjs';
+import { takeUntil, distinctUntilChanged, map } from 'rxjs/operators';
 
 @Component({
-    selector: 'app-sidenav',
-    templateUrl: './sidenav.component.html',
-    styleUrls: ['./sidenav.component.scss']
+  selector: 'app-sidenav',
+  templateUrl: './sidenav.component.html',
+  styleUrls: ['./sidenav.component.scss'],
+  encapsulation: ViewEncapsulation.None,
+  host: { class: 'app-sidenav' }
 })
 export class SidenavComponent implements OnInit, OnDestroy {
-    @Input() showLabel: boolean;
+  private onDestroy$: Subject<boolean> = new Subject<boolean>();
 
-    node: MinimalNodeEntryEntity = null;
-    navigation = [];
+  @Input()
+  showLabel: boolean;
 
-    private subscriptions: Subscription[] = [];
+  groups: Array<NavBarGroupRef> = [];
 
-    constructor(
-        private notificationService: NotificationService,
-        private browsingFilesService: BrowsingFilesService,
-        private appConfig: AppConfigService,
-        public permission: NodePermissionService
-    ) {}
+  constructor(
+    private store: Store<AppStore>,
+    private extensions: AppExtensionService
+  ) {}
 
-    ngOnInit() {
-        this.navigation = this.buildMenu();
-
-        this.subscriptions.concat([
-            this.browsingFilesService.onChangeParent
-                .subscribe((node: MinimalNodeEntryEntity) => this.node = node)
-        ]);
-    }
-
-    openSnackMessage(event: any) {
-        this.notificationService.openSnackMessage(
-            event,
-            4000
+  ngOnInit() {
+    this.store
+      .select(ruleContext)
+      .pipe(
+        map(rules => rules.repository),
+        distinctUntilChanged(),
+        takeUntil(this.onDestroy$)
+      )
+      .subscribe(() => {
+        this.groups = this.extensions.getApplicationNavigation(
+          this.extensions.navbar
         );
-    }
+      });
+  }
 
-    ngOnDestroy() {
-        this.subscriptions.forEach(s => s.unsubscribe());
-    }
+  trackById(index: number, obj: { id: string }) {
+    return obj.id;
+  }
 
-    private buildMenu() {
-        const schema = this.appConfig.get('navigation');
-        const data = Array.isArray(schema) ? { main: schema } : schema;
-
-        return Object.keys(data).map((key) => data[key]);
-    }
+  ngOnDestroy() {
+    this.onDestroy$.next(true);
+    this.onDestroy$.complete();
+  }
 }

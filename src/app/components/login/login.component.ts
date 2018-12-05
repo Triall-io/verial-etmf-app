@@ -25,31 +25,27 @@
 
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
-import { Router } from '@angular/router';
-import { AuthenticationService, UserPreferencesService } from '@alfresco/adf-core';
+import { AuthenticationService } from '@alfresco/adf-core';
+import { ActivatedRoute, Params } from '@angular/router';
 
 @Component({
-    templateUrl: './login.component.html'
+  templateUrl: './login.component.html'
 })
 export class LoginComponent implements OnInit {
-    constructor(
-        private router: Router,
-        private location: Location,
-        private auth: AuthenticationService,
-        private userPreferences: UserPreferencesService
-    ) {}
+  constructor(
+    private location: Location,
+    private auth: AuthenticationService,
+    private route: ActivatedRoute
+  ) {}
 
-    ngOnInit() {
-        if (this.auth.isEcmLoggedIn()) {
-            this.location.forward();
-        }
+  ngOnInit() {
+    if (this.auth.isEcmLoggedIn()) {
+      this.location.forward();
+    } else {
+      this.route.queryParams.subscribe((params: Params) => {
+        const redirectUrl = params['redirectUrl'];
+        this.auth.setRedirect({ provider: 'ECM', url: redirectUrl });
+      });
     }
-
-    onLoginSuccess(data) {
-        if (data && data.username) {
-            this.userPreferences.setStoragePrefix(data.username);
-        }
-
-        this.router.navigateByUrl('/personal-files');
-    }
+  }
 }

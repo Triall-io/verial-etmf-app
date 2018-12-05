@@ -4,7 +4,6 @@
 /dist
 /tmp
 /out-tsc
-/src/versions.json
 
 # dependencies
 /node_modules
@@ -34,6 +33,7 @@
 npm-debug.log
 testem.log
 /typings
+/www
 
 # e2e
 /e2e/*.js

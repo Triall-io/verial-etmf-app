@@ -1,19 +1,24 @@
-<adf-toolbar class="app-menu" [style.background-color]="backgroundColor">
-    <adf-toolbar-title>
-        <button mat-icon-button (click)="toggleMenu()">
-            <mat-icon>menu</mat-icon>
-        </button>
+<adf-layout-header
+  [logo]="logo$ | async"
+  [redirectUrl]="'/personal-files'"
+  [tooltip]="appName$ | async"
+  [color]="headerColor$ | async"
+  [title]="appName$ | async"
+  (clicked)="toggleClicked.emit($event)">
 
-        <a class="app-menu__title"
-            title="{{ appName }}"
-            [routerLink]="[ '/' ]">
-            <img [src]="logo" alt="{{ appName }}" />
-        </a>
-    </adf-toolbar-title>
+  <div class="adf-toolbar--spacer adf-toolbar-divider"></div>
 
-    <app-search-input></app-search-input>
+  <aca-search-input></aca-search-input>
 
-    <adf-toolbar-divider></adf-toolbar-divider>
+  <div class="adf-toolbar-divider"></div>
 
-    <app-current-user></app-current-user>
-</adf-toolbar>
+  <aca-current-user></aca-current-user>
+
+  <ng-container *ngFor="let actionRef of actions; trackBy: trackByActionId">
+    <aca-toolbar-action
+      [actionRef]="actionRef"
+      color="default">
+    </aca-toolbar-action>
+  </ng-container>
+
+</adf-layout-header>

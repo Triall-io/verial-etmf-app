@@ -23,86 +23,54 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, ViewChild } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { NodesApiService, UserPreferencesService } from '@alfresco/adf-core';
-import { DocumentListComponent, ShareDataRow } from '@alfresco/adf-content-services';
-
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Component, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { SiteEntry } from 'alfresco-js-api';
+import { AppExtensionService } from '../../extensions/extension.service';
+import { ContentManagementService } from '../../services/content-management.service';
+import { NavigateLibraryAction } from '../../store/actions';
+import { AppStore } from '../../store/states/app.state';
 import { PageComponent } from '../page.component';
 
 @Component({
-    templateUrl: './libraries.component.html'
+  templateUrl: './libraries.component.html'
 })
-export class LibrariesComponent extends PageComponent {
+export class LibrariesComponent extends PageComponent implements OnInit {
+  isSmallScreen = false;
 
-    @ViewChild(DocumentListComponent)
-    documentList: DocumentListComponent;
+  columns: any[] = [];
 
-    sorting = [ 'title', 'asc' ];
+  constructor(
+    content: ContentManagementService,
+    store: Store<AppStore>,
+    extensions: AppExtensionService,
+    private breakpointObserver: BreakpointObserver
+  ) {
+    super(store, extensions, content);
+  }
 
-    constructor(private nodesApi: NodesApiService,
-                private route: ActivatedRoute,
-                private router: Router,
-                preferences: UserPreferencesService) {
-        super(preferences);
+  ngOnInit() {
+    super.ngOnInit();
 
-        const sortingKey = preferences.get(`${this.prefix}.sorting.key`) || 'title';
-        const sortingDirection = preferences.get(`${this.prefix}.sorting.direction`) || 'desc';
+    this.subscriptions.push(
+      this.content.libraryDeleted.subscribe(() => this.reload()),
+      this.content.libraryUpdated.subscribe(() => this.reload()),
+      this.content.libraryLeft.subscribe(() => this.reload()),
 
-        this.sorting = [sortingKey, sortingDirection];
+      this.breakpointObserver
+        .observe([Breakpoints.HandsetPortrait, Breakpoints.HandsetLandscape])
+        .subscribe(result => {
+          this.isSmallScreen = result.matches;
+        })
+    );
+
+    this.columns = this.extensions.documentListPresets.libraries || [];
+  }
+
+  navigateTo(node: SiteEntry) {
+    if (node && node.entry && node.entry.guid) {
+      this.store.dispatch(new NavigateLibraryAction(node.entry.guid));
     }
-
-    makeLibraryTooltip(library: any): string {
-        const { description, title } = library;
-
-        return description || title || '';
-    }
-
-    makeLibraryTitle(library: any): string {
-        const rows = this.documentList.data.getRows();
-        const entries  = rows.map((r: ShareDataRow) => r.node.entry);
-        const { title, id } = library;
-
-        let isDuplicate = false;
-
-        if (entries) {
-            isDuplicate = entries
-                .some((entry: any) => {
-                    return (entry.id !== id && entry.title === title);
-                });
-        }
-
-        return isDuplicate ? `${title} (${id})` : `${title}`;
-    }
-
-    onNodeDoubleClick(e: CustomEvent) {
-        const node: any = e.detail.node.entry;
-
-        if (node && node.guid) {
-            this.navigate(node.guid);
-        }
-    }
-
-    navigate(libraryId: string) {
-        if (libraryId) {
-            this.nodesApi
-                .getNode(libraryId, { relativePath: '/documentLibrary' })
-                .subscribe(documentLibrary => {
-                    this.router.navigate([ './', documentLibrary.id ], { relativeTo: this.route });
-                });
-        }
-    }
-
-    fetchNodes(): void {
-        // todo: remove once all views migrate to native data source
-    }
-
-    onSortingChanged(event: CustomEvent) {
-        this.preferences.set(`${this.prefix}.sorting.key`, event.detail.key || 'modifiedAt');
-        this.preferences.set(`${this.prefix}.sorting.direction`, event.detail.direction || 'desc');
-    }
-
-    private get prefix() {
-        return this.route.snapshot.data.preferencePrefix;
-    }
+  }
 }

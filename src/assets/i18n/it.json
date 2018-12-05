@@ -3,23 +3,36 @@
     "LANGUAGE": "Lingua",
     "SIGN_IN": "Accedi",
     "SIGN_OUT": "Disconnetti",
+    "SETTINGS": {
+      "TITLE": "Impostazioni",
+      "APPLICATION-SETTINGS": "Impostazioni applicazione",
+      "REPOSITORY-SETTINGS": "Impostazioni repository",
+      "EXPERIMENTAL-FEATURES": "Funzioni sperimentali",
+      "INVALID-VALUE-FORMAT": "Formato valore non valido",
+      "REQUIRED-FIELD": "Questo campo è obbligatorio",
+      "RESET": "Reimposta",
+      "APPLY": "Applica"
+    },
     "PREVIEW": {
       "TITLE": "Anteprima"
     },
     "NEW_MENU": {
       "LABEL": "Nuovo",
+      "TOOLTIP": "Aggiungi nuovi file o cartelle",
       "MENU_ITEMS": {
         "CREATE_FOLDER": "Crea cartella",
         "UPLOAD_FILE": "Carica file",
-        "UPLOAD_FOLDER": "Carica cartella"
+        "UPLOAD_FOLDER": "Carica cartella",
+        "CREATE_LIBRARY": "Crea libreria"
       },
       "TOOLTIPS": {
         "CREATE_FOLDER": "Crea nuova cartella",
-        "CREATE_FOLDER_NOT_ALLOWED": "Impossibile creare una cartella qui. Si potrebbe non disporre dei permessi necessari; rivolgersi al team IT.",
+        "CREATE_FOLDER_NOT_ALLOWED": "Impossibile creare cartelle durante la visualizzazione degli elementi correnti",
         "UPLOAD_FILES": "Seleziona file da caricare",
-        "UPLOAD_FILES_NOT_ALLOWED": "Per il caricamento sono necessari permessi; rivolgersi al team IT.",
+        "UPLOAD_FILES_NOT_ALLOWED": "Impossibile caricare file durante la visualizzazione degli elementi correnti",
         "UPLOAD_FOLDERS": "Seleziona cartelle da caricare",
-        "UPLOAD_FOLDERS_NOT_ALLOWED": "Per il caricamento sono necessari permessi; rivolgersi al team IT."
+        "UPLOAD_FOLDERS_NOT_ALLOWED": "Impossibile caricare cartelle durante la visualizzazione degli elementi correnti",
+        "CREATE_LIBRARY": "Crea una nuova libreria di file"
       }
     },
     "BROWSE": {
@@ -38,7 +51,7 @@
         },
         "EMPTY_STATE": {
           "TITLE": "L'utente non è ancora membro di alcuna Raccolta file",
-          "TEXT": "Iscriversi ai siti per caricare, visualizzare e condividere file."
+          "TEXT": "Unire le librerie per caricare, visualizzare e condividere file."
         }
       },
       "SHARED": {
@@ -88,6 +101,16 @@
       },
       "ABOUT": {
         "TITLE": "Informazioni su"
+      },
+      "SEARCH": {
+        "TITLE": "Risultati della ricerca",
+        "FOUND_RESULTS": "{{ number }} risultati trovati",
+        "CUSTOM_ROW": {
+          "MODIFIED": "Modificato",
+          "LOCATION": "Località",
+          "SIZE": "Dimensione"
+        },
+        "NO_RESULTS": "La ricerca ha restituito 0 risultati"
       }
     },
     "ACTIONS": {
@@ -100,9 +123,25 @@
       "DELETE_PERMANENT": "Elimina definitivamente",
       "MORE": "Altre azioni",
       "UNDO": "Annulla",
+      "PERMISSIONS": "Permessi",
       "RESTORE": "Ripristina",
       "FAVORITE": "Preferito",
-      "UNSHARE": "Rimuovi condivisione"
+      "UNSHARE": "Rimuovi condivisione",
+      "DETAILS": "Visualizza dettagli",
+      "VERSIONS": "Gestione versioni",
+      "TOGGLE-SIDENAV": "Attiva/disattiva barra di navigazione laterale",
+      "SHARE": "Condividi",
+      "SHARE_EDIT": "Impostazioni di collegamento condiviso",
+      "PRINT": "Stampa",
+      "FULLSCREEN": "Attiva modalità schermo intero"
+    },
+    "DIALOGS": {
+      "CONFIRM_PURGE": {
+        "TITLE": "Elimina dal cestino?",
+        "MESSAGE": "Questa operazione eliminerà in maniera permanente gli elementi selezionati.",
+        "YES_LABEL": "Elimina",
+        "NO_LABEL": "Salvare"
+      }
     },
     "DOCUMENT_LIST": {
       "COLUMNS": {
@@ -116,6 +155,10 @@
         "SHARED_BY": "Condiviso da",
         "DELETED_ON": "Eliminato",
         "DELETED_BY": "Eliminato da"
+      },
+      "TOOLBAR": {
+        "CARDVIEW": "Modalità di visualizzazione scheda",
+        "LISTVIEW": "Modalità vista elenco"
       }
     },
     "SITES_VISIBILITY": {
@@ -125,6 +168,7 @@
     },
     "MESSAGES": {
       "ERRORS": {
+        "MISSING_CONTENT": "Il file o la cartella non esistono più o non si dispone delle autorizzazioni per visualizzarli.",
         "GENERIC": "Azione non eseguita correttamente. Riprovare o contattare il team IT.",
         "CONFLICT": "Nome già in uso, provare un nome diverso.",
         "NODE_MOVE": "Spostamento non eseguito correttamente, file con lo stesso nome già esistente.",
@@ -145,6 +189,14 @@
             "LOCATION_MISSING": "Impossibile ripristinare {{ name }}. Il percorso originale non esiste più.",
             "GENERIC": "Si è verificato un problema durante il ripristino di {{ name }}"
           }
+        },
+        "DELETE_LIBRARY_FAILED": "Impossibile eliminare la raccolta"
+      },
+      "UPLOAD": {
+        "ERROR": {
+          "GENERIC": "Si è verificato un problema",
+          "CONFLICT": "Nuova versione non caricata. Esiste già un fil con lo stesso nome.",
+          "500": "Si è verificato un problema durante il caricamento"
         }
       },
       "INFO": {
@@ -182,7 +234,19 @@
             "PLURAL": "Elementi {{ partially }} parzialmente spostati.",
             "FAIL": "Impossibile spostare {{ failed }}."
           }
-        }
+        },
+        "LIBRARY_DELETED": "Raccolta eliminata"
+      }
+    },
+    "CONTENT_METADATA": {
+      "EXIF_GROUP_TITLE": "Immagine EXIF"
+    },
+    "INFO_DRAWER": {
+      "TITLE": "Dettagli",
+      "TABS": {
+        "PROPERTIES": "Proprietà",
+        "VERSIONS": "Versione",
+        "COMMENTS": "Commenti"
       }
     }
   },
@@ -192,5 +256,95 @@
     "MOVE_ITEM": "Sposta '{{ name }}' in...",
     "MOVE_ITEMS": "Sposta {{ number }} elementi in...",
     "SEARCH": "Cerca"
+  },
+  "PERMISSIONS": {
+    "DIALOG": {
+      "TITLE": "Gestione autorizzazioni",
+      "CLOSE": "Chiudi",
+      "INHERIT_PERMISSIONS_BUTTON": "Eredita permessi",
+      "INHERITED_PERMISSIONS_BUTTON": "Permesso ereditato"
+    }
+  },
+  "SHARED_LINK": {
+    "UNSHARE_PERMISSION_ERROR": "Non hai il permesso per rimuovere la condivisione di questo file"
+  },
+  "VERSION": {
+    "DIALOG": {
+      "TITLE": "Gestione versioni",
+      "CLOSE": "Chiudi"
+    },
+    "SELECTION": {
+      "EMPTY": "Selezionare un documento per vedere le versioni.",
+      "NO_PERMISSION": "Non hai il permesso per gestire le versioni di questo documento."
+    }
+  },
+  "LIBRARY": {
+    "DIALOG": {
+      "CREATE_TITLE": "Crea libreria",
+      "CREATE": "Crea",
+      "CANCEL": "Annulla",
+      "FORM": {
+        "DESCRIPTION": "Descrizione",
+        "SITE_ID": "ID libreria",
+        "NAME": "Nome"
+      }
+    },
+    "VISIBILITY": {
+      "PRIVATE": "Privato",
+      "PUBLIC": "Pubblico",
+      "MODERATED": "Moderato"
+    },
+    "ERRORS": {
+      "GENERIC": "Si è verificato un errore",
+      "EXISTENT_SITE": "L'ID libreria specificato non è disponibile. Provare con un'altra libreria.",
+      "CONFLICT": "L'ID libreria specificato è già in uso. Verificare il cestino.",
+      "ID_TOO_LONG": "Utilizzare 72 caratteri o meno per il nome URL",
+      "DESCRIPTION_TOO_LONG": "Utilizzare 512 o meno per la descrizione",
+      "TITLE_TOO_LONG": "Utilizzare 256 caratteri o meno per il titolo",
+      "ILLEGAL_CHARACTERS": "Utilizzare solo lettere e numeri"
+    }
+  },
+  "SEARCH": {
+    "SORT": {
+      "RELEVANCE": "Pertinenza",
+      "FILENAME": "Nome file",
+      "TITLE": "Titolo",
+      "MODIFIED_DATE": "Data di modifica",
+      "SIZE": "Dimensione",
+      "TYPE": "Tipo",
+      "MODIFIER": "Modificatore",
+      "CREATE_DATE": "Data di creazione"
+    },
+    "FACET_FIELDS": {
+      "FILE_TYPE": "Tipo di file",
+      "CREATOR": "Creatore",
+      "MODIFIER": "Modificatore",
+      "LOCATION": "Località"
+    },
+    "CATEGORIES": {
+      "MODIFIED_DATE": "Data di modifica",
+      "SIZE": "Dimensione",
+      "CREATED_DATE": "Data di creazione"
+    }
+  },
+  "CORE": {
+    "METADATA": {
+      "ACTIONS": {
+        "SAVE": "Salva modifiche",
+        "CANCEL": "Ignora modifiche"
+      }
+    }
+  },
+  "ADF_VIEWER": {
+    "ACTIONS": {
+      "INFO": "Visualizza dettagli"
+    }
+  },
+  "ADF_VERSION_LIST": {
+    "ACTIONS": {
+      "UPLOAD": {
+        "TOOLTIP": "Caricare la nuova versione"
+      }
+    }
   }
 }

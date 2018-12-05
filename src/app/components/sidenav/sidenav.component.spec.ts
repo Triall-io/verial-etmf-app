@@ -24,109 +24,31 @@
  */
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { TestBed, async } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { TranslateModule } from '@ngx-translate/core';
-import { MatMenuModule, MatSnackBarModule } from '@angular/material';
-import { HttpClientModule } from '@angular/common/http';
-import {
-    AppConfigService, AuthenticationService,
-    UserPreferencesService, StorageService, AlfrescoApiService,
-    CookieService, LogService, NotificationService
-} from '@alfresco/adf-core';
-import { BrowsingFilesService } from '../../common/services/browsing-files.service';
-import { NodePermissionService } from '../../common/services/node-permission.service';
-
+import { TestBed, async, ComponentFixture } from '@angular/core/testing';
 import { SidenavComponent } from './sidenav.component';
+import { EffectsModule } from '@ngrx/effects';
+import { NodeEffects } from '../../store/effects/node.effects';
+import { AppTestingModule } from '../../testing/app-testing.module';
+import { ExperimentalDirective } from '../../directives/experimental.directive';
 
 describe('SidenavComponent', () => {
-    let fixture;
-    let component: SidenavComponent;
-    let browsingService: BrowsingFilesService;
-    let appConfig: AppConfigService;
-    let notificationService: NotificationService;
-    let appConfigSpy;
+  let fixture: ComponentFixture<SidenavComponent>;
+  let component: SidenavComponent;
 
-    const navItem = {
-        label: 'some-label',
-        route: {
-            url: '/some-url'
-        }
-    };
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      imports: [AppTestingModule, EffectsModule.forRoot([NodeEffects])],
+      declarations: [SidenavComponent, ExperimentalDirective],
+      schemas: [NO_ERRORS_SCHEMA]
+    })
+      .compileComponents()
+      .then(() => {
+        fixture = TestBed.createComponent(SidenavComponent);
+        component = fixture.componentInstance;
+      });
+  }));
 
-    beforeEach(async(() => {
-        TestBed.configureTestingModule({
-            imports: [
-                HttpClientModule,
-                MatMenuModule,
-                MatSnackBarModule,
-                TranslateModule.forRoot(),
-                RouterTestingModule
-            ],
-            declarations: [
-                SidenavComponent
-            ],
-            providers: [
-                LogService,
-                CookieService,
-                AlfrescoApiService,
-                StorageService,
-                UserPreferencesService,
-                AuthenticationService,
-                NodePermissionService,
-                AppConfigService,
-                BrowsingFilesService,
-                NotificationService
-            ],
-            schemas: [ NO_ERRORS_SCHEMA ]
-        })
-        .compileComponents()
-        .then(() => {
-            browsingService = TestBed.get(BrowsingFilesService);
-            appConfig = TestBed.get(AppConfigService);
-            notificationService = TestBed.get(NotificationService);
-
-            fixture = TestBed.createComponent(SidenavComponent);
-            component = fixture.componentInstance;
-
-            appConfigSpy = spyOn(appConfig, 'get').and.returnValue([navItem]);
-        });
-    }));
-
-    it('should update node on change', () => {
-        fixture.detectChanges();
-        const node: any = { entry: { id: 'someNodeId' } };
-
-        browsingService.onChangeParent.next(<any>node);
-
-        expect(component.node).toBe(node);
-    });
-
-    describe('menu', () => {
-        it('should build menu from array', () => {
-            appConfigSpy.and.returnValue([navItem, navItem]);
-            fixture.detectChanges();
-
-            expect(component.navigation).toEqual([[navItem, navItem]]);
-        });
-
-        it('should build menu from object', () => {
-            appConfigSpy.and.returnValue({ a: [navItem, navItem], b: [navItem, navItem] });
-            fixture.detectChanges();
-
-            expect(component.navigation).toEqual([[navItem, navItem], [navItem, navItem]]);
-        });
-    });
-
-    describe('openSnackMessage', () => {
-        it('should call notification service', () => {
-            const message = 'notification message';
-
-            spyOn(notificationService, 'openSnackMessage');
-
-            component.openSnackMessage(message);
-
-            expect(notificationService.openSnackMessage).toHaveBeenCalledWith(message, 4000);
-        });
-    });
+  it('should be created', () => {
+    expect(component).toBeTruthy();
+  });
 });

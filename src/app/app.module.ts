@@ -25,113 +25,124 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterModule, RouteReuseStrategy } from '@angular/router';
+import {
+  BrowserAnimationsModule,
+  NoopAnimationsModule
+} from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TRANSLATION_PROVIDER, CoreModule } from '@alfresco/adf-core';
-import { ContentModule } from '@alfresco/adf-content-services';
+import {
+  TRANSLATION_PROVIDER,
+  CoreModule,
+  AppConfigService,
+  DebugAppConfigService
+} from '@alfresco/adf-core';
+import {
+  ContentModule,
+  CustomResourcesService
+} from '@alfresco/adf-content-services';
 
 import { AppComponent } from './app.component';
 import { APP_ROUTES } from './app.routes';
 
-import { GenericErrorComponent } from './components/generic-error/generic-error.component';
-import { LoginComponent } from './components/login/login.component';
-import { PreviewComponent } from './components/preview/preview.component';
 import { FilesComponent } from './components/files/files.component';
-import { FavoritesComponent } from './components/favorites/favorites.component';
 import { LibrariesComponent } from './components/libraries/libraries.component';
-import { RecentFilesComponent } from './components/recent-files/recent-files.component';
-import { SharedFilesComponent } from './components/shared-files/shared-files.component';
-import { TrashcanComponent } from './components/trashcan/trashcan.component';
-import { LayoutComponent } from './components/layout/layout.component';
-import { HeaderComponent } from './components/header/header.component';
-import { CurrentUserComponent } from './components/current-user/current-user.component';
-import { SearchInputComponent } from './components/search-input/search-input.component';
-import { SidenavComponent } from './components/sidenav/sidenav.component';
-import { AboutComponent } from './components/about/about.component';
-import { LocationLinkComponent } from './components/location-link/location-link.component';
-import { EmptyFolderComponent } from './components/empty-folder/empty-folder.component';
-import { NodeCopyDirective } from './common/directives/node-copy.directive';
-import { NodeDeleteDirective } from './common/directives/node-delete.directive';
-import { NodeMoveDirective } from './common/directives/node-move.directive';
-import { NodeRestoreDirective } from './common/directives/node-restore.directive';
-import { NodePermanentDeleteDirective } from './common/directives/node-permanent-delete.directive';
-import { NodeUnshareDirective } from './common/directives/node-unshare.directive';
-import { NodeInfoDirective } from './common/directives/node-info.directive';
-import { NodeVersionsDirective } from './common/directives/node-versions.directive';
-import { VersionManagerDialogAdapterComponent } from './components/versions-dialog/version-manager-dialog-adapter.component';
-import { BrowsingFilesService } from './common/services/browsing-files.service';
-import { ContentManagementService } from './common/services/content-management.service';
-import { NodeActionsService } from './common/services/node-actions.service';
-import { NodePermissionService } from './common/services/node-permission.service';
-import { MatMenuModule, MatIconModule, MatButtonModule, MatDialogModule, MatInputModule } from '@angular/material';
-import { SearchComponent } from './components/search/search.component';
+import { FavoriteLibrariesComponent } from './components/favorite-libraries/favorite-libraries.component';
+import { NodeVersionsDialogComponent } from './dialogs/node-versions/node-versions.dialog';
+import { LibraryDialogComponent } from './dialogs/library/library.dialog';
+
+import { AppStoreModule } from './store/app-store.module';
+import { MaterialModule } from './material.module';
+import { AppExtensionsModule } from './extensions.module';
+import { CoreExtensionsModule } from './extensions/core.extensions.module';
+import { AppRouteReuseStrategy } from './app.routes.strategy';
+import { AppInfoDrawerModule } from './components/info-drawer/info.drawer.module';
+import { DirectivesModule } from './directives/directives.module';
+import { ContextMenuModule } from './components/context-menu/context-menu.module';
+import { ExtensionsModule } from '@alfresco/adf-extensions';
+import { AppToolbarModule } from './components/toolbar/toolbar.module';
+import { AppSharedModule } from './components/shared/shared.module';
+import { AppCreateMenuModule } from './components/create-menu/create-menu.module';
+import { AppSidenavModule } from './components/sidenav/sidenav.module';
+import { AppPermissionsModule } from './components/permissions/permissions.module';
+import { AppCommonModule } from './components/common/common.module';
+import { AppLayoutModule } from './components/layout/layout.module';
+import { AppCurrentUserModule } from './components/current-user/current-user.module';
+import { AppSearchInputModule } from './components/search/search-input.module';
+import { AppSearchResultsModule } from './components/search/search-results.module';
+import { AppLoginModule } from './components/login/login.module';
+import { AppHeaderModule } from './components/header/header.module';
+import { environment } from '../environments/environment';
+import { LibraryMembershipDirective } from './directives/library-membership.directive';
+import { ToggleJoinLibraryComponent } from './components/toolbar/toggle-join-library/toggle-join-library.component';
+import { LibraryFavoriteDirective } from './directives/library-favorite.directive';
+import { ToggleFavoriteLibraryComponent } from './components/toolbar/toggle-favorite-library/toggle-favorite-library.component';
+import { AppDataService } from './services/data.service';
 
 @NgModule({
-    imports: [
-        BrowserModule,
-        BrowserAnimationsModule,
-        FormsModule,
-        ReactiveFormsModule,
-        RouterModule.forRoot(APP_ROUTES, {
-            useHash: true,
-            enableTracing: false // enable for debug only
-        }),
-        MatMenuModule,
-        MatIconModule,
-        MatButtonModule,
-        MatDialogModule,
-        MatInputModule,
-        CoreModule,
-        ContentModule
-    ],
-    declarations: [
-        AppComponent,
-        GenericErrorComponent,
-        LoginComponent,
-        LayoutComponent,
-        HeaderComponent,
-        CurrentUserComponent,
-        SearchInputComponent,
-        SidenavComponent,
-        FilesComponent,
-        FavoritesComponent,
-        LibrariesComponent,
-        RecentFilesComponent,
-        SharedFilesComponent,
-        TrashcanComponent,
-        PreviewComponent,
-        AboutComponent,
-        LocationLinkComponent,
-        EmptyFolderComponent,
-        NodeCopyDirective,
-        NodeDeleteDirective,
-        NodeMoveDirective,
-        NodeRestoreDirective,
-        NodePermanentDeleteDirective,
-        NodeUnshareDirective,
-        NodeInfoDirective,
-        NodeVersionsDirective,
-        VersionManagerDialogAdapterComponent,
-        SearchComponent
-    ],
-    providers: [
-        {
-            provide: TRANSLATION_PROVIDER,
-            multi: true,
-            useValue: {
-                name: 'app',
-                source: 'assets'
-            }
-        },
-        BrowsingFilesService,
-        ContentManagementService,
-        NodeActionsService,
-        NodePermissionService
-    ],
-    entryComponents: [
-        VersionManagerDialogAdapterComponent
-    ],
-    bootstrap: [AppComponent]
+  imports: [
+    BrowserModule,
+    environment.e2e ? NoopAnimationsModule : BrowserAnimationsModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule.forRoot(APP_ROUTES, {
+      useHash: true,
+      enableTracing: false // enable for debug only
+    }),
+    MaterialModule,
+    CoreModule.forRoot(),
+    ContentModule.forRoot(),
+    AppStoreModule,
+    CoreExtensionsModule.forRoot(),
+    ExtensionsModule,
+    AppExtensionsModule,
+    AppLoginModule,
+    AppCommonModule,
+    AppLayoutModule,
+    AppCurrentUserModule,
+    DirectivesModule,
+    ContextMenuModule,
+    AppInfoDrawerModule,
+    AppToolbarModule,
+    AppSharedModule,
+    AppSidenavModule,
+    AppCreateMenuModule,
+    AppPermissionsModule,
+    AppSearchInputModule,
+    AppSearchResultsModule,
+    AppHeaderModule
+  ],
+  declarations: [
+    AppComponent,
+    FilesComponent,
+    LibrariesComponent,
+    FavoriteLibrariesComponent,
+    NodeVersionsDialogComponent,
+    LibraryDialogComponent,
+    LibraryMembershipDirective,
+    ToggleJoinLibraryComponent,
+    LibraryFavoriteDirective,
+    ToggleFavoriteLibraryComponent
+  ],
+  providers: [
+    { provide: RouteReuseStrategy, useClass: AppRouteReuseStrategy },
+    { provide: AppConfigService, useClass: DebugAppConfigService },
+    { provide: CustomResourcesService, useClass: AppDataService },
+    {
+      provide: TRANSLATION_PROVIDER,
+      multi: true,
+      useValue: {
+        name: 'app',
+        source: 'assets'
+      }
+    }
+  ],
+  entryComponents: [
+    LibraryDialogComponent,
+    NodeVersionsDialogComponent,
+    ToggleJoinLibraryComponent,
+    ToggleFavoriteLibraryComponent
+  ],
+  bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

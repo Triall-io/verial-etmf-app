@@ -23,67 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { AppConfigService, PeopleContentService } from '@alfresco/adf-core';
-import { HttpClientModule } from '@angular/common/http';
-import { Observable } from 'rxjs/Rx';
+import { AppHeaderComponent } from './header.component';
 
-import { HeaderComponent } from './header.component';
-
-describe('HeaderComponent', () => {
-    let fixture;
-    let component;
-    let appConfigService: AppConfigService;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [
-                HttpClientModule,
-                RouterTestingModule
-            ],
-            declarations: [
-                HeaderComponent
-            ],
-            providers: [
-                AppConfigService,
-                PeopleContentService
-            ],
-            schemas: [ NO_ERRORS_SCHEMA ]
-        })
-        .overrideProvider(PeopleContentService, {
-            useValue: {
-                getCurrentPerson: () => Observable.of({ entry: {} })
-            }
-        });
-
-        fixture = TestBed.createComponent(HeaderComponent);
-        component = fixture.componentInstance;
-        appConfigService = TestBed.get(AppConfigService);
-
-        spyOn(appConfigService, 'get').and.callFake((val) => {
-            if (val === 'application.name') {
-                return 'app-name';
-            }
-
-            if (val === 'headerColor') {
-                return 'some-color';
-            }
-
-            if (val === 'application.logo') {
-                return '';
-            }
-        });
-
-        fixture.detectChanges();
-    });
-
-    it('it should set application name', () => {
-        expect(component.appName).toBe('app-name');
-    });
-
-    it('it should set header background color', () => {
-        expect(component.backgroundColor).toBe('some-color');
-    });
+describe('AppHeaderComponent', () => {
+  it('should be defined', () => {
+    expect(AppHeaderComponent).toBeDefined();
+  });
 });
