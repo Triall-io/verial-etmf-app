@@ -136,7 +136,7 @@
       "FULLSCREEN": "Vollbildmodus aktivieren"
       "BLOCKCHAIN_REGISTER": "Register on Blockchain",
       "BLOCKCHAIN_VERIFY": "Verify on Blockchain"
-    },,
+    },
     "DIALOGS": {
       "CONFIRM_PURGE": {
         "TITLE": "Aus Papierkorb löschen?",

@@ -334,7 +334,7 @@
                 "JOINED": "Library joined",
                 "JOIN_REQUESTED": "Join library request sent",
                 "JOIN_CANCELED": "Canceled the request to join the library",
-                "LEFT_LIBRARY": "You have left the library"
+                "LEFT_LIBRARY": "You have left the library",
                 "LIBRARY_DELETED": "Library deleted",
                 "BLOCKCHAIN": {
                     "FILE_WAS": "File %s was",
