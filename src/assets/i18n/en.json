@@ -95,17 +95,17 @@
                 },
                 "MENU": {
                     "MY_LIBRARIES": {
-                        "TITLE": "My Libraries",
+                        "TITLE": "My Trails",
                         "SIDENAV_LINK": {
-                            "LABEL": "My Libraries",
-                            "TOOLTIP": "Access my libraries"
+                            "LABEL": "My Trials",
+                            "TOOLTIP": "Access my trials"
                         }
                     },
                     "FAVORITE_LIBRARIES": {
-                        "TITLE": "Favorite Libraries",
+                        "TITLE": "Favorite Trials",
                         "SIDENAV_LINK": {
-                            "LABEL": "Favorite Libraries",
-                            "TOOLTIP": "Access my favorite libraries"
+                            "LABEL": "Favorite Trials",
+                            "TOOLTIP": "Access my favorite trials"
                         }
                     }
                 }

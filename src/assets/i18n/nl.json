@@ -47,12 +47,28 @@
                 "TITLE": "Onderzoekssbibliotheken",
                 "SIDENAV_LINK": {
                     "LABEL": "Onderzoeksbibliotheken",
-                    "TOOLTIP": "Toegang krijgen tot Onderzoeksbibliotheken"
+                    "TOOLTIP": "Toegang krijgen tot onderzoeksbibliotheken"
                 },
                 "EMPTY_STATE": {
                     "TITLE": "U bent nog geen lid van een bestandsbibliotheek",
                     "TEXT": "Word lid van bibliotheken om bestanden te uploaden, weer te geven en te delen."
+                },
+              "MENU": {
+                "MY_LIBRARIES": {
+                  "TITLE": "Mijn Onderzoekssbibliotheken",
+                  "SIDENAV_LINK": {
+                    "LABEL": "Mijn Onderzoekssbibliotheken",
+                    "TOOLTIP": "Toegang krijgen tot mijn onderzoekssbibliotheken"
+                  }
+                },
+                "FAVORITE_LIBRARIES": {
+                  "TITLE": "Favoriete Onderzoekssbibliotheken",
+                  "SIDENAV_LINK": {
+                    "LABEL": "Favoriete Onderzoekssbibliotheken",
+                    "TOOLTIP": "Toegang krigen tot mijn favoriete onderzoekssbibliotheken"
+                  }
                 }
+              }
             },
             "SHARED": {
                 "TITLE": "Gedeelde bestanden",

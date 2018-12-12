@@ -30,7 +30,7 @@
   },
   "private": true,
   "dependencies": {
-    "@alfresco/adf-content-services": "file:../../../home/sander/DEV/forked/alfresco-ng2-components/lib/dist/alfresco-adf-content-services-2.6.1.tgz",
+    "@alfresco/adf-content-services": "file:../alfresco-ng2-components/lib/dist/alfresco-adf-content-services-2.6.1.tgz",
     "@alfresco/adf-core": "2.6.1",
     "@alfresco/adf-extensions": "3.0.0-383b74151a47e188020249aea7ec0dfb586bd0b6",
     "@angular/animations": "7.1.1",
