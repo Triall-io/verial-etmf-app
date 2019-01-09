@@ -90,31 +90,6 @@
     "presets": {
       "custom": [
         {
-          "title": "APP.CONTENT_METADATA.PROPERTIES_GROUP_TITLE",
-          "items": [
-            {
-              "aspect": "cm:versionable",
-              "properties": [
-                "cm:versionLabel"
-              ]
-            }
-          ]
-        },
-        {
-          "title": "APP.CONTENT_METADATA.BLOCKCHAIN_GROUP_TITLE",
-          "items": [
-            {
-              "aspect": "bc:BlockchainRegistrationState",
-              "properties": [
-                "bc:RegistrationState",
-                "bc:RegistrationTime",
-                "bc:LastVerificationTime",
-                "bc:ExternalLinks"
-              ]
-            }
-          ]
-        },
-        {
           "title": "APP.CONTENT_METADATA.EXIF_GROUP_TITLE",
           "items": [
             {

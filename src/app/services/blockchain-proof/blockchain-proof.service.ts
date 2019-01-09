@@ -7,17 +7,20 @@ import * as models from './api/model/models';
 import {Subject} from 'rxjs';
 import {secrets} from '../../../environments/secrets';
 import {sprintf} from 'sprintf-js';
-
+import { DatePipe } from '@angular/common';
 
 @Injectable()
 export class BlockchainProofService {
+
+    private TIME_FORMAT = 'MMM d, y HH:mm:ss';
 
     private blockchainService: BlockchainService;
 
     constructor(private nodesApiService: NodesApiService,
                 private notification: NotificationService,
                 private translation: TranslationService,
-                private http: HttpClient) {
+                private http: HttpClient,
+                private datePipe: DatePipe) {
 
         this.nodesApiService = nodesApiService;
         this.blockchainService = new BlockchainService(http, null, this.apiConfig());
@@ -150,13 +153,13 @@ export class BlockchainProofService {
         if (verifyContentResponse.perHashProofChain != null) {
             registrationState = verifyContentResponse.perHashProofChain.registrationState;
             if (registrationState === 'REGISTERED') {
-                registrationTime = verifyContentResponse.perHashProofChain.registrationTime;
+                registrationTime = this.datePipe.transform(verifyContentResponse.perHashProofChain.registrationTime, this.TIME_FORMAT);
             }
         }
         if (registrationTime == null && verifyContentResponse.singleProofChain != null) {
             registrationState = verifyContentResponse.singleProofChain.registrationState;
             if (registrationState === 'REGISTERED') {
-                registrationTime = verifyContentResponse.singleProofChain.registrationTime;
+                registrationTime = this.datePipe.transform(verifyContentResponse.singleProofChain.registrationTime, this.TIME_FORMAT);
             }
         }
 
