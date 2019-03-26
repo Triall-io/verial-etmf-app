@@ -203,7 +203,8 @@
             "CANCEL_JOIN": "Cancel join",
             "LEAVE": "Leave library",
             "BLOCKCHAIN_REGISTER": "Register on Blockchain",
-            "BLOCKCHAIN_VERIFY": "Verify on Blockchain"
+            "BLOCKCHAIN_VERIFY": "Verify on Blockchain",
+            "OFFBLOCKS_SEND": "Send for Signature"
         },
         "DIALOGS": {
             "CONFIRM_PURGE": {
@@ -340,13 +341,14 @@
                     "FILE_WAS": "File %s was",
                     "FILE_IS": "File %s is",
                     "REGISTRATION_STARTED": "The registration process was successfully started for file %s",
-                    "PROCESS_FAILED": "The %s process has failed for file %s",
+                    "PROCESS_FAILED": "The %s process has failed: %s",
                     "REGISTERED": "registered",
                     "REGISTERED_ON": "registered on",
                     "PENDING": "pending registration",
                     "NOT_REGISTERED": "not registered",
                     "REGISTRATION": "registration",
-                    "VERIFICATION": "verification"
+                    "VERIFICATION": "verification",
+                    "SEND_TO_OFFBLOCKS": "send for signing"
                 }
             }
         },
