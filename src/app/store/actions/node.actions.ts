@@ -44,6 +44,7 @@ export const PRINT_FILE = 'PRINT_FILE';
 export const FULLSCREEN_VIEWER = 'FULLSCREEN_VIEWER';
 export const BLOCKCHAIN_REGISTER = 'BLOCKCHAIN_REGISTER';
 export const BLOCKCHAIN_VERIFY = 'BLOCKCHAIN_VERIFY';
+export const OFFBLOCKS_SEND = 'OFFBLOCKS_SEND';
 
 
 export class SetSelectedNodesAction implements Action {
@@ -133,6 +134,11 @@ export class BlockchainSignAction implements Action {
 
 export class BlockchainVerifyAction implements Action {
     readonly type = BLOCKCHAIN_VERIFY;
+    constructor(public payload: Array<MinimalNodeEntity>) {}
+}
+
+export class OffblocksSendAction implements Action {
+    readonly type = OFFBLOCKS_SEND;
     constructor(public payload: Array<MinimalNodeEntity>) {}
 }
 

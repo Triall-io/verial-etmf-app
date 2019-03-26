@@ -728,6 +728,18 @@
             "rules": {
               "visible": "app.toolbar.canCopyNode"
             }
+          },
+          {
+            "id": "app.toolbar.offblocks-send",
+            "order": 1300,
+            "title": "APP.ACTIONS.OFFBLOCKS_SEND",
+            "icon": "edit",
+            "actions": {
+              "click": "OFFBLOCKS_SEND"
+            },
+            "rules": {
+              "visible": "app.toolbar.canCopyNode"
+            }
           }
         ]
       }
@@ -971,6 +983,18 @@
         "rules": {
           "visible": "app.toolbar.canCopyNode"
         }
+      },
+      {
+        "id": "app.context.menu.offblocks-send",
+        "order": 1500,
+        "title": "APP.ACTIONS.OFFBLOCKS_SEND",
+        "icon": "edit",
+        "actions": {
+          "click": "OFFBLOCKS_SEND"
+        },
+        "rules": {
+          "visible": "app.toolbar.canCopyNode"
+        }
       }
     ],
     "viewer": {
@@ -1150,6 +1174,18 @@
           "icon": "check",
           "actions": {
             "click": "BLOCKCHAIN_VERIFY"
+          },
+          "rules": {
+            "visible": "app.toolbar.canCopyNode"
+          }
+        },
+        {
+          "id": "app.viewer.offblocks-send",
+          "order": 1000,
+          "title": "APP.ACTIONS.OFFBLOCKS_SEND",
+          "icon": "edit",
+          "actions": {
+            "click": "OFFBLOCKS_SEND"
           },
           "rules": {
             "visible": "app.toolbar.canCopyNode"

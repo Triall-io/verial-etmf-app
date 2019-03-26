@@ -19,6 +19,8 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 import { Observable }                                        from 'rxjs/Observable';
 
 import { ErrorResponse } from '../model/errorResponse';
+import { SendNodesToOffblocksRequest } from '../model/sendNodesToOffblocksRequest';
+import { SendNodesToOffblocksResponse } from '../model/sendNodesToOffblocksResponse';
 import { VerifyNodesRequest } from '../model/verifyNodesRequest';
 import { VerifyNodesResponse } from '../model/verifyNodesResponse';
 
@@ -57,6 +59,52 @@ export class BlockchainService {
         return false;
     }
 
+
+    /**
+     * Send alfresco entries to Offblocks
+     * Send the selected nodes (content) to the Offblocks application
+     * @param nodeIds sendRequest
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public sendEntriesToOffblocks(nodeIds: SendNodesToOffblocksRequest, observe?: 'body', reportProgress?: boolean): Observable<SendNodesToOffblocksResponse>;
+    public sendEntriesToOffblocks(nodeIds: SendNodesToOffblocksRequest, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<SendNodesToOffblocksResponse>>;
+    public sendEntriesToOffblocks(nodeIds: SendNodesToOffblocksRequest, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<SendNodesToOffblocksResponse>>;
+    public sendEntriesToOffblocks(nodeIds: SendNodesToOffblocksRequest, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+        if (nodeIds === null || nodeIds === undefined) {
+            throw new Error('Required parameter nodeIds was null or undefined when calling sendEntriesToOffblocks.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json;charset=UTF-8'
+        ];
+        let httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set("Accept", httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        let consumes: string[] = [
+            'application/json;charset=UTF-8'
+        ];
+        let httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set("Content-Type", httpContentTypeSelected);
+        }
+
+        return this.httpClient.post<SendNodesToOffblocksResponse>(`${this.basePath}/alfresco-blockchain/sendToOffblocks/entries`,
+            nodeIds,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
 
     /**
      * Verify alfresco entries

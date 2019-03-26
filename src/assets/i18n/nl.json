@@ -151,7 +151,8 @@
             "PRINT": "Afdrukken",
             "FULLSCREEN": "Modus voor volledig scherm activeren",
             "BLOCKCHAIN_REGISTER": "Ondertekenen op blockchain ",
-            "BLOCKCHAIN_VERIFY": "Blockchain controle"
+            "BLOCKCHAIN_VERIFY": "Blockchain controle",
+            "OFFBLOCKS_SEND": "Verzenden ter ondertekening"
         },
         "DIALOGS": {
             "CONFIRM_PURGE": {
@@ -262,13 +263,14 @@
                     "FILE_WAS": "Bestand %s was",
                     "FILE_IS": "Bestand %s is",
                     "REGISTRATION_STARTED": "Het opstarten van registratieproces was successvol voor bestand %s",
-                    "PROCESS_FAILED": "het %sproces is mislukt voor bestand %s",
+                    "PROCESS_FAILED": "het %s proces is mislukt voor bestand %s",
                     "REGISTERED": "geregistreerd",
                     "REGISTERED_ON": "geregistreerd op",
                     "PENDING": "in afwachting van registratie",
                     "NOT_REGISTERED": "niet geregistreerd",
                     "REGISTRATION": "registratie",
-                    "VERIFICATION": "controle"
+                    "VERIFICATION": "controle",
+                    "SEND_TO_OFFBLOCKS": "verzenden ter ondertekening"
                 }
             }
         },

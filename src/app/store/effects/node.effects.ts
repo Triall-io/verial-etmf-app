@@ -42,7 +42,7 @@ import {
   RestoreDeletedNodesAction,
   RESTORE_DELETED_NODES,
   ShareNodeAction,
-  SHARE_NODE
+  SHARE_NODE, OffblocksSendAction
 } from '../actions';
 import {ContentManagementService} from '../../services/content-management.service';
 import {BlockchainProofService} from '../../services/blockchain-proof/blockchain-proof.service';
@@ -66,7 +66,8 @@ import {
   BlockchainSignAction,
   BLOCKCHAIN_REGISTER,
   BlockchainVerifyAction,
-  BLOCKCHAIN_VERIFY
+  BLOCKCHAIN_VERIFY,
+  OFFBLOCKS_SEND
 } from '../actions/node.actions';
 import {Observable} from 'rxjs';
 import {MatSnackBarConfig} from '@angular/material';
@@ -373,6 +374,25 @@ export class NodeEffects {
         })
     );
 
+    @Effect({dispatch: false})
+    offblocksSendNodes$ = this.actions$.pipe(
+        ofType<OffblocksSendAction>(OFFBLOCKS_SEND),
+        map(action => {
+            if (action.payload && action.payload.length > 0) {
+                this.offblocksSendNodes(action.payload);
+            } else {
+                this.store
+                    .select(appSelection)
+                    .pipe(take(1))
+                    .subscribe(selection => {
+                        if (selection && !selection.isEmpty) {
+                            this.offblocksSendNodes(selection);
+                        }
+                    });
+            }
+        })
+    );
+
     private signNodes(selection) {
         const messageBuilder = [];
         this.blockchainProofService.registerSelection(selection.nodes).asObservable()
@@ -395,6 +415,24 @@ export class NodeEffects {
     private verifyNodes(selection) {
         const messageBuilder = [];
         this.blockchainProofService.verifySelection(selection.nodes).asObservable()
+            .subscribe(
+                (message) => {
+                    if (message != null) {
+                        messageBuilder.push(message);
+                        messageBuilder.push('\n');
+                    }
+                },
+                (error) => {
+                    this.toastMessage(error.message);
+                }, () => {
+                    this.toastMessage(messageBuilder.join(''));
+                }
+            );
+    }
+
+    private offblocksSendNodes(selection) {
+        const messageBuilder = [];
+        this.blockchainProofService.offblocksSendSelection(selection.nodes).asObservable()
             .subscribe(
                 (message) => {
                     if (message != null) {
