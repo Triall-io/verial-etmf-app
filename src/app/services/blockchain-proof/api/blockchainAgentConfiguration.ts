@@ -7,7 +7,7 @@ export interface ConfigurationParameters {
     withCredentials?: boolean;
 }
 
-export class Configuration {
+export class BlockchainAgentConfiguration {
     apiKeys?: {[ key: string ]: string};
     username?: string;
     password?: string;

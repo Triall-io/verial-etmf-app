@@ -1,6 +1,6 @@
 module.exports = {
     "/alfresco": {
-        "target": "https://triall.dev.sphereon.com",
+        "target": "http://172.16.255.32:8080",
         "secure": false,
         "changeOrigin": true,
         // workaround for REPO-2260

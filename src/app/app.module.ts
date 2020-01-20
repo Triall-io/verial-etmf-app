@@ -80,6 +80,7 @@ import { ToggleJoinLibraryComponent } from './components/toolbar/toggle-join-lib
 import { LibraryFavoriteDirective } from './directives/library-favorite.directive';
 import { ToggleFavoriteLibraryComponent } from './components/toolbar/toggle-favorite-library/toggle-favorite-library.component';
 import { AppDataService } from './services/data.service';
+import {BlockchainService} from './services/blockchain-proof/api';
 
 @NgModule({
   imports: [
@@ -139,7 +140,8 @@ import { AppDataService } from './services/data.service';
         source: 'assets'
       }
     },
-    BlockchainProofService
+    BlockchainProofService,
+    BlockchainService
   ],
   entryComponents: [
     LibraryDialogComponent,

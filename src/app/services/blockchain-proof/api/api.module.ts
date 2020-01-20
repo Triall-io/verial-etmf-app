@@ -1,7 +1,7 @@
 import { NgModule, ModuleWithProviders, SkipSelf, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { Configuration } from './configuration';
+import { BlockchainAgentConfiguration } from './blockchainAgentConfiguration';
 
 import { BlockchainService } from './api/blockchain.service';
 
@@ -13,10 +13,10 @@ import { BlockchainService } from './api/blockchain.service';
     BlockchainService ]
 })
 export class ApiModule {
-    public static forRoot(configurationFactory: () => Configuration): ModuleWithProviders {
+    public static forRoot(configurationFactory: () => BlockchainAgentConfiguration): ModuleWithProviders {
         return {
             ngModule: ApiModule,
-            providers: [ { provide: Configuration, useFactory: configurationFactory } ]
+            providers: [ { provide: BlockchainAgentConfiguration, useFactory: configurationFactory } ]
         }
     }
 

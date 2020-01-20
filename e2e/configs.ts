@@ -32,7 +32,7 @@ export const BROWSER_WAIT_TIMEOUT = 10000;
 export const USE_HASH_STRATEGY = true;
 
 // Repository configs
-export const REPO_API_HOST = 'https://triall.dev.sphereon.com';
+export const REPO_API_HOST = 'http://172.16.255.32';
 export const REPO_API_TENANT = '-default-';
 
 // Admin details
