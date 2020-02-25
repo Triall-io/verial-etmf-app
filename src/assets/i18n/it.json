@@ -1,6 +1,7 @@
 {
   "APP": {
     "LANGUAGE": "Lingua",
+    "USER_DASHBOARD": "Dashboard utente",
     "SIGN_IN": "Accedi",
     "SIGN_OUT": "Disconnetti",
     "SETTINGS": {

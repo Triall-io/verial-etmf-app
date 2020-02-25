@@ -1,6 +1,7 @@
 {
   "APP": {
     "LANGUAGE": "Språk",
+    "USER_DASHBOARD": "Brukerpanel",
     "SIGN_IN": "Logg på",
     "SIGN_OUT": "Logg ut",
     "SETTINGS": {

@@ -1,6 +1,7 @@
 {
   "APP": {
     "LANGUAGE": "Langue",
+    "USER_DASHBOARD": "Tableau de bord utilisateur",
     "SIGN_IN": "Connexion",
     "SIGN_OUT": "Déconnexion",
     "SETTINGS": {

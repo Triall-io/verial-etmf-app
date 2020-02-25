@@ -1,6 +1,7 @@
 {
   "APP": {
     "LANGUAGE": "言語",
+    "USER_DASHBOARD": "ユーザーダッシュボード」",
     "SIGN_IN": "サインイン",
     "SIGN_OUT": "サインアウト",
     "SETTINGS": {
@@ -21,7 +22,7 @@
       "TOOLTIP": "新しいフィールドまたはフォルダを追加します",
       "MENU_ITEMS": {
         "CREATE_FOLDER": "フォルダの作成",
-        "UPLOAD_FILE": "ファイルのアップロード",
+        "UPLOAD_FILE": "ファイルのアップロード",ecmHost
         "UPLOAD_FOLDER": "フォルダのアップロード",
         "CREATE_LIBRARY": "ライブラリの作成"
       },
