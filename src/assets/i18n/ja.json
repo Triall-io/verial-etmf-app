@@ -22,7 +22,7 @@
       "TOOLTIP": "新しいフィールドまたはフォルダを追加します",
       "MENU_ITEMS": {
         "CREATE_FOLDER": "フォルダの作成",
-        "UPLOAD_FILE": "ファイルのアップロード",ecmHost
+        "UPLOAD_FILE": "ファイルのアップロード",
         "UPLOAD_FOLDER": "フォルダのアップロード",
         "CREATE_LIBRARY": "ライブラリの作成"
       },
