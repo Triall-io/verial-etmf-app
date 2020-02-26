@@ -1,6 +1,7 @@
 {
     "APP": {
         "LANGUAGE": "Taal",
+        "USER_DASHBOARD": "Gebruikerspaneel",
         "SIGN_IN": "Aanmelden",
         "SIGN_OUT": "Afmelden",
         "SETTINGS": {

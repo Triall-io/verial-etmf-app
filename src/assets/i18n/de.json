@@ -1,6 +1,7 @@
 {
   "APP": {
     "LANGUAGE": "Sprache",
+    "USER_DASHBOARD": "Benutzer dashboard",
     "SIGN_IN": "Anmelden",
     "SIGN_OUT": "Abmelden",
     "SETTINGS": {

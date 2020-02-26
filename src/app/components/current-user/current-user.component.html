@@ -13,6 +13,10 @@
         {{ 'APP.LANGUAGE' | translate }}
     </button>
 
+    <a mat-menu-item href="/share" target="_blank" class="button">
+        {{ 'APP.USER_DASHBOARD' | translate }}
+    </a>
+
     <button mat-menu-item (click)="onLogoutEvent()" adf-logout>
         {{ 'APP.SIGN_OUT' | translate }}
     </button>
