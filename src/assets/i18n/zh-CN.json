@@ -1,7 +1,6 @@
 {
   "APP": {
     "LANGUAGE": "语言",
-    "USER_DASHBOARD": "用户仪表板",
     "SIGN_IN": "登录",
     "SIGN_OUT": "退出",
     "SETTINGS": {
