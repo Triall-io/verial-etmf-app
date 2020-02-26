@@ -1,7 +1,6 @@
 {
   "APP": {
     "LANGUAGE": "Язык",
-    "USER_DASHBOARD": "Панель пользователя",
     "SIGN_IN": "Войти",
     "SIGN_OUT": "Выйти",
     "SETTINGS": {
