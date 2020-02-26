@@ -78,6 +78,7 @@ export class ContentManagementService {
   nodesDeleted = new Subject<any>();
   nodesPurged = new Subject<any>();
   nodesRestored = new Subject<any>();
+  fileEdited = new Subject<any>();
   folderEdited = new Subject<any>();
   folderCreated = new Subject<any>();
   libraryDeleted = new Subject<string>();
@@ -241,6 +242,28 @@ export class ContentManagementService {
         this.folderCreated.next(node);
       }
     });
+  }
+
+  editFile(file: MinimalNodeEntity) {
+    if (file && file.entry) {
+      const dialog = this.dialogRef.open(FolderDialogComponent, {
+        data: {
+          folder: file.entry,
+          editTitle: 'Edit file',
+        },
+        width: '400px'
+      });
+
+      dialog.componentInstance.error.subscribe(message => {
+        this.store.dispatch(new SnackbarErrorAction(message));
+      });
+
+      dialog.afterClosed().subscribe((node: MinimalNodeEntryEntity) => {
+        if (node) {
+          this.fileEdited.next(node);
+        }
+      });
+    }
   }
 
   editFolder(folder: MinimalNodeEntity) {
