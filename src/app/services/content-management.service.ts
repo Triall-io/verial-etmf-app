@@ -245,6 +245,7 @@ export class ContentManagementService {
     });
   }
 
+  // TODO replace / generalize FolderDialogComponent with a dialog also suitable for files
   editFile(file: MinimalNodeEntity) {
     if (file && file.entry) {
       const dialog = this.dialogRef.open(FolderDialogComponent, {
