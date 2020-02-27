@@ -63,6 +63,7 @@ import { NodeVersionsDialogComponent } from '../dialogs/node-versions/node-versi
 import { ShareDialogComponent } from '../components/shared/content-node-share/content-node-share.dialog';
 import { take, map, tap, mergeMap, catchError } from 'rxjs/operators';
 import { NodePermissionsDialogComponent } from '../components/permissions/permission-dialog/node-permissions.dialog';
+import {TranslateService} from "@ngx-translate/core";
 
 interface RestoredNode {
   status: number;
@@ -249,7 +250,7 @@ export class ContentManagementService {
       const dialog = this.dialogRef.open(FolderDialogComponent, {
         data: {
           folder: file.entry,
-          editTitle: 'Edit file',
+          editTitle: this.translation.instant('APP.DIALOGS.EDIT_FILE'),
         },
         width: '400px'
       });
