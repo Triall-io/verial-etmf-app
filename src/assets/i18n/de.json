@@ -152,6 +152,7 @@
         "NAME": "Name",
         "SIZE": "Größe",
         "MODIFIED_ON": "Bearbeitet",
+        "MODIFIED_BY": "Bearbeitet von",
         "STATUS": "Status",
         "TITLE": "Titel",
         "LOCATION": "Speicherort",
