@@ -23,26 +23,26 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FileUploadEvent, UploadService } from '@alfresco/adf-core';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import {FileUploadEvent, NotificationService, UploadService} from '@alfresco/adf-core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ActivatedRoute, Params, Router} from '@angular/router';
+import {Store} from '@ngrx/store';
 import {
   MinimalNodeEntity,
   MinimalNodeEntryEntity,
   PathElement,
   PathElementEntity
 } from 'alfresco-js-api';
-import { ContentManagementService } from '../../services/content-management.service';
-import { NodeActionsService } from '../../services/node-actions.service';
-import { AppStore } from '../../store/states/app.state';
-import { PageComponent } from '../page.component';
-import { ContentApiService } from '../../services/content-api.service';
-import { AppExtensionService } from '../../extensions/extension.service';
-import { SetCurrentFolderAction } from '../../store/actions';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { debounceTime, takeUntil } from 'rxjs/operators';
-import { isAdmin } from '../../store/selectors/app.selectors';
+import {ContentManagementService} from '../../services/content-management.service';
+import {NodeActionsService} from '../../services/node-actions.service';
+import {AppStore} from '../../store/states/app.state';
+import {PageComponent} from '../page.component';
+import {ContentApiService} from '../../services/content-api.service';
+import {AppExtensionService} from '../../extensions/extension.service';
+import {SetCurrentFolderAction} from '../../store/actions';
+import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
+import {debounceTime, takeUntil} from 'rxjs/operators';
+import {isAdmin} from '../../store/selectors/app.selectors';
 
 @Component({
   templateUrl: './files.component.html'
@@ -65,6 +65,7 @@ export class FilesComponent extends PageComponent implements OnInit, OnDestroy {
     private uploadService: UploadService,
     content: ContentManagementService,
     extensions: AppExtensionService,
+    private notification: NotificationService,
     private breakpointObserver: BreakpointObserver
   ) {
     super(store, extensions, content);
@@ -73,12 +74,12 @@ export class FilesComponent extends PageComponent implements OnInit, OnDestroy {
   ngOnInit() {
     super.ngOnInit();
 
-    const { route, content, nodeActionsService, uploadService } = this;
-    const { data } = route.snapshot;
+    const {route, content, nodeActionsService, uploadService} = this;
+    const {data} = route.snapshot;
 
     this.title = data.title;
 
-    route.params.subscribe(({ folderId }: Params) => {
+    route.params.subscribe(({folderId}: Params) => {
       const nodeId = folderId || data.defaultNodeId;
 
       this.contentApi.getNode(nodeId).subscribe(
@@ -149,7 +150,7 @@ export class FilesComponent extends PageComponent implements OnInit, OnDestroy {
 
   navigateTo(node: MinimalNodeEntity) {
     if (node && node.entry) {
-      const { id, isFolder } = node.entry;
+      const {id, isFolder} = node.entry;
 
       if (isFolder) {
         this.navigate(id);
@@ -310,5 +311,11 @@ export class FilesComponent extends PageComponent implements OnInit, OnDestroy {
       return this.node.path.elements[0].id === nodeId;
     }
     return false;
+  }
+
+  showWarning() {
+    if (this.documentList.isEmpty()) {
+      this.notification.openSnackMessage('Alfresco won’t upload empty folders. To ensure the upload: place a dummy file in the empty folder(s).');
+    }
   }
 }
