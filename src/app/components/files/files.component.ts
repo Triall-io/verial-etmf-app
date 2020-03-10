@@ -315,7 +315,7 @@ export class FilesComponent extends PageComponent implements OnInit, OnDestroy {
 
   showWarning() {
     if (this.documentList.isEmpty()) {
-      this.notification.openSnackMessage('Alfresco won’t upload empty folders. To ensure the upload: place a dummy file in the empty folder(s).');
+      this.notification.openSnackMessage("The application won't upload empty folders. Place a dummy file in empty folders to ensure that they are uploaded.");
     }
   }
 }
