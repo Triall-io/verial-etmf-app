@@ -310,8 +310,6 @@ export class FilesComponent extends PageComponent implements OnInit, OnDestroy {
   }
 
   showWarning() {
-    if (this.documentList.isEmpty()) {
-      this.notification.openSnackMessage(this.translation.instant('APP.NEW_MENU.TOOLTIPS.UPLOAD_FOLDERS'));
-    }
+    this.notification.openSnackMessage(this.translation.instant('APP.NEW_MENU.TOOLTIPS.UPLOAD_FOLDERS'));
   }
 }
