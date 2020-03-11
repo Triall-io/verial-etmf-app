@@ -30,7 +30,7 @@
                 "CREATE_FOLDER_NOT_ALLOWED": "Mappen kunnen niet worden gemaakt terwijl de huidige items worden weergegeven",
                 "UPLOAD_FILES": "Bestanden selecteren om te uploaden",
                 "UPLOAD_FILES_NOT_ALLOWED": "Bestanden kunnen niet worden geüpload terwijl de huidige items worden weergegeven",
-                "UPLOAD_FOLDERS": "Mappen selecteren om te uploaden",
+                "UPLOAD_FOLDERS": "Deze applicatie kan geen lege mappen uploaden. Plaats dummy bestanden in lege mappen om ze te kunnen toevoegen.",
         "UPLOAD_FOLDERS_NOT_ALLOWED": "Mappen kunnen niet worden geüpload terwijl de huidige items worden weergegeven",
         "CREATE_LIBRARY": "Een nieuwe bestandsbibliotheek maken"
             }

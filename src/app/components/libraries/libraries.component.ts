@@ -24,7 +24,7 @@
  */
 
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NotificationService, TranslationService } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { SiteEntry } from 'alfresco-js-api';
 import { AppExtensionService } from '../../extensions/extension.service';
@@ -45,6 +45,8 @@ export class LibrariesComponent extends PageComponent implements OnInit {
     content: ContentManagementService,
     store: Store<AppStore>,
     extensions: AppExtensionService,
+    private notification: NotificationService,
+    private translation: TranslationService,
     private breakpointObserver: BreakpointObserver
   ) {
     super(store, extensions, content);
@@ -71,6 +73,12 @@ export class LibrariesComponent extends PageComponent implements OnInit {
   navigateTo(node: SiteEntry) {
     if (node && node.entry && node.entry.guid) {
       this.store.dispatch(new NavigateLibraryAction(node.entry.guid));
+    }
+  }
+
+  showWarning() {
+    if (this.documentList.isEmpty()) {
+      this.notification.openSnackMessage(this.translation.instant('APP.NEW_MENU.TOOLTIPS.UPLOAD_FOLDERS'));
     }
   }
 }

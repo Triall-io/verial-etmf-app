@@ -23,16 +23,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {FileUploadEvent, NotificationService, UploadService} from '@alfresco/adf-core';
+import {FileUploadEvent, NotificationService, TranslationService, UploadService} from '@alfresco/adf-core';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
-import {
-  MinimalNodeEntity,
-  MinimalNodeEntryEntity,
-  PathElement,
-  PathElementEntity
-} from 'alfresco-js-api';
+import {MinimalNodeEntity, MinimalNodeEntryEntity, PathElement, PathElementEntity} from 'alfresco-js-api';
 import {ContentManagementService} from '../../services/content-management.service';
 import {NodeActionsService} from '../../services/node-actions.service';
 import {AppStore} from '../../store/states/app.state';
@@ -66,6 +61,7 @@ export class FilesComponent extends PageComponent implements OnInit, OnDestroy {
     content: ContentManagementService,
     extensions: AppExtensionService,
     private notification: NotificationService,
+    private translation: TranslationService,
     private breakpointObserver: BreakpointObserver
   ) {
     super(store, extensions, content);
@@ -315,7 +311,7 @@ export class FilesComponent extends PageComponent implements OnInit, OnDestroy {
 
   showWarning() {
     if (this.documentList.isEmpty()) {
-      this.notification.openSnackMessage("The application won't upload empty folders. Place a dummy file in empty folders to ensure that they are uploaded.");
+      this.notification.openSnackMessage(this.translation.instant('APP.NEW_MENU.TOOLTIPS.UPLOAD_FOLDERS'));
     }
   }
 }

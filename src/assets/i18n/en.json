@@ -64,7 +64,7 @@
                 "CREATE_FOLDER_NOT_ALLOWED": "Folders cannot be created whilst viewing the current items",
                 "UPLOAD_FILES": "Select files to upload",
                 "UPLOAD_FILES_NOT_ALLOWED": "Files cannot be uploaded whilst viewing the current items",
-                "UPLOAD_FOLDERS": "Select folders to upload",
+                "UPLOAD_FOLDERS": "The application won't upload empty folders. Place a dummy file in empty folders to ensure that they are uploaded.",
                 "UPLOAD_FOLDERS_NOT_ALLOWED": "Folders cannot be uploaded whilst viewing the current items",
                 "CREATE_LIBRARY": "Create a new File Library"
             }
