@@ -14,7 +14,7 @@
     "redirectUri": "/",
     "redirectUriLogout": "/logout"
   },
-  "blockchainAgentHost": "http://172.16.255.200:22240",
+  "blockchainAgentHost": "http://alfresco-triall.dev.sphereon.com:22240",
   "application": {
     "name": "Alfresco Content Application",
     "logo": "assets/images/triall-logo-alt-44.png",
