@@ -12,10 +12,7 @@
 /* tslint:disable:no-unused-variable member-ordering */
 
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {
-  HttpHeaders, HttpResponse, HttpEvent
-} from '@angular/common/http';
+import {HttpClient, HttpEvent, HttpHeaders, HttpResponse} from '@angular/common/http';
 
 import {Observable} from 'rxjs/Observable';
 
@@ -29,79 +26,79 @@ import {AppConfigService} from '@alfresco/adf-core';
 @Injectable()
 export class BlockchainService {
 
-  private agentConfig: BlockchainAgentConfiguration;
-  private defaultHeaders = new HttpHeaders();
+    private agentConfig: BlockchainAgentConfiguration;
+    private defaultHeaders = new HttpHeaders();
 
-  constructor(protected httpClient: HttpClient,
-              private config: AppConfigService) {
-    const agentHost = this.config.get<string>('blockchainAgentHost');
-    console.log('agentHost: ' + agentHost);
-  }
-
-  /**
-   * @param consumes string[] mime-types
-   * @return true: consumes contains 'multipart/form-data', false: otherwise
-   */
-  private canConsumeForm(consumes: string[]): boolean {
-    const form = 'multipart/form-data';
-    for (let consume of consumes) {
-      if (form === consume) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-
-  /**
-   * Verify alfresco entries
-   * Performs verification on the blockchain for the given node entry id&#39;s.
-   * @param nodeIds verifyNodesRequest
-   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-   * @param reportProgress flag to report request and response progress.
-   */
-  public verifyEntries(nodeIds: VerifyNodesRequest, observe?: 'body', reportProgress?: boolean): Observable<VerifyNodesResponse>;
-  public verifyEntries(nodeIds: VerifyNodesRequest, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<VerifyNodesResponse>>;
-  public verifyEntries(nodeIds: VerifyNodesRequest, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<VerifyNodesResponse>>;
-  public verifyEntries(nodeIds: VerifyNodesRequest, observe: any = 'body', reportProgress: boolean = false): Observable<any> {
-    if (nodeIds === null || nodeIds === undefined) {
-      throw new Error('Required parameter nodeIds was null or undefined when calling verifyEntries.');
+    constructor(protected httpClient: HttpClient,
+                private config: AppConfigService) {
+        const agentHost = this.config.get<string>('blockchainAgentHost');
+        console.log('agentHost: ' + agentHost);
     }
 
-    if (this.agentConfig === undefined) {
-      this.agentConfig = new BlockchainAgentConfiguration();
-      const agentHost = this.config.get<string>('blockchainAgentHost');
-      this.agentConfig.basePath = agentHost + '/agent';
+    /**
+     * @param consumes string[] mime-types
+     * @return true: consumes contains 'multipart/form-data', false: otherwise
+     */
+    private canConsumeForm(consumes: string[]): boolean {
+        const form = 'multipart/form-data';
+        for (let consume of consumes) {
+            if (form === consume) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    let headers = this.defaultHeaders;
 
-    // to determine the Accept header
-    let httpHeaderAccepts: string[] = [
-      'application/json;charset=UTF-8'
-    ];
-    let httpHeaderAcceptSelected: string | undefined = this.agentConfig.selectHeaderAccept(httpHeaderAccepts);
-    if (httpHeaderAcceptSelected != undefined) {
-      headers = headers.set('Accept', httpHeaderAcceptSelected);
+    /**
+     * Verify alfresco entries
+     * Performs verification on the blockchain for the given node entry id&#39;s.
+     * @param nodeIds verifyNodesRequest
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public verifyEntries(nodeIds: VerifyNodesRequest, observe?: 'body', reportProgress?: boolean): Observable<VerifyNodesResponse>;
+    public verifyEntries(nodeIds: VerifyNodesRequest, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<VerifyNodesResponse>>;
+    public verifyEntries(nodeIds: VerifyNodesRequest, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<VerifyNodesResponse>>;
+    public verifyEntries(nodeIds: VerifyNodesRequest, observe: any = 'body', reportProgress: boolean = false): Observable<any> {
+        if (nodeIds === null || nodeIds === undefined) {
+            throw new Error('Required parameter nodeIds was null or undefined when calling verifyEntries.');
+        }
+
+        if (this.agentConfig === undefined) {
+            this.agentConfig = new BlockchainAgentConfiguration();
+            const agentHost = this.config.get<string>('blockchainAgentHost');
+            this.agentConfig.basePath = agentHost + '/agent';
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json;charset=UTF-8'
+        ];
+        let httpHeaderAcceptSelected: string | undefined = this.agentConfig.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        let consumes: string[] = [
+            'application/json;charset=UTF-8'
+        ];
+        let httpContentTypeSelected: string | undefined = this.agentConfig.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set('Content-Type', httpContentTypeSelected);
+        }
+
+        return this.httpClient.post<VerifyNodesResponse>(`${this.agentConfig.basePath}/alfresco-blockchain/verify/entries`,
+            nodeIds,
+            {
+                withCredentials: this.agentConfig.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
     }
-
-    // to determine the Content-Type header
-    let consumes: string[] = [
-      'application/json;charset=UTF-8'
-    ];
-    let httpContentTypeSelected: string | undefined = this.agentConfig.selectHeaderContentType(consumes);
-    if (httpContentTypeSelected != undefined) {
-      headers = headers.set('Content-Type', httpContentTypeSelected);
-    }
-
-    return this.httpClient.post<VerifyNodesResponse>(`${this.agentConfig.basePath}/alfresco-blockchain/verify/entries`,
-      nodeIds,
-      {
-        withCredentials: this.agentConfig.withCredentials,
-        headers: headers,
-        observe: observe,
-        reportProgress: reportProgress
-      }
-    );
-  }
 }
