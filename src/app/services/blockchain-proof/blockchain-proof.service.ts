@@ -12,226 +12,226 @@ import {ContentManagementService} from '../content-management.service';
 @Injectable()
 export class BlockchainProofService {
 
-    private TIME_FORMAT = 'MMM d, y HH:mm:ss';
+  private TIME_FORMAT = 'MMM d, y HH:mm:ss';
 
-    constructor(private nodesApiService: NodesApiService,
-                private blockchainService: BlockchainService,
-                private notification: NotificationService,
-                private translation: TranslationService,
-                private content: ContentManagementService,
-                private http: HttpClient,
-                private datePipe: DatePipe) {
-    }
+  constructor(private nodesApiService: NodesApiService,
+              private blockchainService: BlockchainService,
+              private notification: NotificationService,
+              private translation: TranslationService,
+              private content: ContentManagementService,
+              private http: HttpClient,
+              private datePipe: DatePipe) {
+  }
 
 
-    registerSelection(contentEntities: Array<MinimalNodeEntity>): Subject<string> {
-        const subject: Subject<string> = new Subject<string>();
+  registerSelection(contentEntities: Array<MinimalNodeEntity>): Subject<string> {
+    const subject: Subject<string> = new Subject<string>();
 
-        if (!this.isEntryEntitiesArray(contentEntities)) {
-            subject.error(new Error(JSON.stringify({error: {statusCode: 400}})));
-        } else {
-            const atomicItemCounter: AtomicItemCounter = new AtomicItemCounter();
-            contentEntities.forEach(entity => {
-                if (entity.entry.isFile) {
-                    atomicItemCounter.incrementCount();
-                    this.registerEntry(entity, atomicItemCounter, subject);
-                }
-            });
+    if (!this.isEntryEntitiesArray(contentEntities)) {
+      subject.error(new Error(JSON.stringify({error: {statusCode: 400}})));
+    } else {
+      const atomicItemCounter: AtomicItemCounter = new AtomicItemCounter();
+      contentEntities.forEach(entity => {
+        if (entity.entry.isFile) {
+          atomicItemCounter.incrementCount();
+          this.registerEntry(entity, atomicItemCounter, subject);
         }
-
-        return subject;
+      });
     }
 
+    return subject;
+  }
 
-    private registerEntry(entity, atomicItemCounter: AtomicItemCounter, subject: Subject<string>) {
 
-        if ('Registered' === entity.entry.properties['bc:RegistrationState']) {
-            const messageBuilder = [];
-            messageBuilder.push('File ', entity.entry.name, ' is already registered, skipping.');
-            const message = messageBuilder.join('');
-            console.log(message);
-            subject.next(message);
-            return;
+  private registerEntry(entity, atomicItemCounter: AtomicItemCounter, subject: Subject<string>) {
+
+    if ('Registered' === entity.entry.properties['bc:RegistrationState']) {
+      const messageBuilder = [];
+      messageBuilder.push('File ', entity.entry.name, ' is already registered, skipping.');
+      const message = messageBuilder.join('');
+      console.log(message);
+      subject.next(message);
+      return;
+    }
+
+    console.log('Marking entry for blockchain registration' + entity.entry.id);
+    const nodeBody = {
+      properties: {
+        'bc:RegistrationState': 'ToDo',
+        'bc:StateIcon': 'assets/images/pending-42x42.png'
+      }
+    };
+    this.nodesApiService.updateNode(entity.entry.id, nodeBody).subscribe(value => {
+      const messageBuilder = [];
+      messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION_STARTED'), entity.entry.name));
+      messageBuilder.push('.');
+      const message = messageBuilder.join('');
+      console.log(message);
+      subject.next(message);
+      atomicItemCounter.incrementIndex();
+      if (atomicItemCounter.isLast()) {
+        subject.complete();
+        this.content.nodesMoved.next();
+      }
+    }, error => {
+      const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
+        this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION'), entity.entry.name);
+      this.handleApiError(error, userMessage, subject);
+    });
+  }
+
+
+  verifySelection(contentEntities: Array<MinimalNodeEntity>): Subject<string> {
+    const subject: Subject<string> = new Subject<string>();
+
+    if (!this.isEntryEntitiesArray(contentEntities)) {
+      subject.error(new Error(JSON.stringify({error: {statusCode: 400}})));
+    } else {
+      const fileEntries: Array<MinimalNodeEntryEntity> = [];
+      contentEntities.forEach(entity => {
+        if (entity.entry.isFile) {
+          fileEntries.push(entity.entry);
         }
-
-        console.log('Marking entry for blockchain registration' + entity.entry.id);
-        const nodeBody = {
-            properties: {
-                'bc:RegistrationState': 'ToDo',
-                'bc:StateIcon': 'assets/images/pending-42x42.png'
-            }
-        };
-        this.nodesApiService.updateNode(entity.entry.id, nodeBody).subscribe(value => {
-            const messageBuilder = [];
-            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION_STARTED'), entity.entry.name));
-            messageBuilder.push('.');
-            const message = messageBuilder.join('');
-            console.log(message);
-            subject.next(message);
-            atomicItemCounter.incrementIndex();
-            if (atomicItemCounter.isLast()) {
-                subject.complete();
-                this.content.nodesMoved.next();
-            }
-        }, error => {
-            const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
-                this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTRATION'), entity.entry.name);
-            this.handleApiError(error, userMessage, subject);
-        });
+      });
+      this.verifyEntry(fileEntries, subject);
     }
+    return subject;
+  }
 
 
-    verifySelection(contentEntities: Array<MinimalNodeEntity>): Subject<string> {
-        const subject: Subject<string> = new Subject<string>();
+  private verifyEntry(entries: Array<MinimalNodeEntryEntity>, subject: Subject<string>) {
+    console.log('Verifying ' + entries.length + ' selected entries.');
 
-        if (!this.isEntryEntitiesArray(contentEntities)) {
-            subject.error(new Error(JSON.stringify({error: {statusCode: 400}})));
-        } else {
-            const fileEntries: Array<MinimalNodeEntryEntity> = [];
-            contentEntities.forEach(entity => {
-                if (entity.entry.isFile) {
-                    fileEntries.push(entity.entry);
-                }
-            });
-            this.verifyEntry(fileEntries, subject);
-        }
-        return subject;
-    }
+    const request = {
+      nodeIds: []
+    };
+    entries.forEach(entry => {
+      request.nodeIds.push(entry.id);
+    });
 
-
-    private verifyEntry(entries: Array<MinimalNodeEntryEntity>, subject: Subject<string>) {
-        console.log('Verifying ' + entries.length + ' selected entries.');
-
-        const request = {
-            nodeIds: []
-        };
+    this.blockchainService.verifyEntries(request).subscribe((verifyNodesResponse: models.VerifyNodesResponse) => {
+      const messageBuilder = [];
+      verifyNodesResponse.contentResponses.forEach(verifyContentResponse => {
+        let matchedEntry: MinimalNodeEntryEntity = null;
         entries.forEach(entry => {
-            request.nodeIds.push(entry.id);
+          if (entry.id === verifyContentResponse.requestId) {
+            matchedEntry = entry;
+          }
         });
+        if (matchedEntry !== null) {
+          const message = this.buildVerifyResponseMessage(matchedEntry, verifyContentResponse);
+          messageBuilder.push(message);
+          console.log(message);
+          console.log('Calculated hash: ' + verifyContentResponse.hash);
+          console.log('Calculated signature: ' + verifyContentResponse.hexSignature);
+          if (verifyContentResponse.perHashProofChain != null) {
+            console.log('Per hash proof chain id: ' + verifyContentResponse.perHashProofChain.chainId);
+          }
+          if (verifyContentResponse.singleProofChain != null) {
+            console.log('Single proof chain id: ' + verifyContentResponse.singleProofChain.chainId);
+          }
+        }
+      });
 
-        this.blockchainService.verifyEntries(request).subscribe((verifyNodesResponse: models.VerifyNodesResponse) => {
-            const messageBuilder = [];
-            verifyNodesResponse.contentResponses.forEach(verifyContentResponse => {
-                let matchedEntry: MinimalNodeEntryEntity = null;
-                entries.forEach(entry => {
-                    if (entry.id === verifyContentResponse.requestId) {
-                        matchedEntry = entry;
-                    }
-                });
-                if (matchedEntry !== null) {
-                    const message = this.buildVerifyResponseMessage(matchedEntry, verifyContentResponse);
-                    messageBuilder.push(message);
-                    console.log(message);
-                    console.log('Calculated hash: ' + verifyContentResponse.hash);
-                    console.log('Calculated signature: ' + verifyContentResponse.hexSignature);
-                    if (verifyContentResponse.perHashProofChain != null) {
-                        console.log('Per hash proof chain id: ' + verifyContentResponse.perHashProofChain.chainId);
-                    }
-                    if (verifyContentResponse.singleProofChain != null) {
-                        console.log('Single proof chain id: ' + verifyContentResponse.singleProofChain.chainId);
-                    }
-                }
-            });
+      const finalMessage = messageBuilder.join('');
+      subject.next(finalMessage.substring(0, finalMessage.length - 1));
+      subject.complete();
+      this.content.nodesMoved.next();
+    }, error => {
+      const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
+        this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), ''); // TODO: join file names
+      this.handleApiError(error, userMessage, subject);
+    });
+  }
 
-            const finalMessage = messageBuilder.join('');
-            subject.next(finalMessage.substring(0, finalMessage.length - 1));
-            subject.complete();
-            this.content.nodesMoved.next();
-        }, error => {
-            const userMessage = sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PROCESS_FAILED'),
-                this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.VERIFICATION'), ''); // TODO: join file names
-            this.handleApiError(error, userMessage, subject);
-        });
+  private buildVerifyResponseMessage(entry, verifyContentResponse: VerifyContentResponse) {
+    const messageBuilder = [];
+
+    let registrationState = null;
+    let registrationTime = null;
+    if (verifyContentResponse.perHashProofChain != null) {
+      registrationState = verifyContentResponse.perHashProofChain.registrationState;
+      if (registrationState === 'REGISTERED') {
+        registrationTime = this.datePipe.transform(verifyContentResponse.perHashProofChain.registrationTime, this.TIME_FORMAT);
+      }
+    }
+    if (registrationTime == null && verifyContentResponse.singleProofChain != null) {
+      registrationState = verifyContentResponse.singleProofChain.registrationState;
+      if (registrationState === 'REGISTERED') {
+        registrationTime = this.datePipe.transform(verifyContentResponse.singleProofChain.registrationTime, this.TIME_FORMAT);
+      }
     }
 
-    private buildVerifyResponseMessage(entry, verifyContentResponse: VerifyContentResponse) {
-        const messageBuilder = [];
-
-        let registrationState = null;
-        let registrationTime = null;
-        if (verifyContentResponse.perHashProofChain != null) {
-            registrationState = verifyContentResponse.perHashProofChain.registrationState;
-            if (registrationState === 'REGISTERED') {
-                registrationTime = this.datePipe.transform(verifyContentResponse.perHashProofChain.registrationTime, this.TIME_FORMAT);
-            }
-        }
-        if (registrationTime == null && verifyContentResponse.singleProofChain != null) {
-            registrationState = verifyContentResponse.singleProofChain.registrationState;
-            if (registrationState === 'REGISTERED') {
-                registrationTime = this.datePipe.transform(verifyContentResponse.singleProofChain.registrationTime, this.TIME_FORMAT);
-            }
-        }
-
-        if (registrationState === 'REGISTERED') {
-            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_WAS'), entry.name));
-            messageBuilder.push(' ');
-            if (registrationTime != null) {
-                messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED_ON'));
-                messageBuilder.push(' ');
-                messageBuilder.push(registrationTime);
-            } else {
-                messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED'));
-            }
-        } else if (registrationState === 'PENDING') {
-            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
-            messageBuilder.push(' ');
-            messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PENDING'));
-        } else {
-            messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
-            messageBuilder.push(' ');
-            messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.NOT_REGISTERED'));
-        }
-        messageBuilder.push('.\n');
-        const message = messageBuilder.join('');
-        return message;
+    if (registrationState === 'REGISTERED') {
+      messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_WAS'), entry.name));
+      messageBuilder.push(' ');
+      if (registrationTime != null) {
+        messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED_ON'));
+        messageBuilder.push(' ');
+        messageBuilder.push(registrationTime);
+      } else {
+        messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.REGISTERED'));
+      }
+    } else if (registrationState === 'PENDING') {
+      messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
+      messageBuilder.push(' ');
+      messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.PENDING'));
+    } else {
+      messageBuilder.push(sprintf(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.FILE_IS'), entry.name));
+      messageBuilder.push(' ');
+      messageBuilder.push(this.translate('APP.MESSAGES.INFO.BLOCKCHAIN.NOT_REGISTERED'));
     }
+    messageBuilder.push('.\n');
+    const message = messageBuilder.join('');
+    return message;
+  }
 
-    private translate(key: string) {
-        return this.translation.instant(key);
-    }
+  private translate(key: string) {
+    return this.translation.instant(key);
+  }
 
-    private handleApiError(error, userMessage, subject: Subject<string>) {
-        const logMessageBuilder = [];
-        logMessageBuilder.push(error.message);
-        if (error.error && error.error.errors) {
-            error.error.errors.forEach(errorItem => {
-                const errorMessage = JSON.stringify(errorItem);
-                console.log(errorMessage);
-                if (logMessageBuilder.length > 0) {
-                    logMessageBuilder.push('\n');
-                }
-                logMessageBuilder.push(errorMessage);
-            });
+  private handleApiError(error, userMessage, subject: Subject<string>) {
+    const logMessageBuilder = [];
+    logMessageBuilder.push(error.message);
+    if (error.error && error.error.errors) {
+      error.error.errors.forEach(errorItem => {
+        const errorMessage = JSON.stringify(errorItem);
+        console.log(errorMessage);
+        if (logMessageBuilder.length > 0) {
+          logMessageBuilder.push('\n');
         }
-        console.log(logMessageBuilder.join(''));
-
-        subject.error(new Error(userMessage));
+        logMessageBuilder.push(errorMessage);
+      });
     }
+    console.log(logMessageBuilder.join(''));
 
-    isEntryEntitiesArray(contentEntities: any[]): boolean {
-        if (contentEntities && contentEntities.length) {
-            const nonEntryNode = contentEntities.find(node => (!node || !node.entry || !(node.entry.nodeId || node.entry.id)));
-            return !nonEntryNode;
-        }
-        return false;
+    subject.error(new Error(userMessage));
+  }
+
+  isEntryEntitiesArray(contentEntities: any[]): boolean {
+    if (contentEntities && contentEntities.length) {
+      const nonEntryNode = contentEntities.find(node => (!node || !node.entry || !(node.entry.nodeId || node.entry.id)));
+      return !nonEntryNode;
     }
+    return false;
+  }
 
 }
 
 class AtomicItemCounter {
 
-    private count = 0;
-    private index = 0;
+  private count = 0;
+  private index = 0;
 
-    incrementCount() {
-        this.count++;
-    }
+  incrementCount() {
+    this.count++;
+  }
 
-    incrementIndex() {
-        this.index++;
-    }
+  incrementIndex() {
+    this.index++;
+  }
 
-    isLast(): boolean {
-        return this.index >= this.count;
-    }
+  isLast(): boolean {
+    return this.index >= this.count;
+  }
 }
