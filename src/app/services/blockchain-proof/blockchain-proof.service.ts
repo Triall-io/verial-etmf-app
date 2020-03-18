@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
-import {AppConfigService, NodesApiService, NotificationService, TranslationService} from '@alfresco/adf-core';
-import {BlockchainService, VerifyContentResponse, BlockchainAgentConfiguration} from './api';
+import {NodesApiService, NotificationService, TranslationService} from '@alfresco/adf-core';
+import {BlockchainService, VerifyContentResponse} from './api';
 import {MinimalNodeEntity, MinimalNodeEntryEntity} from 'alfresco-js-api';
 import {HttpClient} from '@angular/common/http';
 import * as models from './api/model/models';

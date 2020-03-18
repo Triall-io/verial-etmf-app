@@ -12,10 +12,7 @@
 /* tslint:disable:no-unused-variable member-ordering */
 
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {
-  HttpHeaders, HttpResponse, HttpEvent
-} from '@angular/common/http';
+import {HttpClient, HttpEvent, HttpHeaders, HttpResponse} from '@angular/common/http';
 
 import {Observable} from 'rxjs/Observable';
 
@@ -34,8 +31,10 @@ export class BlockchainService {
 
   constructor(protected httpClient: HttpClient,
               private config: AppConfigService) {
+    this.agentConfig = new BlockchainAgentConfiguration();
     const agentHost = this.config.get<string>('blockchainAgentHost');
     console.log('agentHost: ' + agentHost);
+    this.agentConfig.basePath = agentHost + '/agent';
   }
 
   /**
@@ -66,12 +65,6 @@ export class BlockchainService {
   public verifyEntries(nodeIds: VerifyNodesRequest, observe: any = 'body', reportProgress: boolean = false): Observable<any> {
     if (nodeIds === null || nodeIds === undefined) {
       throw new Error('Required parameter nodeIds was null or undefined when calling verifyEntries.');
-    }
-
-    if (this.agentConfig === undefined) {
-      this.agentConfig = new BlockchainAgentConfiguration();
-      const agentHost = this.config.get<string>('blockchainAgentHost');
-      this.agentConfig.basePath = agentHost + '/agent';
     }
 
     let headers = this.defaultHeaders;
