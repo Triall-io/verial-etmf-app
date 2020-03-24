@@ -22,9 +22,9 @@ docker=$(which docker)
 tag=$1
 
 echo "Logging docker into $REGISTRY_URL"
-sudo $docker login $REGISTRY_URL -u $REGISTRY_USER -p $REGISTRY_SECRET
+$docker login $REGISTRY_URL
 
 echo "Building and uploading docker image"
-sudo $docker build -t triall.com/alfresco/adf-demo:$tag .
-sudo $docker tag triall.com/alfresco/adf-demo:$tag $REGISTRY_URL/alfresco/adf-demo
-#sudo $docker push $REGISTRY_URL/alfresco/adf-demo:latest
+$docker build -t triall.com/alfresco/adf-demo:$tag .
+$docker tag triall.com/alfresco/adf-demo:$tag $REGISTRY_URL/alfresco/adf-demo
+$docker push $REGISTRY_URL/alfresco/adf-demo:$tag
