@@ -1,5 +1,21 @@
-   <p align="left"> <img title="Alfresco" src="alfresco.png" alt="Alfresco - make business flow"></p>
-   
+# Triall Alfreso Content App
+
+First make sure to build alfresco-ng2-components (Run `./scripts/rebuild-all.sh` in that repository).
+
+Building:
+```bash
+rm dist -rf
+rm node_modules -rf
+npm i
+npm i ../alfresco-ng2-components/lib/dist/alfresco-adf-content-services-2.6.1.tgz
+npm i ../alfresco-ng2-components/lib/dist/alfresco-adf-core-2.6.1.tgz
+npm run build
+./scripts/kube-build.sh <version>
+```
+
+
+<p align="left"> <img title="Alfresco" src="alfresco.png" alt="Alfresco - make business flow"></p>
+
 # Example Content Application
 
 Testing Supported By<br/>
