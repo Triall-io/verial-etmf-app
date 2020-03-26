@@ -10,7 +10,7 @@ npm i
 npm i ../alfresco-ng2-components/lib/dist/alfresco-adf-content-services-2.6.1.tgz
 npm i ../alfresco-ng2-components/lib/dist/alfresco-adf-core-2.6.1.tgz
 npm run build
-./scripts/kube-build.sh <version>
+./scripts/build-kube.sh <version>
 ```
 
 
