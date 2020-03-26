@@ -31,10 +31,8 @@ export class BlockchainService {
 
   constructor(protected httpClient: HttpClient,
               private config: AppConfigService) {
-    this.agentConfig = new BlockchainAgentConfiguration();
     const agentHost = this.config.get<string>('blockchainAgentHost');
     console.log('agentHost: ' + agentHost);
-    this.agentConfig.basePath = agentHost + '/agent';
   }
 
   /**
@@ -66,6 +64,13 @@ export class BlockchainService {
     if (nodeIds === null || nodeIds === undefined) {
       throw new Error('Required parameter nodeIds was null or undefined when calling verifyEntries.');
     }
+
+    if (this.agentConfig === undefined) {
+      this.agentConfig = new BlockchainAgentConfiguration();
+      const agentHost = this.config.get<string>('blockchainAgentHost');
+      this.agentConfig.basePath = agentHost + '/agent';
+    }
+
 
     let headers = this.defaultHeaders;
 
