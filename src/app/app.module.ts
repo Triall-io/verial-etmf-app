@@ -81,6 +81,7 @@ import { LibraryFavoriteDirective } from './directives/library-favorite.directiv
 import { ToggleFavoriteLibraryComponent } from './components/toolbar/toggle-favorite-library/toggle-favorite-library.component';
 import { AppDataService } from './services/data.service';
 import {BlockchainService} from './services/blockchain-proof/api';
+import {AppUploadDragAreaModule} from "./components/upload/upload-drag-area.module";
 
 @NgModule({
   imports: [
@@ -100,6 +101,7 @@ import {BlockchainService} from './services/blockchain-proof/api';
     ExtensionsModule,
     AppExtensionsModule,
     AppLoginModule,
+    AppUploadDragAreaModule,
     AppCommonModule,
     AppLayoutModule,
     AppCurrentUserModule,

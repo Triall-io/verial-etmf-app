@@ -20,7 +20,7 @@
 
   <app-page-layout-content>
     <div class="main-content">
-      <adf-upload-drag-area
+      <adf-upload-drag-drop
         [parentId]="node?.id"
         [disabled]="!canUpload">
 
@@ -31,13 +31,11 @@
             [sorting]="[ 'modifiedAt', 'desc' ]"
             selectionMode="multiple"
             [currentFolderId]="node?.id"
-            [allowDropFiles]="true"
+            [allowDropFiles]="false"
             [navigate]="false"
             [imageResolver]="imageResolver"
             (node-dblclick)="navigateTo($event.detail?.node)"
-            (name-click)="navigateTo($event.detail?.node)"
-            (dragenter)="showWarning()">
-
+            (name-click)="navigateTo($event.detail?.node)">
             <data-columns>
               <ng-container *ngFor="let column of columns; trackBy: trackById">
 
@@ -75,7 +73,7 @@
 
         <adf-pagination acaPagination [target]="documentList">
         </adf-pagination>
-      </adf-upload-drag-area>
+      </adf-upload-drag-drop>
     </div>
 
     <div class="sidebar" *ngIf="infoDrawerOpened$ | async">

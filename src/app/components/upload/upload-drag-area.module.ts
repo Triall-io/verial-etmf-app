@@ -23,21 +23,16 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {NgModule} from '@angular/core';
-import {ExperimentalDirective} from './experimental.directive';
-import {DocumentListDirective} from './document-list.directive';
-import {PaginationDirective} from './pagination.directive';
-import {FileFolderDraggableDirective} from "./file-folder-draggable.directive";
-
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CoreModule } from '@alfresco/adf-core';
+import {UploadDragDropComponent} from "./upload-drag-drop.component";
+import {ContentModule} from "@alfresco/adf-content-services";
+import {DirectivesModule} from "../../directives/directives.module";
 
 @NgModule({
-  declarations: [
-    ExperimentalDirective,
-    DocumentListDirective,
-    PaginationDirective,
-    FileFolderDraggableDirective
-  ],
-  exports: [ExperimentalDirective, DocumentListDirective, PaginationDirective, FileFolderDraggableDirective]
+  imports: [CommonModule, CoreModule.forChild(), ContentModule.forChild(), DirectivesModule],
+  declarations: [UploadDragDropComponent],
+  exports: [UploadDragDropComponent, UploadDragDropComponent]
 })
-export class DirectivesModule {
-}
+export class AppUploadDragAreaModule {}
