@@ -55,10 +55,10 @@
             "LABEL": "New",
             "TOOLTIP": "Add new files and folders, or create a new File Library",
             "MENU_ITEMS": {
-                "CREATE_FOLDER": "Create folder",
+                "CREATE_FOLDER": "New Folder",
                 "UPLOAD_FILE": "Upload file",
                 "UPLOAD_FOLDER": "Upload folder",
-                "CREATE_LIBRARY": "Create Library"
+                "CREATE_LIBRARY": "New Trial"
             },
             "TOOLTIPS": {
                 "CREATE_FOLDER": "Create new folder",
@@ -96,7 +96,7 @@
                 },
                 "MENU": {
                     "MY_LIBRARIES": {
-                        "TITLE": "My Trails",
+                        "TITLE": "My Trials",
                         "SIDENAV_LINK": {
                             "LABEL": "My Trials",
                             "TOOLTIP": "Access my trials"
@@ -398,7 +398,7 @@
     },
     "LIBRARY": {
         "DIALOG": {
-            "CREATE_TITLE": "Create Library",
+            "CREATE_TITLE": "New Trial",
             "CREATE": "Create",
             "UPDATE": "Update",
             "EDIT": "Edit",

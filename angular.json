@@ -23,7 +23,7 @@
             },
             "assets": [
               "src/assets",
-              "src/favicon-96x96.png",
+              "src/assets/images/triall_favicon_original_32x32.png",
               "src/app.config.json",
               {
                 "glob": "**/*",
@@ -153,7 +153,7 @@
             ],
             "assets": [
               "src/assets",
-              "src/favicon-96x96.png",
+              "src/assets/images/triall_favicon_original_32x32.png",
               "src/app.config.json",
               {
                 "glob": "**/*",

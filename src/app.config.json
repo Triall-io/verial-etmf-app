@@ -16,9 +16,9 @@
   },
   "blockchainAgentHost": "http://alfresco-triall.dev.sphereon.com:22240",
   "application": {
-    "name": "Alfresco Content Application",
+    "name": "Verial eTMF by Triall",
     "logo": "assets/images/triall-logo-alt-44.png",
-    "copyright": "© 2017 - 2018 Triall, Alfresco Software, Inc. All rights reserved."
+    "copyright": "© 2022 Triall, Alfresco Software, Inc. All rights reserved."
   },
   "experimental": {},
   "headerColor": "#092C38",
