@@ -78,7 +78,8 @@
 
     .adf-data-table-cell--ellipsis .adf-datatable-cell,
     .adf-data-table-cell--ellipsis__name .adf-datatable-cell {
-      white-space: nowrap;
+
+      white-space: break-spaces;
       display: block;
       overflow: hidden;
       text-overflow: ellipsis;

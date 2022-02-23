@@ -8,6 +8,35 @@
       }
     }
   }
+  .adf-viewer {
+    .adf-pdf-viewer{
+      .textLayer {
+        display: none;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        opacity: 0.2;
+        line-height: 1.0;
+      }
+    }
+  }
+  .adf-viewer__display-name {
+    white-space: break-spaces;
+    font-size: 16px;
+    opacity: 0.87;
+    line-height: 1.5;
+    letter-spacing: -0.4px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    max-width: initial;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    color: rgba(0, 0, 0, 0.87); }
 
   .adf-toolbar {
     @include angular-material-theme($theme);
